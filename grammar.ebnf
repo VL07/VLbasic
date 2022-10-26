@@ -1,0 +1,19 @@
+<statements> 				= NEWLINE* <statement> (NEWLINE* <statement>)* NEWLINE*;
+
+<statement>					= KEYWORD:RETURN 
+							| <expression>;
+
+<expression>				= <var_assignment> 
+							| <comperation_expression>;
+
+<comperation_expression>	= KEYWORD:NOT <comperation_expression>
+							| <arithmetic_expression>;
+
+<arithmetic_expression>		= <term> ((PLUS | MINUS) <term>)*;
+
+<term>						= <factor> ((MULTIPLY | DIVIDE) <factor>)*;
+
+<factor>					= (PLUS | MINUS) <factor>
+							| <power> ;
+
+<var_assignment>			= KEYWORD:LET IDENTIFIER EQUALS <expression>;
