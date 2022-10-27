@@ -69,7 +69,7 @@ class Position:
 		return StartEndPosition(self.file.copy(), self.copy())
 
 	def createStartEndPosition(self, end: Position) -> StartEndPosition:
-		return StartEndPosition(self.file.copy(), self.copy, end.copy())
+		return StartEndPosition(self.file.copy(), self.copy(), end.copy())
 			
 	def copy(self) -> Position:
 		return Position(self.index, self.line, self.column, self.file.copy())
@@ -81,7 +81,7 @@ class StartEndPosition:
 		self.end = end
 
 		if not self.end:
-			self.end = self.start
+			self.end = self.start.copy()
 	
 	def __repr__(self) -> str:
 		return f"startEndPos({repr(self.start)}, {repr(self.end)}, {self.file.name})"

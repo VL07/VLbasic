@@ -60,7 +60,7 @@ class Tokenizer:
 			elif self.currentCharacter in utils.NUMBERS:
 				token, error = self.makeNumber()
 				tokens.append(token)
-			elif self.currentCharacter in utils.LETTERS_UPPERCASE:
+			elif self.currentCharacter in utils.LETTERS:
 				token, error = self.makeKeywordOrIdentifier()
 				tokens.append(token)
 			elif self.currentCharacter in ["'", '"']:

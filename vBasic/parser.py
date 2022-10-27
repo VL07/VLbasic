@@ -83,12 +83,12 @@ class Parser:
 				return None, error
 
 			if self.currentToken.type != TokenTypes.RIGHT_PARENTHESES:
-				return None, InvalidSyntaxError(f"Expected ')', not {str(self.currentToken.type)}", self.currentToken.position)
+				return None, InvalidSyntaxError(f"Expected ')', not {str(self.currentToken.type)}", self.currentToken.position.copy())
 
 			self.advance()
 			return expression, None
 
-		return None, InvalidSyntaxError(f"Expected number, not {str(self.currentToken.type)}", self.currentToken.position)
+		return None, InvalidSyntaxError(f"Expected number, not {str(self.currentToken.type)}", self.currentToken.position.copy())
 
 	def binaryOperation(self, function, operators) -> tuple[BinaryOperationNode, Error]:
 		left, error = function()
