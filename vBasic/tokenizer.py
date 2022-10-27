@@ -36,16 +36,12 @@ class Tokenizer:
 	def advance(self) -> None:
 		nextCharacter = self.currentCharacter
 
-		# print("b", self.position.index, self.currentCharacter)
-
 		if not nextCharacter:
 			nextCharacter = self.getCharacterAtIndex(self.position.index)
 
 		self.position.advance(nextCharacter == "\n")
 
 		self.updateCurrentCharacter()
-
-		# print("a", self.position.index, self.currentCharacter)
 
 	#########################################
 	# TOKENIZE
