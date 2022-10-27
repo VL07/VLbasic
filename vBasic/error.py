@@ -34,3 +34,7 @@ class IllegalCharacterError(Error):
 class ExpectedCharacterError(Error):
 	def __init__(self, details: str, position: utils.StartEndPosition) -> None:
 		super().__init__("ExpectedCharacterError", details, position)
+
+class InvalidSyntaxError(Error):
+	def __init__(self, details: str, position: utils.StartEndPosition) -> None:
+		super().__init__("InvalidSyntaxError", details, position)

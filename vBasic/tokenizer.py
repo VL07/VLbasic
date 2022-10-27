@@ -62,7 +62,7 @@ class Tokenizer:
 			elif self.currentCharacter in [" ", "\t"]:
 				self.advance()
 			elif self.currentCharacter in utils.NUMBERS:
-				token, error = self.makeNumberOrLineNumber()
+				token, error = self.makeNumber()
 				tokens.append(token)
 			elif self.currentCharacter in utils.LETTERS_UPPERCASE:
 				token, error = self.makeKeywordOrIdentifier()
@@ -110,7 +110,7 @@ class Tokenizer:
 
 		return tokens, None
 
-	def makeNumberOrLineNumber(self) -> tuple[Token | None, Error | None]:
+	def makeNumber(self) -> tuple[Token | None, Error | None]:
 		number = self.currentCharacter
 		startPosition = self.position.copy()
 		dots = 0
@@ -130,9 +130,7 @@ class Tokenizer:
 
 		position = utils.StartEndPosition(self.file, startPosition, self.position.copy())
 
-		if startPosition.column == 1 and dots == 0:
-			return Token(TokenTypes.LINE_NUMBER, position, int(number)), None
-		elif dots == 0:
+		if dots == 0:
 			return Token(TokenTypes.INTEGER, position, int(number)), None
 		return Token(TokenTypes.FLOAT, position, float(number)), None
 

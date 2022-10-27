@@ -11,7 +11,6 @@ from enum import Enum, auto
 
 class TokenTypes(Enum):
 	NEW_LINE = 			auto()
-	LINE_NUMBER = 		auto()
 	EOF =				auto()
 
 	KEYWORD = 			auto()
