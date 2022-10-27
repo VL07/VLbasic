@@ -1,4 +1,5 @@
 import tokenizer
+import parser
 
 while True:
 	inputText = input("] ")
@@ -8,5 +9,17 @@ while True:
 	if error:
 		print(repr(error))
 		print("")
-	else:
-		print(tokens)
+		continue
+	
+	print(tokens)
+	p = parser.Parser("SHELL", tokens)
+
+	statements, error = p.parse()
+
+	if error:
+		print(repr(error))
+		print("")
+		continue
+
+	print(statements)
+		
