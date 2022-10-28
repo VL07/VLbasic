@@ -39,3 +39,7 @@ class ExpectedCharacterError(Error):
 class InvalidSyntaxError(Error):
 	def __init__(self, details: str, position: utils.StartEndPosition) -> None:
 		super().__init__("InvalidSyntaxError", details, position)
+
+class RTError(Error):
+	def __init__(self, details: str, position: utils.StartEndPosition, context) -> None:
+		super().__init__("RuntimeError", details, position)
