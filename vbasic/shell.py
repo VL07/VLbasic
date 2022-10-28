@@ -2,6 +2,7 @@ import tokenizer
 import parser
 import interpreter
 import contextclass
+import contextclass
 
 while True:
 	inputText = input("] ")
@@ -25,7 +26,7 @@ while True:
 
 	print(statements)
 
-	context = contextClass.Context("SHELL")
+	context = contextclass.Context("SHELL")
 
 	i = interpreter.Interpreter(statements)
 	out, error = i.interpret(context)
