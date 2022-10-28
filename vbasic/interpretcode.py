@@ -1,9 +1,9 @@
 from .tokenizer import Token
 from .parser import Parser
 from .interpreter import Interpreter
-from .contextClass import Context
+from .contextclass import Context
 from .tokenizer import Tokenizer
-from .runtimeValuesClass import RuntimeValue
+from .runtimevaluesclass import RuntimeValue
 
 def interpret(code, name) -> list[RuntimeValue]:
 	t = Tokenizer(name, code)

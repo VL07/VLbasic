@@ -1,7 +1,7 @@
 import tokenizer
 import parser
 import interpreter
-import contextClass
+import contextclass
 
 while True:
 	inputText = input("] ")

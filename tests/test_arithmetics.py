@@ -1,5 +1,5 @@
 import pytest
-from vbasic.interpretCode import interpret
+from vbasic.interpretcode import interpret
 
 def interpretCode(code):
 	return interpret(code, "TEST")[0]
