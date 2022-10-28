@@ -1,10 +1,12 @@
 from vbasic.tokenizer import Tokenizer
 from vbasic.parser import Parser
 from vbasic.interpreter import Interpreter
-from vbasic.contextclass import Context
+from vbasic.contextclass import Context, VariableTable
+
+v = VariableTable()
 
 while True:
-	inputText = input("] ")
+	inputText = input("] ").replace("\\n", "\n")
 	t = Tokenizer("SHELL", inputText)
 	tokens, error = t.tokenize()
 
@@ -26,6 +28,7 @@ while True:
 	print(statements)
 
 	context = Context("SHELL")
+	context.setVariableTable(v)
 
 	i = Interpreter(statements)
 	out, error = i.interpret(context)

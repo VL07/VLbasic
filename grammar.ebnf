@@ -16,4 +16,4 @@
 <factor>					= (PLUS | MINUS) <factor>
 							| <power> ;
 
-<var_assignment>			= KEYWORD:LET IDENTIFIER EQUALS <expression>;
+<var_assignment>			= (KEYWORD:LET | KEYWORD:CONST) IDENTIFIER EQUALS <expression>;

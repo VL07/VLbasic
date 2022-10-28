@@ -30,6 +30,8 @@ class TokenTypes(Enum):
 	FLOAT = 			auto()
 	STRING =			auto()
 
+	EQUALS =			auto()
+
 ########################################
 #	TOKEN CLASS
 ########################################
@@ -45,3 +47,6 @@ class Token:
 
 	def isKeyword(self, keywordName: str) -> bool:
 		return self.type == TokenTypes.KEYWORD and self.value == keywordName
+
+	def isOneOfKeywords(self, keywordNames: list[str]) -> bool:
+		return self.type == TokenTypes.KEYWORD and self.value in keywordNames

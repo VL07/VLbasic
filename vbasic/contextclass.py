@@ -7,23 +7,31 @@ from .error import RTError, Error
 from .utils import StartEndPosition
 
 ########################################
-#	CONTEXT
+#	VARIABLE
 ########################################
 
-class Context:
-	def __init__(self, displayName: str, parent: Context | None = None) -> None:
-		self.displayName = displayName
-		self.parent = parent
-		self.variables = {}
+class Variable:
+	def __init__(self, value: any, constant: bool) -> None:
+		self.constant = constant
+		self.value = value
 
-	def __repr__(self) -> str:
-		return f"ENVIRONMENT(vars: {' ,'.join(self.variables)}, parent: {str(self.parent)})"
+########################################
+#	VARIABLE TABLE
+########################################
 
-	def declareVariable(self, key: str, value: any, position: StartEndPosition) -> tuple[any, Error]:
+class VariableTable:
+	def __init__(self) -> None:
+		self.variables: dict[str, Variable] = {}
+		self.parent: VariableTable = None
+		self.context: Context = None
+	
+	def declareVariable(self, key: str, value: any, constant: bool, position: StartEndPosition) -> tuple[any, Error]:
 		if key in self.variables.keys():
-			return None, RTError(f"Variable {key} is already declared", position.copy())
+			return None, RTError(f"Variable {key} is already declared", position.copy(), self.context)
 
-		self.variables[key] = value
+		self.variables[key] = Variable(value, constant)
+
+		self.test = "abc"
 
 		return value, None
 
@@ -32,7 +40,11 @@ class Context:
 		if error:
 			return None, error
 
-		environment.variables[key] = value
+		variable = environment.variables[key]
+		if variable.constant:
+			return None, RTError(f"Variable {key} is a constant, and can therefor not be assigned to", position.copy(), self.context)
+
+		variable.value = value
 
 		return value, None
 
@@ -41,14 +53,41 @@ class Context:
 		if error:
 			return None, error
 
-		return environment[key]
+		return environment.variables[key].value, None
 
-	def resolve(self, key: str, position: StartEndPosition) -> tuple[Context, RTError]:
+	def resolve(self, key: str, position: StartEndPosition) -> tuple[VariableTable, RTError]:
 		if key in self.variables.keys():
-			return self
+			return self, None
 
 		if not self.parent:
-			return RTError(f"Variable {key} is not defined", position.copy())
+			return None, RTError(f"Variable {key} is not defined", position.copy(), self.context)
 
-		return self.parent.resolve(key, position)
+		parentResolve, error = self.parent.resolve(key, position)
+		if error:
+			return None, error
+
+		return parentResolve, None
+
+########################################
+#	CONTEXT
+########################################
+
+lastContext = None
+
+class Context:
+	classes = 0
+
+	def __init__(self, displayName: str, parent: Context | None = None) -> None:
+		self.classes += 1
+		self.id = self.classes
+		self.displayName = displayName
+		self.parent = parent
+		self.variableTable: VariableTable = None
+
+	def __repr__(self) -> str:
+		return f"ENVIRONMENT(vars: {str(self.variableTable)}, parent: {str(self.parent)}, id: {str(self.id)})"
+
+	def setVariableTable(self, variableTable: VariableTable) -> None:
+		self.variableTable = variableTable
+		self.variableTable.context = self
 	
