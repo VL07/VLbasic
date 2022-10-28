@@ -70,6 +70,10 @@ class Interpreter:
 
 		if node.operationToken.type == TokenTypes.MINUS:
 			number, error = number.multiplied(Number(-1, number.position.copy(), context))
+		elif node.operationToken.type == TokenTypes.PLUS:
+			number, error = number.multiplied(Number(1, number.position.copy(), context))
+		elif node.operationToken.isKeyword("NOT"):
+			number, error = number.notted(node.operationToken)
 		else:
 			return None, RTError(f"Expected operation token, not {node.operationToken}", number.position, context)
 

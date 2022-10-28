@@ -6,6 +6,7 @@ from __future__ import annotations
 from .utils import StartEndPosition
 from .contextclass import Context
 from .error import RTError
+from .tokenclass import Token
 
 ########################################
 #	INTERPRETER
@@ -21,6 +22,9 @@ class Number(RuntimeValue):
 		self.value = value
 		self.position = position
 		self.context = context
+
+	def __repr__(self) -> str:
+		return f"NUMBER({self.value})"
 
 	def added(self, to: Number | RuntimeValue) -> tuple[Number, RTError]:
 		if isinstance(to, Number):
@@ -42,5 +46,28 @@ class Number(RuntimeValue):
 
 			return Number(self.value / by.value, position, self.context), None
 
+	def notted(self, by: Token) -> tuple[Boolean, RTError]:
+		asBoolean, error = self.toBoolean()
+		if error:
+			return None, error
+		
+		asNotBoolean, error = asBoolean.notted(by)
+		if error:
+			return None, error
+
+		return asNotBoolean, None
+
+	def toBoolean(self) -> tuple[Boolean, RTError]:
+		return Boolean(False if self.value == 0 else True, self.position.copy(), self.context), None
+
+class Boolean(RuntimeValue):
+	def __init__(self, value: bool, position: StartEndPosition, context: Context) -> None:
+		self.value = value
+		self.position = position
+		self.context = context
+
 	def __repr__(self) -> str:
-		return f"NUMBER({self.value})"
+		return f"BOOLEAN({self.value})"
+
+	def notted(self, by: Token) -> tuple[Boolean, RTError]:
+		return Boolean(not self.value, self.position.start.createStartEndPosition(by.position.end), self.context), None

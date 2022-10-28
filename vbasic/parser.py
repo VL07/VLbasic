@@ -64,7 +64,7 @@ class Parser:
 	def factor(self) -> tuple[UnaryOperationNode | NumberNode, Error]:
 		startToken = self.currentToken
 
-		if startToken.type in (TokenTypes.PLUS, TokenTypes.MINUS):
+		if startToken.type in (TokenTypes.PLUS, TokenTypes.MINUS) or startToken.isKeyword("NOT"):
 			self.advance()
 			factor, error = self.factor()
 			if error: 

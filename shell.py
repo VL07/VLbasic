@@ -1,12 +1,11 @@
-import tokenizer
-import parser
-import interpreter
-import contextclass
-import contextclass
+from vbasic.tokenizer import Tokenizer
+from vbasic.parser import Parser
+from vbasic.interpreter import Interpreter
+from vbasic.contextclass import Context
 
 while True:
 	inputText = input("] ")
-	t = tokenizer.Tokenizer("SHELL", inputText)
+	t = Tokenizer("SHELL", inputText)
 	tokens, error = t.tokenize()
 
 	if error:
@@ -15,7 +14,7 @@ while True:
 		continue
 	
 	print(tokens)
-	p = parser.Parser("SHELL", tokens)
+	p = Parser("SHELL", tokens)
 
 	statements, error = p.parse()
 
@@ -26,9 +25,9 @@ while True:
 
 	print(statements)
 
-	context = contextclass.Context("SHELL")
+	context = Context("SHELL")
 
-	i = interpreter.Interpreter(statements)
+	i = Interpreter(statements)
 	out, error = i.interpret(context)
 
 	if error:

@@ -3,9 +3,10 @@
 ########################################
 
 from typing import Optional
-from .utils import File, Position, NUMBERS, LETTERS, StartEndPosition, KEYWORDS
+from .utils import File, Position, NUMBERS, LETTERS, StartEndPosition
 from .tokenclass import Token, TokenTypes
 from .error import Error, IllegalCharacterError, ExpectedCharacterError
+from .keywords import KEYWORDS
 
 ########################################
 #	TOKENIZER

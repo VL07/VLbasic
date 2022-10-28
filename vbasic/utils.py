@@ -22,10 +22,6 @@ LETTERS_LOWERCASE = string.ascii_lowercase
 LETTERS_UPPERCASE = string.ascii_uppercase
 LETTERS = string.ascii_letters
 
-KEYWORDS = [
-	"PRINT"
-]
-
 
 ########################################
 #	CLASSES

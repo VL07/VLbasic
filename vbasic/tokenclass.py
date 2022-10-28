@@ -42,3 +42,6 @@ class Token:
 		
 	def __repr__(self) -> str:
 		return f"{self.type.name}({str(self.value or '')})"
+
+	def isKeyword(self, keywordName: str) -> bool:
+		return self.type == TokenTypes.KEYWORD and self.value == keywordName
