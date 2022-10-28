@@ -16,6 +16,7 @@ class StatementNode:
 class ExpressionNode(StatementNode):
 	def __init__(self) -> None:
 		self.position: StartEndPosition = None
+		self.token: Token = None
 
 class BinaryOperationNode:
 	def __init__(self, left: ExpressionNode, operationToken: Token, right: ExpressionNode) -> None:
@@ -46,3 +47,33 @@ class NumberNode:
 
 	def __repr__(self) -> str:
 		return f"{str(self.token.value)}"
+
+class VariableAccessNode:
+	def __init__(self, token: Token) -> None:
+		self.token = token
+
+		self.position = token.position.copy()
+
+	def __repr__(self) -> str:
+		return f"VARIABLE_ACCESS_NODE({str(self.token.value)})"
+		
+class VariableAssignNode:
+	def __init__(self, token: Token, valueNode: ExpressionNode) -> None:
+		self.token = token
+		self.valueNode = valueNode
+
+		self.position = self.token.position.start.createStartEndPosition(valueNode.position.end)
+
+	def __repr__(self) -> str:
+		return f"VARIABLE_ACCESS_NODE({str(self.token.value)})"
+
+class VariableDeclareNode:
+	def __init__(self, token: Token, valueNode: ExpressionNode, declareToken: Token) -> None:
+		self.token = token
+		self.valueNode = valueNode
+		self.declareToken = declareToken
+
+		self.position = self.declareToken.position.start.createStartEndPosition(valueNode.position.end)
+
+	def __repr__(self) -> str:
+		return f"VARIABLE_ACCESS_NODE({str(self.token.value)})"

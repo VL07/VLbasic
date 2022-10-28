@@ -88,6 +88,9 @@ class Tokenizer:
 			elif self.currentCharacter == ",":
 				tokens.append(Token(TokenTypes.COMMA, self.position.asStartEndPosition()))
 				self.advance()
+			elif self.currentCharacter == "=":
+				tokens.append(Token(TokenTypes.EQUALS, self.position.asStartEndPosition()))
+				self.advance()
 			elif self.currentCharacter is not None:
 				startPosition = self.position.copy()
 				character = self.currentCharacter
@@ -157,7 +160,6 @@ class Tokenizer:
 			self.advance()
 
 		if self.currentCharacter == startStringChar:
-			print(self.currentCharacter)
 			self.advance()
 			return Token(TokenTypes.STRING, startPosition.createStartEndPosition(self.position), text), None
 
