@@ -4,7 +4,7 @@
 
 from .tokenclass import Token, TokenTypes
 from .error import Error, InvalidSyntaxError
-from .statementclass import StatementNode, ExpressionNode, BinaryOperationNode, UnaryOperationNode, NumberNode
+from .statementClass import StatementNode, ExpressionNode, BinaryOperationNode, UnaryOperationNode, NumberNode
 
 ########################################
 #	PARSER

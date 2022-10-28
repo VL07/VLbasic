@@ -4,7 +4,7 @@
 
 from __future__ import annotations
 from .utils import StartEndPosition
-from .contextclass import Context
+from .contextClass import Context
 from .error import RTError
 
 ########################################
