@@ -2,8 +2,8 @@
 #	IMPORTS
 ########################################
 
-from tokenclass import Token
-from utils import StartEndPosition
+from .tokenclass import Token
+from .utils import StartEndPosition
 
 ########################################
 #	PARSER

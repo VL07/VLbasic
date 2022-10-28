@@ -2,7 +2,7 @@
 #	IMPORTS
 ########################################
 
-import utils
+from .utils import StartEndPosition
 from enum import Enum, auto
 
 ########################################
@@ -35,7 +35,7 @@ class TokenTypes(Enum):
 ########################################
 
 class Token:
-	def __init__(self, type_: TokenTypes, position: utils.StartEndPosition, value = None) -> None:
+	def __init__(self, type_: TokenTypes, position: StartEndPosition, value = None) -> None:
 		self.type = type_
 		self.value = value
 		self.position = position

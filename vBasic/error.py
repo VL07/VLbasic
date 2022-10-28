@@ -3,14 +3,14 @@
 ########################################
 
 from __future__ import annotations
-import utils
+from .utils import StartEndPosition
 
 ########################################
 #	ERROR CLASS
 ########################################
 
 class Error:
-	def __init__(self, name: str, details: str, position: utils.StartEndPosition) -> None:
+	def __init__(self, name: str, details: str, position: StartEndPosition) -> None:
 		self.name = name
 		self.details = details
 		self.position = position
@@ -29,17 +29,17 @@ class Error:
 ########################################
 
 class IllegalCharacterError(Error):
-	def __init__(self, details: str, position: utils.StartEndPosition) -> None:
+	def __init__(self, details: str, position: StartEndPosition) -> None:
 		super().__init__("IllegalCharacterError", details, position)
 
 class ExpectedCharacterError(Error):
-	def __init__(self, details: str, position: utils.StartEndPosition) -> None:
+	def __init__(self, details: str, position: StartEndPosition) -> None:
 		super().__init__("ExpectedCharacterError", details, position)
 
 class InvalidSyntaxError(Error):
-	def __init__(self, details: str, position: utils.StartEndPosition) -> None:
+	def __init__(self, details: str, position: StartEndPosition) -> None:
 		super().__init__("InvalidSyntaxError", details, position)
 
 class RTError(Error):
-	def __init__(self, details: str, position: utils.StartEndPosition, context) -> None:
+	def __init__(self, details: str, position: StartEndPosition, context) -> None:
 		super().__init__("RuntimeError", details, position)

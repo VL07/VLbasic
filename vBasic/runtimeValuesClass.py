@@ -3,9 +3,9 @@
 ########################################
 
 from __future__ import annotations
-from utils import StartEndPosition
-from contextClass import Context
-from error import RTError
+from .utils import StartEndPosition
+from .contextclass import Context
+from .error import RTError
 
 ########################################
 #	INTERPRETER
@@ -14,6 +14,7 @@ from error import RTError
 class RuntimeValue:
 	def __init__(self, position: StartEndPosition) -> None:
 		self.position = position
+		self.value = None
 
 class Number(RuntimeValue):
 	def __init__(self, value: int | float, position: StartEndPosition, context: Context) -> None:

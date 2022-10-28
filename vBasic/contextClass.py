@@ -3,8 +3,8 @@
 ########################################
 
 from __future__ import annotations
-from error import RTError, Error
-from utils import StartEndPosition
+from .error import RTError, Error
+from .utils import StartEndPosition
 
 ########################################
 #	CONTEXT

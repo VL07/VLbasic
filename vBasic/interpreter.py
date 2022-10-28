@@ -2,11 +2,11 @@
 #	IMPORTS
 ########################################
 
-from statementClass import StatementNode, NumberNode, BinaryOperationNode, UnaryOperationNode
-from contextClass import Context
-from runtimeValuesClass import RuntimeValue, Number
-from tokenclass import TokenTypes
-from error import RTError
+from .statementclass import StatementNode, NumberNode, BinaryOperationNode, UnaryOperationNode
+from .contextclass import Context
+from .runtimevaluesclass import RuntimeValue, Number
+from .tokenclass import TokenTypes
+from .error import RTError
 
 ########################################
 #	INTERPRETER

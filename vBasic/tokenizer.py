@@ -3,9 +3,9 @@
 ########################################
 
 from typing import Optional
-import utils
-from tokenclass import Token, TokenTypes
-from error import Error, IllegalCharacterError, ExpectedCharacterError
+from .utils import File, Position, NUMBERS, LETTERS, StartEndPosition, KEYWORDS
+from .tokenclass import Token, TokenTypes
+from .error import Error, IllegalCharacterError, ExpectedCharacterError
 
 ########################################
 #	TOKENIZER
@@ -13,8 +13,8 @@ from error import Error, IllegalCharacterError, ExpectedCharacterError
 
 class Tokenizer:
 	def __init__(self, filename: str, fileText: str) -> None:
-		self.file = utils.File(filename, fileText)
-		self.position = utils.Position(-1, 1, 0, self.file)
+		self.file = File(filename, fileText)
+		self.position = Position(-1, 1, 0, self.file)
 		self.currentCharacter = None
 
 		self.advance()
@@ -57,10 +57,10 @@ class Tokenizer:
 				self.advance()
 			elif self.currentCharacter in [" ", "\t"]:
 				self.advance()
-			elif self.currentCharacter in utils.NUMBERS:
+			elif self.currentCharacter in NUMBERS:
 				token, error = self.makeNumber()
 				tokens.append(token)
-			elif self.currentCharacter in utils.LETTERS:
+			elif self.currentCharacter in LETTERS:
 				token, error = self.makeKeywordOrIdentifier()
 				tokens.append(token)
 			elif self.currentCharacter in ["'", '"']:
@@ -113,7 +113,7 @@ class Tokenizer:
 
 		self.advance()
 
-		while self.currentCharacter and self.currentCharacter in utils.NUMBERS + ".":
+		while self.currentCharacter and self.currentCharacter in NUMBERS + ".":
 			number += self.currentCharacter
 
 			if self.currentCharacter == ".":
@@ -124,7 +124,7 @@ class Tokenizer:
 
 			self.advance()
 
-		position = utils.StartEndPosition(self.file, startPosition, self.position.copy())
+		position = StartEndPosition(self.file, startPosition, self.position.copy())
 
 		if dots == 0:
 			return Token(TokenTypes.INTEGER, position, int(number)), None
@@ -136,11 +136,11 @@ class Tokenizer:
 
 		self.advance()
 
-		while self.currentCharacter and self.currentCharacter in utils.LETTERS_UPPERCASE + "_":
+		while self.currentCharacter and self.currentCharacter in LETTERS + "_":
 			text += self.currentCharacter
 			self.advance()
 
-		if text in utils.KEYWORDS:
+		if text in KEYWORDS:
 			return Token(TokenTypes.KEYWORD, startPosition.createStartEndPosition(self.position), text), None
 		return Token(TokenTypes.IDENTIFIER, startPosition.createStartEndPosition(self.position), text), None
 	
