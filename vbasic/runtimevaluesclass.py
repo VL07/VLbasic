@@ -29,14 +29,26 @@ class Number(RuntimeValue):
 	def added(self, to: Number | RuntimeValue) -> tuple[Number, RTError]:
 		if isinstance(to, Number):
 			return Number(self.value + to.value, self.position.start.createStartEndPosition(to.position.end), self.context), None
+		elif isinstance(to, Boolean):
+			return Number(self.value + (1 if to.value else 0), self.position.start.createStartEndPosition(to.position.end), self.context), None
+		else:
+			return None, RTError(f"Unable to add Number to {type(to).__name__}", self.position.start.createStartEndPosition(to.position.end), self.context)
 
 	def subtracted(self, by: Number | RuntimeValue) -> tuple[Number, RTError]:
 		if isinstance(by, Number):
 			return Number(self.value - by.value, self.position.start.createStartEndPosition(by.position.end), self.context), None
+		elif isinstance(by, Boolean):
+			return Number(self.value - (1 if by.value else 0), self.position.start.createStartEndPosition(by.position.end), self.context), None
+		else:
+			return None, RTError(f"Unable to subtract Number by {type(by).__name__}", self.position.start.createStartEndPosition(by.position.end), self.context)
 
 	def multiplied(self, by: Number | RuntimeValue) -> tuple[Number, RTError]:
 		if isinstance(by, Number):
 			return Number(self.value * by.value, self.position.start.createStartEndPosition(by.position.end), self.context), None
+		elif isinstance(by, Boolean):
+			return Number(self.value * (1 if by.value else 0), self.position.start.createStartEndPosition(by.position.end), self.context), None
+		else:
+			return None, RTError(f"Unable to multiply Number by {type(by).__name__}", self.position.start.createStartEndPosition(by.position.end), self.context)
 
 	def divided(self, by: Number | RuntimeValue) -> tuple[Number, RTError]:
 		if isinstance(by, Number):
@@ -45,6 +57,12 @@ class Number(RuntimeValue):
 				return None, RTError("Cannot divide by zero", position, self.context)
 
 			return Number(self.value / by.value, position, self.context), None
+		elif isinstance(bool, Boolean):
+			if not by.value:
+				return None, RTError("Cannot divide by zero", position, self.context)
+			return Number(self.value - (1 if by.value else 0), position, self.context), None
+		else:
+			return None, RTError(f"Unable to divide Number by {type(by).__name__}", position, self.context)
 
 	def notted(self, by: Token) -> tuple[Boolean, RTError]:
 		asBoolean, error = self.toBoolean()
