@@ -32,6 +32,13 @@ class TokenTypes(Enum):
 
 	EQUALS =			auto()
 
+	DOUBLE_EQUALS = 	auto()
+	NOT_EQUALS =		auto()
+	GRATER_THAN = 		auto()
+	LESS_THAN = 		auto()
+	GREATER_EQUALS =	auto()
+	LESS_EQUALS = 		auto()
+
 ########################################
 #	TOKEN CLASS
 ########################################

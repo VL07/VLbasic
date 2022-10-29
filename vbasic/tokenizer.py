@@ -89,8 +89,17 @@ class Tokenizer:
 				tokens.append(Token(TokenTypes.COMMA, self.position.asStartEndPosition()))
 				self.advance()
 			elif self.currentCharacter == "=":
-				tokens.append(Token(TokenTypes.EQUALS, self.position.asStartEndPosition()))
-				self.advance()
+				token, error = self.makeEquals()
+				tokens.append(token)
+			elif self.currentCharacter == "!":
+				token, error = self.makeNotEquals()
+				tokens.append(token)
+			elif self.currentCharacter == ">":
+				token, error = self.makeGraterThanEquals()
+				tokens.append(token)
+			elif self.currentCharacter == "<":
+				token, error = self.makeLessThanEquals()
+				tokens.append(token)
 			elif self.currentCharacter is not None:
 				startPosition = self.position.copy()
 				character = self.currentCharacter
@@ -109,6 +118,59 @@ class Tokenizer:
 		tokens.append(Token(TokenTypes.EOF, position.asStartEndPosition()))
 
 		return tokens, None
+
+	def makeEquals(self) -> tuple[Token | None, Error | None]:
+		startPosition = self.position.copy()
+
+		self.advance()
+
+		if self.currentCharacter == "=":
+			token = Token(TokenTypes.DOUBLE_EQUALS, startPosition.createStartEndPosition(self.position))
+			self.advance()
+		else:
+			token = Token(TokenTypes.EQUALS, startPosition.asStartEndPosition())
+
+		return token, None
+
+	def makeNotEquals(self) -> tuple[Token | None, Error | None]:
+		startPosition = self.position.copy()
+
+		self.advance()
+
+		if self.currentCharacter != "=":
+			return None, IllegalCharacterError(f"'{self.currentCharacter}' is not a valid character", startPosition.asStartEndPosition())
+
+		token = Token(TokenTypes.NOT_EQUALS, startPosition.createStartEndPosition(self.position))
+
+		self.advance()
+
+		return token, None
+
+	def makeGraterThanEquals(self) -> tuple[Token | None, Error | None]:
+		startPosition = self.position.copy()
+
+		self.advance()
+
+		if self.currentCharacter == "=":
+			token = Token(TokenTypes.GREATER_EQUALS, startPosition.createStartEndPosition(self.position))
+			self.advance()
+		else:
+			token = Token(TokenTypes.GRATER_THAN, startPosition.asStartEndPosition())
+
+		return token, None
+
+	def makeLessThanEquals(self) -> tuple[Token | None, Error | None]:
+		startPosition = self.position.copy()
+
+		self.advance()
+
+		if self.currentCharacter == "=":
+			token = Token(TokenTypes.LESS_EQUALS, startPosition.createStartEndPosition(self.position))
+			self.advance()
+		else:
+			token = Token(TokenTypes.LESS_THAN, startPosition.asStartEndPosition())
+
+		return token, None
 
 	def makeNumber(self) -> tuple[Token | None, Error | None]:
 		number = self.currentCharacter

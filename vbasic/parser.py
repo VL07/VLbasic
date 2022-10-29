@@ -91,11 +91,34 @@ class Parser:
 
 			return VariableAssignNode(varName, expression), None
 
-		term, error = self.binaryOperation(self.term, (TokenTypes.PLUS, TokenTypes.MINUS))
+		term, error = self.binaryOperation(self.compExpression, (TokenTypes.PLUS, TokenTypes.MINUS))
 		if error:
 			return None, error
 
 		return term, None
+
+	def compExpression(self) -> tuple[BinaryOperationNode, Error]:
+		if self.currentToken.isKeyword("NOT"):
+			self.advance()
+			factor, error = self.factor()
+			if error:
+				return None, error
+
+			return UnaryOperationNode(self.currentToken, factor), None
+
+		node, error = self.binaryOperation(self.term, (
+			TokenTypes.DOUBLE_EQUALS,
+			TokenTypes.NOT_EQUALS,
+			TokenTypes.GRATER_THAN,
+			TokenTypes.LESS_THAN,
+			TokenTypes.GREATER_EQUALS,
+			TokenTypes.LESS_EQUALS
+		))
+		
+		if error:
+			return None, error
+
+		return node, None
 
 	def term(self) -> tuple[BinaryOperationNode, Error]:
 		factor, error = self.binaryOperation(self.factor, (TokenTypes.MULTIPLY, TokenTypes.DIVIDE))
@@ -107,7 +130,7 @@ class Parser:
 	def factor(self) -> tuple[UnaryOperationNode, Error]:
 		startToken = self.currentToken
 
-		if startToken.type in (TokenTypes.PLUS, TokenTypes.MINUS) or startToken.isKeyword("NOT"):
+		if startToken.type in (TokenTypes.PLUS, TokenTypes.MINUS):
 			self.advance()
 			factor, error = self.factor()
 			if error: 

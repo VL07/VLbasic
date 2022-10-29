@@ -37,6 +37,24 @@ class RuntimeValue:
 	def divided(self, by: RuntimeValue, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
 		return None, RTError(f"Unable to divide {type(self).__name__} by {type(by).__name__}", position.copy(), self.context)
 
+	def equals(self, other: RuntimeValue, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
+		return None, RTError(f"Unable to check equality between {type(self).__name__} and {type(other).__name__}", position.copy(), self.context)
+
+	def notEquals(self, other: RuntimeValue, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
+		return None, RTError(f"Unable to check inequality between {type(self).__name__} and {type(other).__name__}", position.copy(), self.context)
+
+	def graterThan(self, other: RuntimeValue, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
+		return None, RTError(f"Unable to compare size between {type(self).__name__} and {type(other).__name__}", position.copy(), self.context)
+
+	def lessThan(self, other: RuntimeValue, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
+		return None, RTError(f"Unable to compare size between {type(self).__name__} and {type(other).__name__}", position.copy(), self.context)
+
+	def graterThanEquals(self, other: RuntimeValue, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
+		return None, RTError(f"Unable to compare size between {type(self).__name__} and {type(other).__name__}", position.copy(), self.context)
+
+	def lessThanEquals(self, other: RuntimeValue, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
+		return None, RTError(f"Unable to compare size between {type(self).__name__} and {type(other).__name__}", position.copy(), self.context)
+
 	def notted(self, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
 		return None, RTError(f"Unable to invert {type(self).__name__}", position.copy(), self.context)
 
@@ -88,6 +106,54 @@ class Number(RuntimeValue):
 			return Number(self.value - (1 if by.value else 0), position.copy(), self.context), None
 		
 		return super().divided()
+
+	def equals(self, other: RuntimeValue, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
+		if isinstance(other, Number):
+			return Boolean(self.value == other.value, position, self.context), None
+		elif isinstance(other, Boolean):
+			node, error = self.toBoolean(position.copy())
+			if error:
+				return None, error
+
+			return Boolean(node.value == other.value, position.copy(), self.context), None
+		
+		return Boolean(False, position.copy(), self.context), None
+
+	def notEquals(self, other: RuntimeValue, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
+		if isinstance(other, Number):
+			return Boolean(self.value != other.value, position, self.context), None
+		elif isinstance(other, Boolean):
+			node, error = self.toBoolean(position.copy())
+			if error:
+				return None, error
+
+			return Boolean(node.value != other.value, position.copy(), self.context), None
+		
+		return Boolean(True, position.copy(), self.context), None
+
+	def graterThan(self, other: RuntimeValue, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
+		if isinstance(other, Number):
+			return Boolean(self.value > other.value, position, self.context), None
+		
+		return super().graterThan(other, position)
+
+	def lessThan(self, other: RuntimeValue, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
+		if isinstance(other, Number):
+			return Boolean(self.value < other.value, position, self.context), None
+		
+		return super().lessThan(other, position)
+
+	def graterThanEquals(self, other: RuntimeValue, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
+		if isinstance(other, Number):
+			return Boolean(self.value >= other.value, position, self.context), None
+		
+		return super().graterThanEquals(other, position)
+	
+	def lessThanEquals(self, other: RuntimeValue, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
+		if isinstance(other, Number):
+			return Boolean(self.value <= other.value, position, self.context), None
+		
+		return super().lessThanEquals(other, position)
 
 	def notted(self, position: StartEndPosition) -> tuple[Boolean, RTError]:
 		asBoolean, error = self.toBoolean(position)

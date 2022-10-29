@@ -67,6 +67,18 @@ class Interpreter:
 			result, error = left.multiplied(right, position)
 		elif node.operationToken.type == TokenTypes.DIVIDE:
 			result, error = left.divided(right, position)
+		elif node.operationToken.type == TokenTypes.DOUBLE_EQUALS:
+			result, error = left.equals(right, position)
+		elif node.operationToken.type == TokenTypes.NOT_EQUALS:
+			result, error = left.notEquals(right, position)
+		elif node.operationToken.type == TokenTypes.GRATER_THAN:
+			result, error = left.graterThan(right, position)
+		elif node.operationToken.type == TokenTypes.LESS_THAN:
+			result, error = left.lessThan(right, position)
+		elif node.operationToken.type == TokenTypes.GREATER_EQUALS:
+			result, error = left.graterThanEquals(right, position)
+		elif node.operationToken.type == TokenTypes.LESS_EQUALS:
+			result, error = left.lessThanEquals(right, position)
 		else:
 			return None, RTError(f"Expected operation token, not {node.operationToken}", node.operationToken.position.copy(), context)
 
