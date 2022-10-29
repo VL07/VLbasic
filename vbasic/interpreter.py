@@ -98,6 +98,8 @@ class Interpreter:
 		if error:
 			return None, error
 
+		value.position = node.position.copy()
+
 		return value, None
 
 	def visit_VariableAssignNode(self, node: VariableAssignNode, context: Context) -> tuple[ExpressionNode,  RTError]:
