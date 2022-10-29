@@ -28,6 +28,7 @@ def interpret(code, name) -> list[RuntimeValue]:
 	context.setVariableTable(v)
 
 	i = Interpreter(statements)
+	i.addDefaultVariables(context)
 	out, error = i.interpret(context)
 
 	if error:

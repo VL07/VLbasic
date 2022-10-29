@@ -4,9 +4,10 @@
 
 from .statementclass import StatementNode, NumberNode, BinaryOperationNode, UnaryOperationNode, VariableAccessNode, VariableAssignNode, VariableDeclareNode, ExpressionNode
 from .contextclass import Context
-from .runtimevaluesclass import RuntimeValue, Number
+from .runtimevaluesclass import RuntimeValue, Number, Boolean, Null
 from .tokenclass import TokenTypes
 from .error import RTError
+from .utils import StartEndPosition, Position, File
 
 ########################################
 #	INTERPRETER
@@ -26,6 +27,14 @@ class Interpreter:
 			values.append(value)
 
 		return values, None
+
+	def addDefaultVariables(self, context: Context) -> None:
+		file = File("<DEFAULT_VARIABLE>", "")
+		position = StartEndPosition(file, Position(-1, -1, -1, file))
+
+		context.variableTable.declareVariable("TRUE", Boolean(True, position, context), True, position)
+		context.variableTable.declareVariable("FALSE", Boolean(False, position, context), True, position)
+		context.variableTable.declareVariable("NULL", Null(position, context), True, position)
 
 	def visit(self, statement: StatementNode, context: Context) -> tuple[RuntimeValue | Number, RTError]:
 
@@ -48,14 +57,16 @@ class Interpreter:
 		if error:
 			return None, error
 
+		position = left.position.start.createStartEndPosition(right.position.end)
+
 		if node.operationToken.type == TokenTypes.PLUS:
-			result, error = left.added(right)
+			result, error = left.added(right, position)
 		elif node.operationToken.type == TokenTypes.MINUS:
-			result, error = left.subtracted(right)
+			result, error = left.subtracted(right, position)
 		elif node.operationToken.type == TokenTypes.MULTIPLY:
-			result, error = left.multiplied(right)
+			result, error = left.multiplied(right, position)
 		elif node.operationToken.type == TokenTypes.DIVIDE:
-			result, error = left.divided(right)
+			result, error = left.divided(right, position)
 		else:
 			return None, RTError(f"Expected operation token, not {node.operationToken}", node.operationToken.position.copy(), context)
 
@@ -69,12 +80,14 @@ class Interpreter:
 		if error:
 			return None, error
 
+		position = node.operationToken.position.start.createStartEndPosition(node.expression.position.end)
+
 		if node.operationToken.type == TokenTypes.MINUS:
-			number, error = number.multiplied(Number(-1, number.position.copy(), context))
+			number, error = number.multiplied(Number(-1, number.position.copy(), context), position)
 		elif node.operationToken.type == TokenTypes.PLUS:
-			number, error = number.multiplied(Number(1, number.position.copy(), context))
+			number, error = number.multiplied(Number(1, number.position.copy(), context), position)
 		elif node.operationToken.isKeyword("NOT"):
-			number, error = number.notted(node.operationToken)
+			number, error = number.notted(position)
 		else:
 			return None, RTError(f"Expected operation token, not {node.operationToken}", number.position, context)
 
