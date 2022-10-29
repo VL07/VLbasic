@@ -94,7 +94,7 @@ class Number(RuntimeValue):
 		if error:
 			return None, error
 		
-		asNotBoolean, error = asBoolean.notted(by, position)
+		asNotBoolean, error = asBoolean.notted(position)
 		if error:
 			return None, error
 

@@ -65,3 +65,8 @@ class TestVariables:
 		interpretCode("var = 66")
 		assert interpretCode("var").value == 66
 		resetVariables()
+
+	def testBuiltIns(self):
+		assert interpretCode("TRUE").value == True
+		assert interpretCode("FALSE").value == False
+		assert interpretCode("NULL").value == "NULL"

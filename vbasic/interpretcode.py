@@ -6,11 +6,18 @@ from .tokenizer import Tokenizer
 from .runtimevaluesclass import RuntimeValue
 
 v = VariableTable()
+i: Interpreter = None
+context: Context = None
 
 def resetVariables():
 	v.variables = {}
+	if i and context:
+		i.addDefaultVariables(context)
 
 def interpret(code, name) -> list[RuntimeValue]:
+	global i
+	global context
+
 	t = Tokenizer(name, code)
 	tokens, error = t.tokenize()
 
