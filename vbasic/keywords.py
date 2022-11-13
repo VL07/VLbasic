@@ -1,5 +1,8 @@
 KEYWORDS = [
 	"NOT",
 	"LET",
-	"CONST"
+	"CONST",
+	"WHILE",
+	"THEN",
+	"END"
 ]

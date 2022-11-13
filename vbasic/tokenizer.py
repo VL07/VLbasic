@@ -53,7 +53,7 @@ class Tokenizer:
 		error: Error | None = None
 
 		while self.currentCharacter is not None:
-			if self.currentCharacter in ["\n", ":"]:
+			if self.currentCharacter in ["\n", ";"]:
 				tokens.append(Token(TokenTypes.NEW_LINE, self.position.asStartEndPosition()))
 				self.advance()
 			elif self.currentCharacter in [" ", "\t"]:

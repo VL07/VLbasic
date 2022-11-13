@@ -77,3 +77,9 @@ class VariableDeclareNode:
 
 	def __repr__(self) -> str:
 		return f"VARIABLE_ACCESS_NODE({str(self.token.value)})"
+
+class WhileNode:
+	def __init__(self, position: StartEndPosition, condition: ExpressionNode, body: list[ExpressionNode]) -> None:
+		self.position = position
+		self.condition = condition
+		self.body = body

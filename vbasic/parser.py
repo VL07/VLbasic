@@ -4,7 +4,7 @@
 
 from .tokenclass import Token, TokenTypes
 from .error import Error, InvalidSyntaxError
-from .statementclass import StatementNode, ExpressionNode, BinaryOperationNode, UnaryOperationNode, NumberNode, VariableAccessNode, VariableDeclareNode, VariableAssignNode
+from .statementclass import StatementNode, ExpressionNode, BinaryOperationNode, UnaryOperationNode, NumberNode, VariableAccessNode, VariableDeclareNode, VariableAssignNode, WhileNode
 
 ########################################
 #	PARSER
@@ -32,7 +32,7 @@ class Parser:
 			return None
 		return self.tokens[self.index + 1]
 
-	def parse(self) -> tuple[list[StatementNode], Error]:
+	def parse(self) -> tuple[list[ExpressionNode], Error]:
 		statements: list[StatementNode] = []
 
 		while self.currentToken.type != TokenTypes.EOF:
@@ -45,7 +45,23 @@ class Parser:
 
 		return statements, None
 
-	def statement(self) -> tuple[StatementNode, Error]:
+	def parseEnd(self) -> tuple[list[ExpressionNode], Error]:
+		statements: list[StatementNode] = []
+
+		while self.currentToken.type != TokenTypes.EOF and not self.currentToken.isKeyword("END"):
+			statement, error = self.statement()
+			if error:
+				return None, error
+
+			if statement:
+				statements.append(statement)
+
+		if self.currentToken.type == TokenTypes.EOF:
+			return None, InvalidSyntaxError(f"Expected keyword END, not {str(self.currentToken.type)}", self.currentToken.position.copy())
+		
+		return statements, None
+
+	def statement(self) -> tuple[ExpressionNode, Error]:
 		expression, error = self.expression()
 
 		if error:
@@ -173,9 +189,51 @@ class Parser:
 			
 			return None, None
 
-
+		elif startToken.isKeyword("WHILE"):
+			expression, error = self.whileExpression()
+			if error:
+				return None, error
+			return expression, None
 
 		return None, InvalidSyntaxError(f"Expected number or identifier, not {str(self.currentToken.type)}", self.currentToken.position.copy())
+
+	######################################
+
+	def whileExpression(self) -> tuple[WhileNode, Error]:
+		startPosition = self.currentToken.position.start.copy()
+
+		self.advance()
+
+		condition, error = self.compExpression()
+		if error:
+			return None, error
+
+		previousPosition = self.currentToken.position.copy()
+
+		if not self.currentToken:
+			return None, InvalidSyntaxError(f"Expected keyword THEN, not EOF", previousPosition)
+
+		if not self.currentToken.isKeyword("THEN"):
+			return None, InvalidSyntaxError(f"Expected keyword THEN, not {str(self.currentToken.type)}", self.currentToken.position.copy())
+
+		self.advance()
+
+		if not self.currentToken.type == TokenTypes.NEW_LINE:
+			return None, InvalidSyntaxError(f"Expected new line, not {str(self.currentToken.type)}", self.currentToken.position.copy())
+
+		self.advance()
+
+		body, error = self.parseEnd()
+		if error:
+			return None, error
+
+		print("WHILE BODY:", body)
+
+		endPosition = self.currentToken.position.end.copy()
+
+		self.advance()
+
+		return WhileNode(startPosition.createStartEndPosition(endPosition), condition, body), None
 
 	######################################
 

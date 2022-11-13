@@ -6,7 +6,6 @@ from __future__ import annotations
 from .utils import StartEndPosition
 from .contextclass import Context
 from .error import RTError
-from .tokenclass import Token
 
 ########################################
 #	INTERPRETER
@@ -207,6 +206,9 @@ class Boolean(RuntimeValue):
 
 	def notted(self, position: StartEndPosition) -> tuple[Boolean, RTError]:
 		return Boolean(not self.value, position.copy(), self.context), None
+
+	def toBoolean(self, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
+		return Boolean(self.value, self.position.copy(), self.context), None
 
 class Null(RuntimeValue):
 	def __init__(self, position: StartEndPosition, context: Context) -> None:

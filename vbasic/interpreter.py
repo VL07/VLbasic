@@ -2,7 +2,7 @@
 #	IMPORTS
 ########################################
 
-from .statementclass import StatementNode, NumberNode, BinaryOperationNode, UnaryOperationNode, VariableAccessNode, VariableAssignNode, VariableDeclareNode, ExpressionNode
+from .statementclass import StatementNode, NumberNode, BinaryOperationNode, UnaryOperationNode, VariableAccessNode, VariableAssignNode, VariableDeclareNode, ExpressionNode, WhileNode
 from .contextclass import Context
 from .runtimevaluesclass import RuntimeValue, Number, Boolean, Null
 from .tokenclass import TokenTypes
@@ -43,7 +43,7 @@ class Interpreter:
 		return func(statement, context)
 
 	def visitFunctionNotFound(self, statement: StatementNode, context: Context) -> None:
-		raise NotImplemented(f"visit_{type(statement).__name__} is not implemented")
+		raise NotImplementedError(f"visit_{type(statement).__name__} is not implemented")
 
 	def visit_NumberNode(self, node: NumberNode, context: Context) -> tuple[Number, RTError]:
 		return Number(node.token.value, node.position.copy(), context), None
@@ -138,3 +138,27 @@ class Interpreter:
 
 		return value, None
 	
+	def visit_WhileNode(self, node: WhileNode, context: Context) -> tuple[ExpressionNode,  RTError]:
+		condition, error = self.visit(node.condition, context)
+		if error:
+			return None, error
+
+		conditionBoolean, error = condition.toBoolean(node.condition.position.copy())
+		if error:
+			return None, error
+
+		while conditionBoolean.value:
+			for statement in node.body:
+				statementVisited, error = self.visit(statement, context)
+				if error: 
+					return None, error
+
+			condition, error = self.visit(node.condition, context)
+			if error:
+				return None, error
+
+			conditionBoolean, error = condition.toBoolean(node.condition.position.copy())
+			if error:
+				return None, error
+
+		return None, None
