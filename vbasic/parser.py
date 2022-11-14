@@ -4,7 +4,7 @@
 
 from .tokenclass import Token, TokenTypes
 from .error import Error, InvalidSyntaxError
-from .statementclass import StatementNode, ExpressionNode, BinaryOperationNode, UnaryOperationNode, NumberNode, VariableAccessNode, VariableDeclareNode, VariableAssignNode, WhileNode
+from .statementclass import StatementNode, ExpressionNode, BinaryOperationNode, UnaryOperationNode, NumberNode, VariableAccessNode, VariableDeclareNode, VariableAssignNode, WhileNode, FunctionCallNode
 
 ########################################
 #	PARSER
@@ -154,10 +154,51 @@ class Parser:
 
 			return UnaryOperationNode(startToken, factor), None
 
-		atom, error = self.atom()
+		call, error = self.call()
 		if error:
 			return None, error
 		
+		return call, None
+
+	def call(self) -> tuple[FunctionCallNode, Error]:
+		print("t", self.currentToken.type)
+
+		atom, error = self.atom()
+		if error:
+			return None, error
+
+		print("t2", self.currentToken.type)
+
+		if self.currentToken.type == TokenTypes.LEFT_PARENTHESES:
+			self.advance()
+
+			arguments = []
+
+			if self.currentToken.type != TokenTypes.RIGHT_PARENTHESES:
+				firstArgument, error = self.expression()
+				if error:
+					return None, error
+
+				arguments.append(firstArgument)
+
+				while self.currentToken.type == TokenTypes.COMMA:
+					self.advance()
+
+					argument, error = self.expression()
+					if error:
+						return None, error
+
+					arguments.append(argument)
+
+			if self.currentToken.type != TokenTypes.RIGHT_PARENTHESES:
+				print(self.currentToken)
+				return None, InvalidSyntaxError(f"Expected , or ), not {str(self.currentToken.type)}", self.currentToken.position.copy())
+
+			endPosition = self.currentToken.position.end.copy()
+
+			self.advance()
+
+			return FunctionCallNode(atom.position.start.copy().createStartEndPosition(endPosition), atom, arguments), None
 		return atom, None
 
 	def atom(self) -> tuple[NumberNode | VariableAccessNode | VariableDeclareNode | VariableAssignNode, Error]:

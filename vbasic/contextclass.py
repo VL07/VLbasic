@@ -72,14 +72,8 @@ class VariableTable:
 #	CONTEXT
 ########################################
 
-lastContext = None
-
 class Context:
-	classes = 0
-
 	def __init__(self, displayName: str, parent: Context | None = None) -> None:
-		self.classes += 1
-		self.id = self.classes
 		self.displayName = displayName
 		self.parent = parent
 		self.variableTable: VariableTable = None

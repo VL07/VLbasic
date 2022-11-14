@@ -2,12 +2,13 @@
 #	IMPORTS
 ########################################
 
-from .statementclass import StatementNode, NumberNode, BinaryOperationNode, UnaryOperationNode, VariableAccessNode, VariableAssignNode, VariableDeclareNode, ExpressionNode, WhileNode
+from .statementclass import StatementNode, NumberNode, BinaryOperationNode, UnaryOperationNode, VariableAccessNode, VariableAssignNode, VariableDeclareNode, ExpressionNode, WhileNode, FunctionCallNode
 from .contextclass import Context
-from .runtimevaluesclass import RuntimeValue, Number, Boolean, Null
+from .runtimevaluesclass import RuntimeValue, Number, Boolean, Null, BuiltInFunction
 from .tokenclass import TokenTypes
 from .error import RTError
 from .utils import StartEndPosition, Position, File
+from .builtInfunctions import funcPrint
 
 ########################################
 #	INTERPRETER
@@ -35,6 +36,7 @@ class Interpreter:
 		context.variableTable.declareVariable("TRUE", Boolean(True, position, context), True, position)
 		context.variableTable.declareVariable("FALSE", Boolean(False, position, context), True, position)
 		context.variableTable.declareVariable("NULL", Null(position, context), True, position)
+		context.variableTable.declareVariable("PRINT", BuiltInFunction("PRINT", funcPrint, position, context), True, position)
 
 	def visit(self, statement: StatementNode, context: Context) -> tuple[RuntimeValue | Number, RTError]:
 
@@ -105,7 +107,7 @@ class Interpreter:
 
 		return number, None
 
-	def visit_VariableAccessNode(self, node: VariableAccessNode, context: Context) -> tuple[ExpressionNode,  RTError]:
+	def visit_VariableAccessNode(self, node: VariableAccessNode, context: Context) -> tuple[Number,  RTError]:
 		value, error = context.variableTable.lookupVariable(node.token.value, node.position.copy())
 		if error:
 			return None, error
@@ -114,7 +116,7 @@ class Interpreter:
 
 		return value, None
 
-	def visit_VariableAssignNode(self, node: VariableAssignNode, context: Context) -> tuple[ExpressionNode,  RTError]:
+	def visit_VariableAssignNode(self, node: VariableAssignNode, context: Context) -> tuple[Number,  RTError]:
 		result, error = self.visit(node.valueNode, context)
 		if error:
 			return None, error
@@ -125,7 +127,7 @@ class Interpreter:
 
 		return value, None
 
-	def visit_VariableDeclareNode(self, node: VariableDeclareNode, context: Context) -> tuple[ExpressionNode,  RTError]:
+	def visit_VariableDeclareNode(self, node: VariableDeclareNode, context: Context) -> tuple[Number,  RTError]:
 		isConstant = node.declareToken.isKeyword("CONST")
 
 		result, error = self.visit(node.valueNode, context)
@@ -138,7 +140,7 @@ class Interpreter:
 
 		return value, None
 	
-	def visit_WhileNode(self, node: WhileNode, context: Context) -> tuple[ExpressionNode,  RTError]:
+	def visit_WhileNode(self, node: WhileNode, context: Context) -> tuple[Number,  RTError]:
 		condition, error = self.visit(node.condition, context)
 		if error:
 			return None, error
@@ -162,3 +164,24 @@ class Interpreter:
 				return None, error
 
 		return None, None
+
+	def visit_FunctionCallNode(self, node: FunctionCallNode, context: Context) -> tuple[Number,  RTError]:
+		func, error = self.visit(node.func, context)
+		if error:
+			return None, error
+
+		argumentsVisited = []
+		for argument in node.arguments:
+			argumentVisited, error = self.visit(argument, context)
+			if error:
+				return None, error
+
+			argumentsVisited.append(argumentVisited)
+
+		returnValue, error = func.execute(argumentsVisited, node.position.copy())
+		if error:
+			return None, error
+
+		return returnValue, None
+
+		

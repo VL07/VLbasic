@@ -86,3 +86,12 @@ class WhileNode:
 
 	def __repr__(self) -> str:
 		return "WHILE_NODE()"
+
+class FunctionCallNode:
+	def __init__(self, position: StartEndPosition, func: VariableAccessNode, arguments: list[ExpressionNode]) -> None:
+		self.position = position
+		self.func = func
+		self.arguments = arguments
+
+	def __repr__(self) -> str:
+		return f"FUNCTION_CALL_NODE({str(self.func)}, {str(self.arguments)})"

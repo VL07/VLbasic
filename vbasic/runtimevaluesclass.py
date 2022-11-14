@@ -6,16 +6,13 @@ from __future__ import annotations
 from .utils import StartEndPosition
 from .contextclass import Context
 from .error import RTError
+from typing import Callable
 
 ########################################
 #	INTERPRETER
 ########################################
 
 class RuntimeValue:
-	def __init__(self, position: StartEndPosition) -> None:
-		self.position = position
-		self.value = None
-	
 	def __init__(self, value: int | float, position: StartEndPosition, context: Context) -> None:
 		self.value = value
 		self.position = position
@@ -58,7 +55,10 @@ class RuntimeValue:
 		return None, RTError(f"Unable to invert {type(self).__name__}", position.copy(), self.context)
 
 	def toBoolean(self, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
-		return None, RTError(f"Unable to convert {type(self).__name__} by a Boolean", position.copy(), self.context)
+		return None, RTError(f"Unable to convert a {type(self).__name__} by a Boolean", position.copy(), self.context)
+
+	def execute(self, arguments: list[RuntimeValue], position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
+		return None, RTError(f"Unable to call a {type(self).__name__}", position.copy(), self.context)
 
 class Number(RuntimeValue):
 	def __init__(self, value: int | float, position: StartEndPosition, context: Context) -> None:
@@ -218,3 +218,25 @@ class Null(RuntimeValue):
 
 	def __repr__(self) -> str:
 		return f"NULL()"
+
+class BuiltInFunction(RuntimeValue):
+	def __init__(self, name: str, executeFunction: Callable[[list[RuntimeValue], Context], tuple[RuntimeValue, RuntimeError]], position: StartEndPosition, context: Context) -> None:
+		self.name = name
+		self.position = position
+		self.context = context
+		self.executeFunction = executeFunction
+
+	def execute(self, arguments: list[RuntimeValue], position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
+		executeContext = Context(self.name, self.context)
+
+		returnValue, error = self.executeFunction(arguments, executeContext)
+		if error:
+			return None, error
+
+		returnValue.context = self.context
+		returnValue.position = position.copy()
+		
+		return returnValue, None
+
+	def __repr__(self) -> str:
+		return f"BUILT_IN_FUNCTION({self.name}"
