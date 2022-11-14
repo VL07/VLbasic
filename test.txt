@@ -1,0 +1,12 @@
+LET a = 0
+LET b = 0
+LET max = 99
+WHILE a < max THEN
+	a = a + 1
+	WHILE b < max * max THEN
+		b = b + 1
+	END
+END
+
+a
+b

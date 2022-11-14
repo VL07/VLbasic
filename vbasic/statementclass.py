@@ -83,3 +83,6 @@ class WhileNode:
 		self.position = position
 		self.condition = condition
 		self.body = body
+
+	def __repr__(self) -> str:
+		return "WHILE_NODE()"

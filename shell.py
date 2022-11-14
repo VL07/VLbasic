@@ -7,6 +7,9 @@ v = VariableTable()
 
 while True:
 	inputText = input("] ").replace("\\n", "\n")
+	if inputText.startswith("> "):
+		with open(inputText[2:], "r") as f:
+			inputText = f.read()
 	print("TOKENIZING")
 	t = Tokenizer("SHELL", inputText)
 	tokens, error = t.tokenize()
