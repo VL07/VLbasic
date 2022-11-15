@@ -309,6 +309,32 @@ class Null(RuntimeValue):
 	def toString(self, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
 		return String("NULL" if self.value else "FALSE", position.copy(), self.context), None
 
+class List(RuntimeValue):
+	def __init__(self, expressions: list[RuntimeValue], position: StartEndPosition, context: Context) -> None:
+		self.position = position
+		self.context = context
+		self.value = expressions
+
+	def __repr__(self) -> str:
+		return f"LIST({self.value})"
+
+	def toString(self, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
+		listAsString = "["
+
+		for expression in self.value:
+			expressionAsString, error = expression.toString(position.copy())
+			if error:
+				return None, error
+
+			listAsString += expressionAsString.value + ", "
+
+		if len(self.value):
+			listAsString = listAsString[:-2] + "]"
+		else:
+			listAsString = "[]"
+
+		return String(listAsString, position.copy(), self.context), None
+
 class BuiltInFunction(RuntimeValue):
 	def __init__(self, name: str, executeFunction: Callable[[list[RuntimeValue], Context], tuple[RuntimeValue, RuntimeError]], position: StartEndPosition, context: Context) -> None:
 		self.name = name

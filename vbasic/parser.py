@@ -4,7 +4,7 @@
 
 from .tokenclass import Token, TokenTypes
 from .error import Error, InvalidSyntaxError
-from .statementclass import StatementNode, ExpressionNode, BinaryOperationNode, UnaryOperationNode, NumberNode, VariableAccessNode, VariableDeclareNode, VariableAssignNode, WhileNode, FunctionCallNode, StringNode
+from .statementclass import StatementNode, ExpressionNode, BinaryOperationNode, UnaryOperationNode, NumberNode, VariableAccessNode, VariableDeclareNode, VariableAssignNode, WhileNode, FunctionCallNode, StringNode, ListNode
 
 ########################################
 #	PARSER
@@ -221,6 +221,15 @@ class Parser:
 			self.advance()
 			return expression, None
 
+		elif startToken.type == TokenTypes.LEFT_SQUARE:
+			expression, error = self.listExpression()
+			if error:
+				return None, error
+
+			self.advance()
+			
+			return expression, None
+
 		elif startToken.type == TokenTypes.IDENTIFIER:
 			self.advance()
 			
@@ -240,6 +249,38 @@ class Parser:
 		return None, InvalidSyntaxError(f"Expected number or identifier, not {str(self.currentToken.type)}", self.currentToken.position.copy())
 
 	######################################
+
+	def listExpression(self) -> tuple[ListNode, Error]:
+		startPosition = self.currentToken.position.start.copy()
+
+		self.advance()
+
+		expressions = []
+
+		if self.currentToken.type == TokenTypes.RIGHT_SQUARE:
+			return ListNode(startPosition.createStartEndPosition(self.currentToken.position.end.copy()), expressions), None
+
+		print("1")
+
+		firstExpression, error = self.expression()
+		if error:
+			return None, error
+
+		expressions.append(firstExpression)
+		
+		while self.currentToken.type == TokenTypes.COMMA:
+			self.advance()
+
+			expression, error = self.expression()
+			if error:
+				return None, error
+
+			expressions.append(expression)
+
+		if self.currentToken.type != TokenTypes.RIGHT_SQUARE:
+			return None, InvalidSyntaxError(f"Expected , or ], not {str(self.currentToken.type)}", self.currentToken.position.copy())
+
+		return ListNode(startPosition.createStartEndPosition(self.currentToken.position.end.copy()), expressions), None
 
 	def whileExpression(self) -> tuple[WhileNode, Error]:
 		startPosition = self.currentToken.position.start.copy()

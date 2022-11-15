@@ -85,6 +85,12 @@ class Tokenizer:
 			elif self.currentCharacter == ")":
 				tokens.append(Token(TokenTypes.RIGHT_PARENTHESES, self.position.asStartEndPosition()))
 				self.advance()
+			elif self.currentCharacter == "[":
+				tokens.append(Token(TokenTypes.LEFT_SQUARE, self.position.asStartEndPosition()))
+				self.advance()
+			elif self.currentCharacter == "]":
+				tokens.append(Token(TokenTypes.RIGHT_SQUARE, self.position.asStartEndPosition()))
+				self.advance()
 			elif self.currentCharacter == ",":
 				tokens.append(Token(TokenTypes.COMMA, self.position.asStartEndPosition()))
 				self.advance()

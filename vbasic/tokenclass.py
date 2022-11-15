@@ -24,6 +24,9 @@ class TokenTypes(Enum):
 	LEFT_PARENTHESES = 	auto()
 	RIGHT_PARENTHESES = auto()
 
+	LEFT_SQUARE =		auto()
+	RIGHT_SQUARE =		auto()
+
 	COMMA = 			auto()
 
 	INTEGER =			auto()

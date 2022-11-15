@@ -2,9 +2,9 @@
 #	IMPORTS
 ########################################
 
-from .statementclass import StatementNode, NumberNode, BinaryOperationNode, UnaryOperationNode, VariableAccessNode, VariableAssignNode, VariableDeclareNode, ExpressionNode, WhileNode, FunctionCallNode, StringNode
+from .statementclass import StatementNode, NumberNode, BinaryOperationNode, UnaryOperationNode, VariableAccessNode, VariableAssignNode, VariableDeclareNode, WhileNode, FunctionCallNode, StringNode, ListNode
 from .contextclass import Context
-from .runtimevaluesclass import RuntimeValue, Number, Boolean, Null, BuiltInFunction, String
+from .runtimevaluesclass import RuntimeValue, Number, Boolean, Null, BuiltInFunction, String, List
 from .tokenclass import TokenTypes
 from .error import RTError
 from .utils import StartEndPosition, Position, File
@@ -189,4 +189,15 @@ class Interpreter:
 
 		return returnValue, None
 
+	def visit_ListNode(self, node: List, context: Context) -> tuple[Number,  RTError]:
+		expressions = []
+
+		for expression in node.expressions:
+			expressionVisited, error = self.visit(expression, context)
+			if error:
+				return None, error
+
+			expressions.append(expressionVisited)
+
+		return List(expressions, node.position.copy(), context), None
 		

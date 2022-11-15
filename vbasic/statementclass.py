@@ -104,3 +104,11 @@ class FunctionCallNode:
 
 	def __repr__(self) -> str:
 		return f"FUNCTION_CALL_NODE({str(self.func)}, {str(self.arguments)})"
+
+class ListNode:
+	def __init__(self, position: StartEndPosition, expressions: list[ExpressionNode]) -> None:
+		self.position = position
+		self.expressions = expressions
+
+	def __repr__(self) -> str:
+		return f"LIST_NODE({str(self.expressions)})"
