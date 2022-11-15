@@ -3,7 +3,7 @@
 ########################################
 
 from __future__ import annotations
-from .utils import StartEndPosition
+from .utils import StartEndPosition, NUMBERS
 from .contextclass import Context
 from .error import RTError
 from typing import Callable
@@ -54,11 +54,14 @@ class RuntimeValue:
 	def notted(self, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
 		return None, RTError(f"Unable to invert {type(self).__name__}", position.copy(), self.context)
 
-	def toBoolean(self, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
+	def toBoolean(self, position: StartEndPosition) -> tuple[Boolean, RTError]:
 		return None, RTError(f"Unable to convert a {type(self).__name__} by a Boolean", position.copy(), self.context)
 
-	def toString(self, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
+	def toString(self, position: StartEndPosition) -> tuple[String, RTError]:
 		return None, RTError(f"Unable to convert a {type(self).__name__} by a String", position.copy(), self.context)
+
+	def toNumber(self, position: StartEndPosition) -> tuple[Number, RTError]:
+		return None, RTError(f"Unable to convert a {type(self).__name__} by a Number", position.copy(), self.context)
 
 	def execute(self, arguments: list[RuntimeValue], position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
 		return None, RTError(f"Unable to call a {type(self).__name__}", position.copy(), self.context)
@@ -173,8 +176,11 @@ class Number(RuntimeValue):
 	def toBoolean(self, position: StartEndPosition) -> tuple[Boolean, RTError]:
 		return Boolean(False if self.value == 0 else True, position.copy(), self.context), None
 
-	def toString(self, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
+	def toString(self, position: StartEndPosition) -> tuple[String, RTError]:
 		return String(str(self.value), position.copy(), self.context), None
+
+	def toNumber(self, position: StartEndPosition) -> tuple[Number, RTError]:
+		return Number(self.value, position.copy(), self.context), None
 
 class String(RuntimeValue):
 	def __init__(self, value: str, position: StartEndPosition, context: Context) -> None:
@@ -227,6 +233,22 @@ class String(RuntimeValue):
 	def toString(self, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
 		return String(str(self.value), position.copy(), self.context), None
 
+	def toNumber(self, position: StartEndPosition) -> tuple[Number, RTError]:
+		dots = 0
+
+		for i, character in enumerate(self.value):
+			if character in NUMBERS:
+				continue
+			elif character == "." and i > 0 and dots == 0:
+				dots += 1
+				continue
+
+			return None, RTError("Unable to convert this String, to a number", position.copy(), self.context)
+
+		if not dots:
+			return Number(int(self.value), position.copy(), self.context), None
+		return Number(float(self.value), position.copy(), self.context), None
+
 class Boolean(RuntimeValue):
 	def __init__(self, value: bool, position: StartEndPosition, context: Context) -> None:
 		self.value = value
@@ -271,6 +293,9 @@ class Boolean(RuntimeValue):
 
 	def toString(self, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
 		return String("TRUE" if self.value else "FALSE", position.copy(), self.context), None
+
+	def toNumber(self, position: StartEndPosition) -> tuple[Number, RTError]:
+		return Number(1 if self.value else 0, position.copy(), self.context), None
 
 class Null(RuntimeValue):
 	def __init__(self, position: StartEndPosition, context: Context) -> None:

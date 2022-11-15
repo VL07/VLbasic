@@ -12,6 +12,7 @@ from .runtimevaluesclass import String, Number
 ########################################
 
 placeholderPosition = Position(0, 0, 0, File("<FUNC_RETURN>", ""))
+placeholderStartEndPosition = placeholderPosition.asStartEndPosition()
 
 ########################################
 #	FUNCTIONS
@@ -21,7 +22,7 @@ def funcPrint(arguments, executeContext):
 	textConcatenated = ""
 
 	for argument in arguments:
-		string, error = argument.toString(placeholderPosition.copy())
+		string, error = argument.toString(placeholderStartEndPosition.copy())
 		if error:
 			return None, error
 
@@ -29,16 +30,28 @@ def funcPrint(arguments, executeContext):
 
 	print(textConcatenated[:-2])
 
-	return Null(placeholderPosition.copy(), executeContext), None
+	return Null(placeholderStartEndPosition.copy(), executeContext), None
 
 def funcToString(arguments, executeContext):
 	if len(arguments) > 1:
-		return None, RTError(f"STRING function only accepts 1 argument, not {str(len(arguments))}", placeholderPosition.copy(), executeContext)
+		return None, RTError(f"STRING function only accepts 1 argument, not {str(len(arguments))}", placeholderStartEndPosition.copy(), executeContext)
 
 	argument = arguments[0]
 
-	asString, error = argument.toString(placeholderPosition.copy())
+	asString, error = argument.toString(placeholderStartEndPosition.copy())
 	if error:
 		return None, error
 
-	return String(asString.value, placeholderPosition.copy(), executeContext), None
+	return String(asString.value, placeholderStartEndPosition.copy(), executeContext), None
+
+def funcToNumber(arguments, executeContext):
+	if len(arguments) > 1:
+		return None, RTError(f"NUMBER function only accepts 1 argument, not {str(len(arguments))}", placeholderStartEndPosition.copy(), executeContext)
+
+	argument = arguments[0]
+
+	asNumber, error = argument.toNumber(placeholderStartEndPosition.copy())
+	if error:
+		return None, error
+
+	return Number(asNumber.value, placeholderStartEndPosition.copy(), executeContext), None

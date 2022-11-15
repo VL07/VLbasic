@@ -8,7 +8,7 @@ from .runtimevaluesclass import RuntimeValue, Number, Boolean, Null, BuiltInFunc
 from .tokenclass import TokenTypes
 from .error import RTError
 from .utils import StartEndPosition, Position, File
-from .builtInfunctions import funcPrint, funcToString
+from .builtInfunctions import funcPrint, funcToString, funcToNumber
 
 ########################################
 #	INTERPRETER
@@ -38,6 +38,7 @@ class Interpreter:
 		context.variableTable.declareVariable("NULL", Null(position, context), True, position)
 		context.variableTable.declareVariable("PRINT", BuiltInFunction("PRINT", funcPrint, position, context), True, position)
 		context.variableTable.declareVariable("STRING", BuiltInFunction("STRING", funcToString, position, context), True, position)
+		context.variableTable.declareVariable("NUMBER", BuiltInFunction("NUMBER", funcToNumber, position, context), True, position)
 
 	def visit(self, statement: StatementNode, context: Context) -> tuple[RuntimeValue | Number, RTError]:
 
