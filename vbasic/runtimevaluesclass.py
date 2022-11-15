@@ -57,6 +57,9 @@ class RuntimeValue:
 	def toBoolean(self, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
 		return None, RTError(f"Unable to convert a {type(self).__name__} by a Boolean", position.copy(), self.context)
 
+	def toString(self, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
+		return None, RTError(f"Unable to convert a {type(self).__name__} by a String", position.copy(), self.context)
+
 	def execute(self, arguments: list[RuntimeValue], position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
 		return None, RTError(f"Unable to call a {type(self).__name__}", position.copy(), self.context)
 
@@ -90,6 +93,8 @@ class Number(RuntimeValue):
 			return Number(self.value * by.value, position.copy(), self.context), None
 		elif isinstance(by, Boolean):
 			return Number(self.value * (1 if by.value else 0), position.copy(), self.context), None
+		elif isinstance(by, String):
+			return String(by.value * self.value, position.copy(), self.context), None
 		
 		return super().multiplied(by, position)
 
@@ -168,6 +173,60 @@ class Number(RuntimeValue):
 	def toBoolean(self, position: StartEndPosition) -> tuple[Boolean, RTError]:
 		return Boolean(False if self.value == 0 else True, position.copy(), self.context), None
 
+	def toString(self, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
+		return String(str(self.value), position.copy(), self.context), None
+
+class String(RuntimeValue):
+	def __init__(self, value: str, position: StartEndPosition, context: Context) -> None:
+		self.value = value
+		self.position = position
+		self.context = context
+
+	def __repr__(self) -> str:
+		return f"STRING({self.value})" 
+
+	def added(self, to: Number | RuntimeValue, position: StartEndPosition) -> tuple[Number, RTError]:
+		if isinstance(to, String):
+			print(self.value, to.value)
+			return String(self.value + to.value, position.copy(), self.context), None
+
+		return super().added(to, position.copy())
+
+	def multiplied(self, by: Number | RuntimeValue, position: StartEndPosition) -> tuple[Number, RTError]:
+		if isinstance(by, Number):
+			return String(self.value * by.value, position.copy(), self.context), None
+		
+		return super().multiplied(by, position)
+
+	def equals(self, other: RuntimeValue, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
+		if isinstance(other, String):
+			return Boolean(self.value == other.value, position, self.context), None
+		
+		return Boolean(False, position.copy(), self.context), None
+
+	def notEquals(self, other: RuntimeValue, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
+		if isinstance(other, Number):
+			return Boolean(self.value != other.value, position, self.context), None
+		
+		return Boolean(True, position.copy(), self.context), None
+
+	def notted(self, position: StartEndPosition) -> tuple[Boolean, RTError]:
+		asBoolean, error = self.toBoolean(position)
+		if error:
+			return None, error
+		
+		asNotBoolean, error = asBoolean.notted(position)
+		if error:
+			return None, error
+
+		return asNotBoolean, None
+
+	def toBoolean(self, position: StartEndPosition) -> tuple[Boolean, RTError]:
+		return Boolean(False if len(self.value) == 0 else True, position.copy(), self.context), None
+
+	def toString(self, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
+		return String(str(self.value), position.copy(), self.context), None
+
 class Boolean(RuntimeValue):
 	def __init__(self, value: bool, position: StartEndPosition, context: Context) -> None:
 		self.value = value
@@ -210,6 +269,9 @@ class Boolean(RuntimeValue):
 	def toBoolean(self, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
 		return Boolean(self.value, self.position.copy(), self.context), None
 
+	def toString(self, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
+		return String("TRUE" if self.value else "FALSE", position.copy(), self.context), None
+
 class Null(RuntimeValue):
 	def __init__(self, position: StartEndPosition, context: Context) -> None:
 		self.position = position
@@ -218,6 +280,9 @@ class Null(RuntimeValue):
 
 	def __repr__(self) -> str:
 		return f"NULL()"
+
+	def toString(self, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
+		return String("NULL" if self.value else "FALSE", position.copy(), self.context), None
 
 class BuiltInFunction(RuntimeValue):
 	def __init__(self, name: str, executeFunction: Callable[[list[RuntimeValue], Context], tuple[RuntimeValue, RuntimeError]], position: StartEndPosition, context: Context) -> None:
@@ -240,3 +305,6 @@ class BuiltInFunction(RuntimeValue):
 
 	def __repr__(self) -> str:
 		return f"BUILT_IN_FUNCTION({self.name}"
+
+	def toString(self, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
+		return String(f"{self.name}()", position.copy(), self.context), None

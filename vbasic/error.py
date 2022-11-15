@@ -16,7 +16,6 @@ class Error:
 		self.position = position
 
 	def __repr__(self) -> str:
-		print(self.position.start)
 		errorText = f"{self.name}: {self.details}\n"
 		errorText += f"file: {self.position.file.name}, ln: {self.position.start.line}, col: {self.position.start.column}"
 		return errorText

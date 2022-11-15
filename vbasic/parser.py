@@ -4,7 +4,7 @@
 
 from .tokenclass import Token, TokenTypes
 from .error import Error, InvalidSyntaxError
-from .statementclass import StatementNode, ExpressionNode, BinaryOperationNode, UnaryOperationNode, NumberNode, VariableAccessNode, VariableDeclareNode, VariableAssignNode, WhileNode, FunctionCallNode
+from .statementclass import StatementNode, ExpressionNode, BinaryOperationNode, UnaryOperationNode, NumberNode, VariableAccessNode, VariableDeclareNode, VariableAssignNode, WhileNode, FunctionCallNode, StringNode
 
 ########################################
 #	PARSER
@@ -114,13 +114,15 @@ class Parser:
 		return term, None
 
 	def compExpression(self) -> tuple[BinaryOperationNode, Error]:
-		if self.currentToken.isKeyword("NOT"):
+		startToken = self.currentToken
+
+		if startToken.isKeyword("NOT"):
 			self.advance()
-			factor, error = self.factor()
+			factor, error = self.compExpression()
 			if error:
 				return None, error
 
-			return UnaryOperationNode(self.currentToken, factor), None
+			return UnaryOperationNode(startToken, factor), None
 
 		node, error = self.binaryOperation(self.term, (
 			TokenTypes.DOUBLE_EQUALS,
@@ -161,13 +163,9 @@ class Parser:
 		return call, None
 
 	def call(self) -> tuple[FunctionCallNode, Error]:
-		print("t", self.currentToken.type)
-
 		atom, error = self.atom()
 		if error:
 			return None, error
-
-		print("t2", self.currentToken.type)
 
 		if self.currentToken.type == TokenTypes.LEFT_PARENTHESES:
 			self.advance()
@@ -191,7 +189,6 @@ class Parser:
 					arguments.append(argument)
 
 			if self.currentToken.type != TokenTypes.RIGHT_PARENTHESES:
-				print(self.currentToken)
 				return None, InvalidSyntaxError(f"Expected , or ), not {str(self.currentToken.type)}", self.currentToken.position.copy())
 
 			endPosition = self.currentToken.position.end.copy()
@@ -207,6 +204,10 @@ class Parser:
 		if startToken.type in (TokenTypes.INTEGER, TokenTypes.FLOAT):
 			self.advance()
 			return NumberNode(startToken), None
+
+		elif startToken.type == TokenTypes.STRING:
+			self.advance()
+			return StringNode(startToken), None
 		
 		elif startToken.type == TokenTypes.LEFT_PARENTHESES:
 			self.advance()
@@ -267,8 +268,6 @@ class Parser:
 		body, error = self.parseEnd()
 		if error:
 			return None, error
-
-		print("WHILE BODY:", body)
 
 		endPosition = self.currentToken.position.end.copy()
 

@@ -2,13 +2,13 @@
 #	IMPORTS
 ########################################
 
-from .statementclass import StatementNode, NumberNode, BinaryOperationNode, UnaryOperationNode, VariableAccessNode, VariableAssignNode, VariableDeclareNode, ExpressionNode, WhileNode, FunctionCallNode
+from .statementclass import StatementNode, NumberNode, BinaryOperationNode, UnaryOperationNode, VariableAccessNode, VariableAssignNode, VariableDeclareNode, ExpressionNode, WhileNode, FunctionCallNode, StringNode
 from .contextclass import Context
-from .runtimevaluesclass import RuntimeValue, Number, Boolean, Null, BuiltInFunction
+from .runtimevaluesclass import RuntimeValue, Number, Boolean, Null, BuiltInFunction, String
 from .tokenclass import TokenTypes
 from .error import RTError
 from .utils import StartEndPosition, Position, File
-from .builtInfunctions import funcPrint
+from .builtInfunctions import funcPrint, funcToString
 
 ########################################
 #	INTERPRETER
@@ -37,6 +37,7 @@ class Interpreter:
 		context.variableTable.declareVariable("FALSE", Boolean(False, position, context), True, position)
 		context.variableTable.declareVariable("NULL", Null(position, context), True, position)
 		context.variableTable.declareVariable("PRINT", BuiltInFunction("PRINT", funcPrint, position, context), True, position)
+		context.variableTable.declareVariable("STRING", BuiltInFunction("STRING", funcToString, position, context), True, position)
 
 	def visit(self, statement: StatementNode, context: Context) -> tuple[RuntimeValue | Number, RTError]:
 
@@ -49,6 +50,9 @@ class Interpreter:
 
 	def visit_NumberNode(self, node: NumberNode, context: Context) -> tuple[Number, RTError]:
 		return Number(node.token.value, node.position.copy(), context), None
+
+	def visit_StringNode(self, node: StringNode, context: Context) -> tuple[String, RTError]:
+		return String(node.token.value, node.position.copy(), context), None
 
 	def visit_BinaryOperationNode(self, node: BinaryOperationNode, context: Context) -> tuple[Number, RTError]:
 		left, error = self.visit(node.left, context)

@@ -48,6 +48,15 @@ class NumberNode:
 	def __repr__(self) -> str:
 		return f"{str(self.token.value)}"
 
+class StringNode:
+	def __init__(self, token: Token) -> None:
+		self.token = token
+
+		self.position = token.position.copy()
+
+	def __repr__(self) -> str:
+		return f"{str(self.token.value)}"
+
 class VariableAccessNode:
 	def __init__(self, token: Token) -> None:
 		self.token = token
