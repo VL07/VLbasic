@@ -66,6 +66,12 @@ class RuntimeValue:
 	def execute(self, arguments: list[RuntimeValue], position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
 		return None, RTError(f"Unable to call a {type(self).__name__}", position.copy(), self.context)
 
+	def getItem(self, item: RuntimeValue, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
+		return None, RTError(f"Unable to get item {str(item)} of {type(self).__name__}", position.copy(), self.context)
+
+	def getLength(self, position: StartEndPosition) -> tuple[Number, RTError]:
+		return None, RTError(f"Unable to get length of a {type(self).__name__}", position.copy(), self.context)
+
 class Number(RuntimeValue):
 	def __init__(self, value: int | float, position: StartEndPosition, context: Context) -> None:
 		self.value = value
@@ -112,7 +118,7 @@ class Number(RuntimeValue):
 				return None, RTError("Cannot divide by zero", position.copy(), self.context)
 			return Number(self.value - (1 if by.value else 0), position.copy(), self.context), None
 		
-		return super().divided()
+		return super().divided(by, position)
 
 	def equals(self, other: RuntimeValue, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
 		if isinstance(other, Number):
@@ -233,6 +239,22 @@ class String(RuntimeValue):
 	def toString(self, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
 		return String(str(self.value), position.copy(), self.context), None
 
+	def getItem(self, item: RuntimeValue, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
+		if isinstance(item, Number):
+			length, error = self.getLength(position)
+			if error:
+				return None, error
+
+			if item.value + 1 > length.value:
+				return None, RTError("String is out of range", position.copy(), self.context)
+
+			return String(self.value[item.value], position.copy(), self.context), None
+
+		return super().getItem(item, position)
+
+	def getLength(self, position: StartEndPosition) -> tuple[Number, RTError]:
+		return Number(len(self.value), position.copy(), self.context), None
+
 	def toNumber(self, position: StartEndPosition) -> tuple[Number, RTError]:
 		dots = 0
 
@@ -334,6 +356,22 @@ class List(RuntimeValue):
 			listAsString = "[]"
 
 		return String(listAsString, position.copy(), self.context), None
+
+	def getItem(self, item: RuntimeValue, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
+		if isinstance(item, Number):
+			length, error = self.getLength(position)
+			if error:
+				return None, error
+
+			if item.value + 1 > length.value:
+				return None, RTError("List is out of range", position.copy(), self.context)
+
+			return self.value[item.value], None
+
+		return super().getItem(item, position)
+
+	def getLength(self, position: StartEndPosition) -> tuple[Number, RTError]:
+		return Number(len(self.value), position.copy(), self.context), None
 
 class BuiltInFunction(RuntimeValue):
 	def __init__(self, name: str, executeFunction: Callable[[list[RuntimeValue], Context], tuple[RuntimeValue, RuntimeError]], position: StartEndPosition, context: Context) -> None:

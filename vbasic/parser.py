@@ -4,7 +4,7 @@
 
 from .tokenclass import Token, TokenTypes
 from .error import Error, InvalidSyntaxError
-from .statementclass import StatementNode, ExpressionNode, BinaryOperationNode, UnaryOperationNode, NumberNode, VariableAccessNode, VariableDeclareNode, VariableAssignNode, WhileNode, FunctionCallNode, StringNode, ListNode
+from .statementclass import StatementNode, ExpressionNode, BinaryOperationNode, UnaryOperationNode, NumberNode, VariableAccessNode, VariableDeclareNode, VariableAssignNode, WhileNode, FunctionCallNode, StringNode, ListNode, GetItemNode
 
 ########################################
 #	PARSER
@@ -107,11 +107,11 @@ class Parser:
 
 			return VariableAssignNode(varName, expression), None
 
-		term, error = self.binaryOperation(self.compExpression, (TokenTypes.PLUS, TokenTypes.MINUS))
+		compExpression, error = self.binaryOperation(self.compExpression, (TokenTypes.PLUS, TokenTypes.MINUS))
 		if error:
 			return None, error
 
-		return term, None
+		return compExpression, None
 
 	def compExpression(self) -> tuple[BinaryOperationNode, Error]:
 		startToken = self.currentToken
@@ -156,46 +156,22 @@ class Parser:
 
 			return UnaryOperationNode(startToken, factor), None
 
-		call, error = self.call()
+		callGetItem, error = self.callGetItem()
 		if error:
 			return None, error
 		
-		return call, None
+		return callGetItem, None
 
-	def call(self) -> tuple[FunctionCallNode, Error]:
+	def callGetItem(self) -> tuple[FunctionCallNode, Error]:
 		atom, error = self.atom()
 		if error:
 			return None, error
 
-		if self.currentToken.type == TokenTypes.LEFT_PARENTHESES:
-			self.advance()
-
-			arguments = []
-
-			if self.currentToken.type != TokenTypes.RIGHT_PARENTHESES:
-				firstArgument, error = self.expression()
-				if error:
-					return None, error
-
-				arguments.append(firstArgument)
-
-				while self.currentToken.type == TokenTypes.COMMA:
-					self.advance()
-
-					argument, error = self.expression()
-					if error:
-						return None, error
-
-					arguments.append(argument)
-
-			if self.currentToken.type != TokenTypes.RIGHT_PARENTHESES:
-				return None, InvalidSyntaxError(f"Expected , or ), not {str(self.currentToken.type)}", self.currentToken.position.copy())
-
-			endPosition = self.currentToken.position.end.copy()
-
-			self.advance()
-
-			return FunctionCallNode(atom.position.start.copy().createStartEndPosition(endPosition), atom, arguments), None
+		while self.currentToken.type in [TokenTypes.LEFT_PARENTHESES, TokenTypes.LEFT_SQUARE]:
+			atom, error = self.makeSubGetItemCall(atom)
+			if error:
+				return None, error
+			
 		return atom, None
 
 	def atom(self) -> tuple[NumberNode | VariableAccessNode | VariableDeclareNode | VariableAssignNode, Error]:
@@ -250,6 +226,58 @@ class Parser:
 
 	######################################
 
+	def makeSubGetItemCall(self, base: GetItemNode | FunctionCallNode) -> tuple[GetItemNode | FunctionCallNode, Error]:
+		startPosition = self.currentToken.position.start.copy()
+
+		if self.currentToken.type == TokenTypes.LEFT_PARENTHESES:
+			self.advance()
+
+			arguments = []
+
+			if self.currentToken.type != TokenTypes.RIGHT_PARENTHESES:
+				firstArgument, error = self.expression()
+				if error:
+					return None, error
+
+				arguments.append(firstArgument)
+
+				while self.currentToken.type == TokenTypes.COMMA:
+					self.advance()
+
+					argument, error = self.expression()
+					if error:
+						return None, error
+
+					arguments.append(argument)
+
+			if self.currentToken.type != TokenTypes.RIGHT_PARENTHESES:
+				return None, InvalidSyntaxError(f"Expected , or ), not {str(self.currentToken.type)}", self.currentToken.position.copy())
+
+			endPosition = self.currentToken.position.end.copy()
+
+			self.advance()
+
+			return FunctionCallNode(startPosition.createStartEndPosition(endPosition), base, arguments), None
+		elif self.currentToken.type == TokenTypes.LEFT_SQUARE:
+			print("YES")
+			self.advance()
+
+			if self.currentToken.type == TokenTypes.RIGHT_SQUARE:
+				return None, InvalidSyntaxError(f"Expected expression, not {str(self.currentToken.type)}", self.currentToken.position.copy())
+			
+			indexNode, error = self.expression()
+			if error:
+				return None, error
+
+			if self.currentToken.type != TokenTypes.RIGHT_SQUARE:
+				return None, InvalidSyntaxError(f"Expected ], not {str(self.currentToken.type)}", self.currentToken.position.copy())
+			
+			endPosition = self.currentToken.position.end.copy()
+
+			self.advance()
+
+			return GetItemNode(startPosition.createStartEndPosition(endPosition), base, indexNode), None
+
 	def listExpression(self) -> tuple[ListNode, Error]:
 		startPosition = self.currentToken.position.start.copy()
 
@@ -262,7 +290,7 @@ class Parser:
 
 		print("1")
 
-		firstExpression, error = self.expression()
+		firstExpression, error = self.compExpression()
 		if error:
 			return None, error
 
@@ -271,7 +299,7 @@ class Parser:
 		while self.currentToken.type == TokenTypes.COMMA:
 			self.advance()
 
-			expression, error = self.expression()
+			expression, error = self.compExpression()
 			if error:
 				return None, error
 

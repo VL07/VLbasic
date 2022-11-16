@@ -2,7 +2,7 @@
 #	IMPORTS
 ########################################
 
-from .statementclass import StatementNode, NumberNode, BinaryOperationNode, UnaryOperationNode, VariableAccessNode, VariableAssignNode, VariableDeclareNode, WhileNode, FunctionCallNode, StringNode, ListNode
+from .statementclass import StatementNode, NumberNode, BinaryOperationNode, UnaryOperationNode, VariableAccessNode, VariableAssignNode, VariableDeclareNode, WhileNode, FunctionCallNode, StringNode, ListNode, GetItemNode
 from .contextclass import Context
 from .runtimevaluesclass import RuntimeValue, Number, Boolean, Null, BuiltInFunction, String, List
 from .tokenclass import TokenTypes
@@ -189,7 +189,7 @@ class Interpreter:
 
 		return returnValue, None
 
-	def visit_ListNode(self, node: List, context: Context) -> tuple[Number,  RTError]:
+	def visit_ListNode(self, node: ListNode, context: Context) -> tuple[Number,  RTError]:
 		expressions = []
 
 		for expression in node.expressions:
@@ -201,3 +201,15 @@ class Interpreter:
 
 		return List(expressions, node.position.copy(), context), None
 		
+	def visit_GetItemNode(self, node: GetItemNode, context: Context) -> tuple[Number,  RTError]:
+		variable, error = self.visit(node.variable, context)
+		if error:
+			return None, error
+
+		item, error = self.visit(node.item, context)
+
+		value, error = variable.getItem(item, node.position.copy())
+		if error:
+			return None, error
+
+		return value, None

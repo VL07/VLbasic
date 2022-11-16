@@ -112,3 +112,12 @@ class ListNode:
 
 	def __repr__(self) -> str:
 		return f"LIST_NODE({str(self.expressions)})"
+
+class GetItemNode:
+	def __init__(self, position: StartEndPosition, variable: ExpressionNode, item: VariableAccessNode) -> None:
+		self.position = position
+		self.variable = variable
+		self.item = item
+
+	def __repr__(self) -> str:
+		return f"GET_ITEM_NODE({str(self.variable)}, {str(self.item)})"
