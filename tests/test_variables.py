@@ -1,5 +1,5 @@
 import pytest
-from vbasic.interpretcode import interpret, resetVariables
+from vlbasic.interpretcode import interpret, resetVariables
 
 def interpretCode(code):
 	return interpret(code, "TEST")[0]

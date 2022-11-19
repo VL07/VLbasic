@@ -1,7 +1,7 @@
-from vbasic.tokenizer import Tokenizer
-from vbasic.parser import Parser
-from vbasic.interpreter import Interpreter
-from vbasic.contextclass import Context, VariableTable
+from vlbasic.tokenizer import Tokenizer
+from vlbasic.parser import Parser
+from vlbasic.interpreter import Interpreter
+from vlbasic.contextclass import Context, VariableTable
 
 v = VariableTable()
 
