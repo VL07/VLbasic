@@ -375,7 +375,7 @@ class List(RuntimeValue):
 		return Number(len(self.value), position.copy(), self.context), None
 
 class BuiltInFunction(RuntimeValue):
-	def __init__(self, name: str, executeFunction: Callable[[list[RuntimeValue], Context], tuple[RuntimeValue, RuntimeError]], position: StartEndPosition, context: Context) -> None:
+	def __init__(self, name: str, executeFunction: Callable[[list[RuntimeValue], Context], tuple[RuntimeValue, RTError]], position: StartEndPosition, context: Context) -> None:
 		self.name = name
 		self.position = position
 		self.context = context
@@ -387,6 +387,8 @@ class BuiltInFunction(RuntimeValue):
 
 		returnValue, error = self.executeFunction(arguments, executeContext)
 		if error:
+			error.position = position.copy()
+			error.context = self.context
 			return None, error
 
 		returnValue.context = self.context
@@ -410,7 +412,7 @@ class Function(RuntimeValue):
 		self.value = "FUNCTION"
 
 	def __repr__(self) -> str:
-		return f"FUNCTION_DEFINITION({self.name})"
+		return f"FUNCTION({self.name})"
 
 	def execute(self, arguments: list[RuntimeValue], position: StartEndPosition, executeFunction: function) -> tuple[RuntimeValue, RTError]:
 		return None, None

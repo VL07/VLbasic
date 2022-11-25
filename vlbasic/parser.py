@@ -317,10 +317,13 @@ class Parser:
 				return None, InvalidSyntaxError(f"Expected , or ), not {str(self.currentToken.type)}", self.currentToken.position.copy())
 
 			endPosition = self.currentToken.position.end.copy()
+			endPosition.column += 1
 
 			self.advance()
 
-			return FunctionCallNode(startPosition.createStartEndPosition(endPosition), base, arguments), None
+			print("FUNCTION CALL NODE")
+
+			return FunctionCallNode(base.position.start.createStartEndPosition(endPosition), base, arguments), None
 		elif self.currentToken.type == TokenTypes.LEFT_SQUARE:
 			print("YES")
 			self.advance()
@@ -336,6 +339,7 @@ class Parser:
 				return None, InvalidSyntaxError(f"Expected ], not {str(self.currentToken.type)}", self.currentToken.position.copy())
 			
 			endPosition = self.currentToken.position.end.copy()
+			endPosition.column += 1
 
 			self.advance()
 
