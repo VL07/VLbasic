@@ -74,7 +74,7 @@ class VariableAssignNode:
 		self.position = self.token.position.start.createStartEndPosition(valueNode.position.end)
 
 	def __repr__(self) -> str:
-		return f"VARIABLE_ACCESS_NODE({str(self.token.value)})"
+		return f"VARIABLE_ASSIGN_NODE({str(self.token.value)})"
 
 class VariableDeclareNode:
 	def __init__(self, token: Token, valueNode: ExpressionNode, declareToken: Token) -> None:
@@ -85,7 +85,7 @@ class VariableDeclareNode:
 		self.position = self.declareToken.position.start.createStartEndPosition(valueNode.position.end)
 
 	def __repr__(self) -> str:
-		return f"VARIABLE_ACCESS_NODE({str(self.token.value)})"
+		return f"VARIABLE_DECLARE_NODE({str(self.token.value)})"
 
 class WhileNode:
 	def __init__(self, position: StartEndPosition, condition: ExpressionNode, body: list[ExpressionNode]) -> None:
@@ -121,3 +121,14 @@ class GetItemNode:
 
 	def __repr__(self) -> str:
 		return f"GET_ITEM_NODE({str(self.variable)}, {str(self.item)})"
+
+class FunctionDefineNode:
+	def __init__(self, position: StartEndPosition, variable: str, arguments: list[ExpressionNode], body: list[ExpressionNode]) -> None:
+		self.position = position
+		self.variable = variable
+		self.arguments = arguments
+		self.body = body
+
+	def __repr__(self) -> str:
+		return f"FUNCTION_DEFINE_NODE({str(self.variable)}, {str(self.arguments)})"
+		

@@ -4,9 +4,10 @@
 
 from __future__ import annotations
 from .utils import StartEndPosition, NUMBERS
-from .contextclass import Context
+from .contextclass import Context, VariableTable
 from .error import RTError
 from typing import Callable
+from .statementclass import ExpressionNode
 
 ########################################
 #	INTERPRETER
@@ -374,17 +375,20 @@ class List(RuntimeValue):
 		return Number(len(self.value), position.copy(), self.context), None
 
 class BuiltInFunction(RuntimeValue):
-	def __init__(self, name: str, executeFunction: Callable[[list[RuntimeValue], Context], tuple[RuntimeValue, RuntimeError]], position: StartEndPosition, context: Context) -> None:
+	def __init__(self, name: str, executeFunction: Callable[[list[RuntimeValue], Context], tuple[RuntimeValue, RTError]], position: StartEndPosition, context: Context) -> None:
 		self.name = name
 		self.position = position
 		self.context = context
 		self.executeFunction = executeFunction
+		self.value = "BUILT_IN_FUNCTION"
 
 	def execute(self, arguments: list[RuntimeValue], position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
 		executeContext = Context(self.name, self.context)
 
 		returnValue, error = self.executeFunction(arguments, executeContext)
 		if error:
+			error.position = position.copy()
+			error.context = self.context
 			return None, error
 
 		returnValue.context = self.context
@@ -393,7 +397,25 @@ class BuiltInFunction(RuntimeValue):
 		return returnValue, None
 
 	def __repr__(self) -> str:
-		return f"BUILT_IN_FUNCTION({self.name}"
+		return f"BUILT_IN_FUNCTION({self.name})"
+
+	def toString(self, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
+		return String(f"{self.name}()", position.copy(), self.context), None
+
+class Function(RuntimeValue):
+	def __init__(self, name: str, arguments: list[str], body: list[ExpressionNode], position: StartEndPosition, context: Context) -> None:
+		self.name = name
+		self.arguments = arguments
+		self.body = body
+		self.position = position
+		self.context = context
+		self.value = "FUNCTION"
+
+	def __repr__(self) -> str:
+		return f"FUNCTION({self.name})"
+
+	def execute(self, arguments: list[RuntimeValue], position: StartEndPosition, executeFunction: function) -> tuple[RuntimeValue, RTError]:
+		return None, None
 
 	def toString(self, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
 		return String(f"{self.name}()", position.copy(), self.context), None

@@ -14,8 +14,8 @@ from .keywords import KEYWORDS
 
 class Tokenizer:
 	def __init__(self, filename: str, fileText: str) -> None:
-		self.file = File(filename, fileText)
-		self.position = Position(-1, 1, 0, self.file)
+		self.file = File(filename, fileText.replace("\t", "    "))
+		self.position = Position(-1, 1, -1, self.file)
 		self.currentCharacter = None
 
 		self.advance()

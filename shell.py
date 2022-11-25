@@ -21,6 +21,9 @@ while True:
 	
 	print(tokens)
 
+	# for token in tokens:
+	# 	print(token.position, end=" ")
+
 	print("PARSING")
 	p = Parser("SHELL", tokens)
 
