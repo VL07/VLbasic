@@ -2,4 +2,4 @@ FUNCTION a(text)
 	PRINT(text)
 END
 
-a("abcasdkpodsoapopda" * NUMBER("1000"))
+a("abcasdkpodsoapopda" * TONUMBER("1"))
