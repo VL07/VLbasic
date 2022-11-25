@@ -271,6 +271,8 @@ class Parser:
 
 				arguments.append(argument)
 
+				self.advance()
+
 		if self.currentToken.type != TokenTypes.RIGHT_PARENTHESES:
 			return None, InvalidSyntaxError(f"Expected ), not {str(self.currentToken.type)}", self.currentToken.position.copy())
 

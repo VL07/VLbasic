@@ -1,5 +1,8 @@
-FUNCTION a(text)
-	PRINT(text)
+FUNCTION a(text, times)
+	FUNCTION b()
+		PRINT(text * times)
+	END
+	b()
 END
 
-a("abcasdkpodsoapopda" * NUMBER("1"))
+a("HELLO WORLD!", 3)
