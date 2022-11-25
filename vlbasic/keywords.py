@@ -4,5 +4,6 @@ KEYWORDS = [
 	"CONST",
 	"WHILE",
 	"THEN",
-	"END"
+	"END",
+	"FUNCTION"
 ]

@@ -1,12 +1,5 @@
-LET a = 0
-LET b = 0
-LET max = 99
-WHILE a < max THEN
-	a = a + 1
-	WHILE b < max * max THEN
-		b = b + 1
-	END
+FUNCTION a(text)
+	PRINT(text)
 END
 
-a
-b
+a("abcasdkpodsoapopda" * NUMBER("1000"))

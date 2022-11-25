@@ -84,4 +84,5 @@ class Context:
 	def setVariableTable(self, variableTable: VariableTable) -> None:
 		self.variableTable = variableTable
 		self.variableTable.context = self
+		self.variableTable.parent = self.parent.variableTable if self.parent else None
 	

@@ -2,9 +2,9 @@
 #	IMPORTS
 ########################################
 
-from .statementclass import StatementNode, NumberNode, BinaryOperationNode, UnaryOperationNode, VariableAccessNode, VariableAssignNode, VariableDeclareNode, WhileNode, FunctionCallNode, StringNode, ListNode, GetItemNode
-from .contextclass import Context
-from .runtimevaluesclass import RuntimeValue, Number, Boolean, Null, BuiltInFunction, String, List
+from .statementclass import StatementNode, NumberNode, BinaryOperationNode, UnaryOperationNode, VariableAccessNode, VariableAssignNode, VariableDeclareNode, WhileNode, FunctionCallNode, StringNode, ListNode, GetItemNode, FunctionDefineNode
+from .contextclass import Context, VariableTable
+from .runtimevaluesclass import RuntimeValue, Number, Boolean, Null, BuiltInFunction, String, List, Function
 from .tokenclass import TokenTypes
 from .error import RTError
 from .utils import StartEndPosition, Position, File
@@ -183,9 +183,40 @@ class Interpreter:
 
 			argumentsVisited.append(argumentVisited)
 
-		returnValue, error = func.execute(argumentsVisited, node.position.copy())
-		if error:
-			return None, error
+		returnValue = None
+		
+		if isinstance(func, Function):
+			if len(func.arguments) != len(node.arguments):
+				return None, RTError(f"FUNCTION {func.name} expected {str(len(func.arguments))}, not {str(len(node.arguments))} arguments", node.position.copy(), context)
+
+			executeContext = Context(f"<FUNCTION {func.name}>", context)
+			executeContext.setVariableTable(VariableTable())
+
+			interpreter = Interpreter(func.body)
+			interpreter.addDefaultVariables(executeContext)
+
+			for argumentName, argument in zip(func.arguments, argumentsVisited):
+				executeContext.variableTable.declareVariable(argumentName, argument, False, argument.position)
+
+			returnValue, error = interpreter.interpret(executeContext)
+			if error:
+				return None, error
+
+			# returnValue.context = self.context
+			# returnValue.position = position.copy()
+
+			return Null(func.position.copy(), context), None
+
+		elif isinstance(func, BuiltInFunction):
+			returnValue, error = func.execute(argumentsVisited, node.position.copy())
+			if error:
+				return None, error
+
+		else:
+			returnValue, error = func.execute(argumentsVisited, func.position.copy())
+			if error:
+				return None, error
+			return returnValue, None
 
 		return returnValue, None
 
@@ -213,3 +244,10 @@ class Interpreter:
 			return None, error
 
 		return value, None
+
+	def visit_FunctionDefineNode(self, node: FunctionDefineNode, context: Context) -> tuple[Function,  RTError]:
+		func = Function(node.variable, node.arguments, node.body, node.position, context)
+		value, error = context.variableTable.declareVariable(node.variable, func, True, node.position.copy())
+		if error:
+			return None, error
+		return None, None

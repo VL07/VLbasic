@@ -4,7 +4,7 @@
 
 from .tokenclass import Token, TokenTypes
 from .error import Error, InvalidSyntaxError
-from .statementclass import StatementNode, ExpressionNode, BinaryOperationNode, UnaryOperationNode, NumberNode, VariableAccessNode, VariableDeclareNode, VariableAssignNode, WhileNode, FunctionCallNode, StringNode, ListNode, GetItemNode
+from .statementclass import StatementNode, ExpressionNode, BinaryOperationNode, UnaryOperationNode, NumberNode, VariableAccessNode, VariableDeclareNode, VariableAssignNode, WhileNode, FunctionCallNode, StringNode, ListNode, GetItemNode, FunctionDefineNode
 
 ########################################
 #	PARSER
@@ -222,9 +222,72 @@ class Parser:
 				return None, error
 			return expression, None
 
+		elif startToken.isKeyword("FUNCTION"):
+			expression, error = self.functionDefinition()
+			if error:
+				return None, error
+			return expression, None
+
 		return None, InvalidSyntaxError(f"Expected number or identifier, not {str(self.currentToken.type)}", self.currentToken.position.copy())
 
 	######################################
+
+	def functionDefinition(self) -> tuple[ListNode, Error]:
+		startPosition = self.currentToken.position.start.copy()
+
+		self.advance()
+
+		if self.currentToken.type != TokenTypes.IDENTIFIER:
+			return None, InvalidSyntaxError(f"Expected identifier, not {str(self.currentToken.type)}", self.currentToken.position.copy())
+
+		functionName = self.currentToken.value
+
+		self.advance()
+
+		if self.currentToken.type != TokenTypes.LEFT_PARENTHESES:
+			return None, InvalidSyntaxError(f"Expected (, not {str(self.currentToken.type)}", self.currentToken.position.copy())
+
+		self.advance()
+
+		arguments = []
+
+		if self.currentToken.type != TokenTypes.RIGHT_PARENTHESES:
+			if self.currentToken.type != TokenTypes.IDENTIFIER:
+				return None, InvalidSyntaxError(f"Expected IDENTIFIER, not {str(self.currentToken.type)}", self.currentToken.position.copy())
+
+			firstArgument = self.currentToken.value
+
+			arguments.append(firstArgument)
+
+			self.advance()
+
+			while self.currentToken.type == TokenTypes.COMMA:
+				self.advance()
+				
+				if self.currentToken.type != TokenTypes.IDENTIFIER:
+					return None, InvalidSyntaxError(f"Expected IDENTIFIER, not {str(self.currentToken.type)}", self.currentToken.position.copy())
+
+				argument = self.currentToken.value
+
+				arguments.append(argument)
+
+		if self.currentToken.type != TokenTypes.RIGHT_PARENTHESES:
+			return None, InvalidSyntaxError(f"Expected ), not {str(self.currentToken.type)}", self.currentToken.position.copy())
+
+		self.advance()
+
+		if self.currentToken.type != TokenTypes.NEW_LINE:
+			return None, InvalidSyntaxError(f"Expected , or new line, not {str(self.currentToken.type)}", self.currentToken.position.copy())
+
+		body, error = self.parseEnd()
+		if error:
+			return None, error
+		
+		endPosition = self.currentToken.position.end.copy()
+
+		self.advance()
+
+		return FunctionDefineNode(startPosition.createStartEndPosition(endPosition), functionName, arguments, body), None
 
 	def makeSubGetItemCall(self, base: GetItemNode | FunctionCallNode) -> tuple[GetItemNode | FunctionCallNode, Error]:
 		startPosition = self.currentToken.position.start.copy()
