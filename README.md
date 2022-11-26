@@ -41,8 +41,11 @@
   - [x] Power
   - [x] Modulus
   - [x] Order of operations
-- [ ] Import
+- [x] Import
+  - [x] Circular import detection
 - [ ] Modules
+  - [ ] Built in
+  - [x] Creatable
 - [ ] CLI
   - [x] Help
   - [x] Run code
