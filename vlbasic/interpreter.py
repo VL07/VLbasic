@@ -2,21 +2,25 @@
 #	IMPORTS
 ########################################
 
-from .statementclass import StatementNode, NumberNode, BinaryOperationNode, UnaryOperationNode, VariableAccessNode, VariableAssignNode, VariableDeclareNode, WhileNode, FunctionCallNode, StringNode, ListNode, GetItemNode, FunctionDefineNode, ReturnNode, IfContainerNode, SetItemNode
+from .statementclass import StatementNode, NumberNode, BinaryOperationNode, UnaryOperationNode, VariableAccessNode, VariableAssignNode, VariableDeclareNode, WhileNode, FunctionCallNode, StringNode, ListNode, GetItemNode, FunctionDefineNode, ReturnNode, IfContainerNode, SetItemNode, ImportNode
 from .contextclass import Context, VariableTable
 from .runtimevaluesclass import RuntimeValue, Number, Boolean, Null, BuiltInFunction, String, List, Function
 from .tokenclass import TokenTypes
 from .error import RTError
-from .utils import StartEndPosition, Position, File
+from .utils import StartEndPosition, Position, File, InterpretFile
 from .builtInfunctions import funcPrint, funcToString, funcToNumber
+from .tokenizer import Tokenizer
+from .parser import Parser
+import os
 
 ########################################
 #	INTERPRETER
 ########################################
 
 class Interpreter:
-	def __init__(self, statements: list[StatementNode], isAFunction: bool = False) -> None:
+	def __init__(self, statements: list[StatementNode], interpretFile: InterpretFile, isAFunction: bool = False) -> None:
 		self.statements = statements
+		self.interpretFile = interpretFile
 		self.isAFunction = isAFunction
 		self.returnValue = None
 	
@@ -42,15 +46,68 @@ class Interpreter:
 		file = File("<DEFAULT_VARIABLE>", "")
 		position = StartEndPosition(file, Position(-1, -1, -1, file))
 
-		context.variableTable.declareVariable("TRUE", Boolean(True, position, context), True, position)
-		context.variableTable.declareVariable("FALSE", Boolean(False, position, context), True, position)
-		context.variableTable.declareVariable("NULL", Null(position, context), True, position)
-		context.variableTable.declareVariable("PRINT", BuiltInFunction("PRINT", funcPrint, position, context), True, position)
-		context.variableTable.declareVariable("STRING", BuiltInFunction("STRING", funcToString, position, context), True, position)
-		context.variableTable.declareVariable("NUMBER", BuiltInFunction("NUMBER", funcToNumber, position, context), True, position)
+		context.variableTable.declareVariable("TRUE", Boolean(True, position, context), True, position, True)
+		context.variableTable.declareVariable("FALSE", Boolean(False, position, context), True, position, True)
+		context.variableTable.declareVariable("NULL", Null(position, context), True, position, True)
+		context.variableTable.declareVariable("PRINT", BuiltInFunction("PRINT", funcPrint, position, context), True, position, True)
+		context.variableTable.declareVariable("STRING", BuiltInFunction("STRING", funcToString, position, context), True, position, True)
+		context.variableTable.declareVariable("NUMBER", BuiltInFunction("NUMBER", funcToNumber, position, context), True, position, True)
+
+	def importModule(self, moduleName: str, context: Context, position: StartEndPosition) -> tuple[Null, RTError]:
+		circularImport = self.interpretFile.findCircularImport(moduleName)
+		if circularImport:
+			return None, RTError(f"Circular import for {self.interpretFile.filepath}, while trying to import {moduleName}", position.copy(), context)
+
+		path = None
+		if os.path.exists(os.path.join(os.path.dirname(self.interpretFile.filepath), "vlbasic/modules/", moduleName + ".vlb")):
+			path = os.path.join(os.path.dirname(self.interpretFile.filepath), "vlbasic/modules/", moduleName + ".vlb")
+		elif os.path.join(os.path.dirname(self.interpretFile.filepath), moduleName + ".vlb"):
+			path = os.path.join(os.path.dirname(self.interpretFile.filepath), moduleName + ".vlb")
+
+		if not path:
+			return None, RTError(f"Module {moduleName} was not found ({os.path.join(os.path.dirname(self.interpretFile.filepath), moduleName + '.vlb')})", position.copy(), context)
+
+		with open(path, "r") as f:
+			inputText = f.read()
+
+		tokenizer = Tokenizer(f"{self.interpretFile.filepath}", inputText)
+		tokens, error = tokenizer.tokenize()
+
+		if error:
+			error.importStack.append(f"Error while trying to import module {moduleName}")
+			return None, error
+
+		parser = Parser(f"{self.interpretFile.filepath}", tokens)
+
+		statements, error = parser.parse()
+
+		if error:
+			error.importStack.append(f"Error while trying to import module {moduleName}")
+			return None, error
+
+		importFileContext = Context(f"{self.interpretFile.filepath}")
+		importFileContext.setVariableTable(VariableTable())
+		
+		interpreter = Interpreter(statements, InterpretFile(path, self.interpretFile))
+		interpreter.addDefaultVariables(importFileContext)
+		out, error = interpreter.interpret(importFileContext)
+
+		if error:
+			error.context.parent = context
+			error.importStack.append(f"Error while trying to import module {moduleName}")
+			return None, error
+
+		for variableName in importFileContext.variableTable.variables.keys():
+			variable = importFileContext.variableTable.variables[variableName]
+
+			if variable.builtIn:
+				continue
+
+			context.variableTable.declareVariable(variableName, variable.value, variable.constant, position.copy(), False)
+
+		return None, None
 
 	def visit(self, statement: StatementNode, context: Context) -> tuple[RuntimeValue | Number, RTError]:
-
 		functionName = f"visit_{type(statement).__name__}"
 		func = getattr(self, functionName, self.visitFunctionNotFound)
 		return func(statement, context)
@@ -300,12 +357,12 @@ class Interpreter:
 		self.returnValue = Null(node.position.copy(), context)
 		return self.returnValue, None
 
-	def visit_IfContainerNode(self, node: IfContainerNode, context: Context) -> tuple[None,  RTError]:
+	def visit_IfContainerNode(self, node: IfContainerNode, context: Context) -> tuple[Null,  RTError]:
 		ifCondition, error = self.visit(node.ifNode.condition, context)
 		if error:
 			return None, error
 
-		ifConditionAsBoolean, error = ifCondition.toBoolean(node.ifNode.condition.position.copy())
+		ifConditionAsBoolean, error = ifCondition.toBoolean(node.ifNode.condition.position.copy(), context)
 		if error:
 			return None, error
 
@@ -315,7 +372,7 @@ class Interpreter:
 				if error:
 					return None, error
 
-			return None, None
+			return Null(node.ifNode.position.copy()), None
 
 		for elseIfNode in node.elseIfNodes:
 			elseIfCondition, error = self.visit(elseIfNode.condition, context)
@@ -334,7 +391,7 @@ class Interpreter:
 				if error:
 					return None, error 
 
-			return None, None
+			return Null(elseIfNode.position.copy(), context), None
 
 		if node.elseNode:
 			for statement in node.elseNode.body:
@@ -342,5 +399,20 @@ class Interpreter:
 				if error:
 					return None, error 
 
-			return None, None
-		return None, None
+			return Null(node.elseNode.position.copy(), context), None
+		return Null(node.position.copy(), context), None
+
+	def visit_ImportNode(self, node: ImportNode, context: Context) -> tuple[Null,  RTError]:
+		moduleName, error = self.visit(node.moduleName, context)
+		if error:
+			return None, error
+
+		if not isinstance(moduleName, String):
+			return None, RTError(f"Module name must be a STRING, not {str(moduleName)}")
+
+		imported, error = self.importModule(moduleName.value, context, node.position.copy())
+		if error:
+			return None, error
+
+		return Null(node.position.copy(), context), None
+		

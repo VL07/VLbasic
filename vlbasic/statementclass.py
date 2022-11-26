@@ -149,7 +149,7 @@ class ReturnNode:
 		self.value = value
 
 	def __repr__(self) -> str:
-		return f"RETURN({str(self.value)})"
+		return f"RETURN_NODE({str(self.value)})"
 
 class IfNode:
 	def __init__(self, position: StartEndPosition, condition: ExpressionNode, body: list[ExpressionNode]) -> None:
@@ -158,7 +158,7 @@ class IfNode:
 		self.position = position
 
 	def __repr__(self) -> str:
-		return f"IF({str(self.condition)})"
+		return f"IF_NODE({str(self.condition)})"
 
 class IfContainerNode:
 	def __init__(self, position: StartEndPosition, ifNode: IfNode, elseIfNodes: list[IfNode], elseNode: IfNode) -> None:
@@ -168,4 +168,12 @@ class IfContainerNode:
 		self.elseNode = elseNode
 
 	def __repr__(self) -> str:
-		return f"IF_CONTAINER({str(self.ifNode)}, {str(self.elseIfNodes)}, {str(self.elseNode)})"
+		return f"IF_CONTAINER_NODE({str(self.ifNode)}, {str(self.elseIfNodes)}, {str(self.elseNode)})"
+
+class ImportNode:
+	def __init__(self, position: StartEndPosition, moduleName: ExpressionNode) -> None:
+		self.position = position
+		self.moduleName = moduleName
+
+	def __repr__(self) -> str:
+		return f"IMPORT_NODE({self.moduleName})"

@@ -1,0 +1,3 @@
+IMPORT "list"
+
+PRINT("FROM MAIN", STRING(a))

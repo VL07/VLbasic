@@ -11,9 +11,10 @@ from .utils import StartEndPosition
 ########################################
 
 class Variable:
-	def __init__(self, value: any, constant: bool) -> None:
+	def __init__(self, value: any, constant: bool, builtIn: bool) -> None:
 		self.constant = constant
 		self.value = value
+		self.builtIn = builtIn
 
 ########################################
 #	VARIABLE TABLE
@@ -25,11 +26,11 @@ class VariableTable:
 		self.parent: VariableTable = None
 		self.context: Context = None
 	
-	def declareVariable(self, key: str, value: any, constant: bool, position: StartEndPosition) -> tuple[any, Error]:
+	def declareVariable(self, key: str, value: any, constant: bool, position: StartEndPosition, builtIn: bool = False) -> tuple[any, Error]:
 		if key in self.variables.keys():
 			return None, RTError(f"Variable {key} is already declared", position.copy(), self.context)
 
-		self.variables[key] = Variable(value, constant)
+		self.variables[key] = Variable(value, constant, builtIn)
 
 		self.test = "abc"
 

@@ -9,5 +9,6 @@ KEYWORDS = [
 	"RETURN",
 	"IF",
 	"ELSEIF",
-	"ELSE"
+	"ELSE",
+	"IMPORT"
 ]

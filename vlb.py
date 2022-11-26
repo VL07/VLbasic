@@ -8,6 +8,7 @@ from vlbasic.tokenizer import Tokenizer
 from vlbasic.parser import Parser
 from vlbasic.contextclass import Context, VariableTable
 from vlbasic.interpreter import Interpreter
+from vlbasic.utils import InterpretFile
 
 ########################################
 #	COMMAND LINE TOOL
@@ -85,7 +86,7 @@ def run(file: str, debug = False):
 	if debug == "stages":
 		print("TOKENIZING")
 
-	tokenizer = Tokenizer("SHELL", inputText)
+	tokenizer = Tokenizer(file, inputText)
 	tokens, error = tokenizer.tokenize()
 
 	if error:
@@ -98,7 +99,7 @@ def run(file: str, debug = False):
 	if debug == "stages":
 		print("PARSING")
 
-	parser = Parser("SHELL", tokens)
+	parser = Parser(file, tokens)
 
 	statements, error = parser.parse()
 
@@ -109,13 +110,13 @@ def run(file: str, debug = False):
 	if debug == "all":
 		print(statements)
 
-	context = Context("SHELL")
+	context = Context(file)
 	context.setVariableTable(VariableTable())
 
 	if debug == "stages":
 		print("INTERPRETING")
 	
-	interpreter = Interpreter(statements)
+	interpreter = Interpreter(statements, InterpretFile(file, None))
 	interpreter.addDefaultVariables(context)
 	out, error = interpreter.interpret(context)
 

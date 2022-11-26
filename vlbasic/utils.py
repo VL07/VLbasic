@@ -43,6 +43,27 @@ class File:
 	def copy(self) -> File:
 		return File(self.name, self.text)
 
+class InterpretFile:
+	def __init__(self, filepath: str, parent: InterpretFile) -> None:
+		self.filepath = filepath
+		self.parent = parent
+
+	def findCircularImport(self, fileToImport: str) -> bool:
+		if fileToImport == self.filepath:
+			return True
+
+		parent = self.parent
+		while parent:
+			if parent.filepath == self.filepath:
+				return True
+
+			parent = parent.parent
+
+		return False
+
+	def __repr__(self) -> str:
+		return f"INTERPRET_FILE({self.name}, {str(self.importedModules)})"
+
 class Position:
 	def __init__(self, index: int, line: int, column: int, file: File) -> None:
 		self.index = index

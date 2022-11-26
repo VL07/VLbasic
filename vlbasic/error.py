@@ -45,9 +45,10 @@ class RTError(Error):
 		self.details = details
 		self.position = position
 		self.context = context
+		self.importStack: list[str] = []
 
 	def __repr__(self) -> str:
-		errorText = "stack:\n"
+		errorText = "Stack:\n"
 
 		hasStack = False
 
@@ -60,9 +61,8 @@ class RTError(Error):
 		if not hasStack:
 			errorText = ""
 		else:
-			errorText += "\n"
-
-		errorText += f"file: {self.position.file.name}, ln: {self.position.start.line}, col: {self.position.start.column}\n"
+			errorText += "\n" + self.context.displayName
+			errorText += "\n\n"
 
 		codeAtLine = self.position.file.text.split("\n")[self.position.start.line - 1]
 		arrows = (" " * (self.position.start.column)) + ("^" * (self.position.end.column - self.position.start.column))
@@ -70,7 +70,12 @@ class RTError(Error):
 		errorText += codeAtLine + "\n"
 		errorText += arrows + "\n"
 
+		if len(self.importStack):
+			errorText += self.importStack[0] + "\n"
+
 		errorText += f"{self.name}: {self.details}\n"
+
+		errorText += f"\nfile: {self.position.file.name}, ln: {self.position.start.line}, col: {self.position.start.column}"
 		
 
 		return errorText

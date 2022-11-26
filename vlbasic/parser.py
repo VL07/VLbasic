@@ -4,7 +4,7 @@
 
 from .tokenclass import Token, TokenTypes
 from .error import Error, InvalidSyntaxError
-from .statementclass import StatementNode, ExpressionNode, BinaryOperationNode, UnaryOperationNode, NumberNode, VariableAccessNode, VariableDeclareNode, VariableAssignNode, WhileNode, FunctionCallNode, StringNode, ListNode, GetItemNode, FunctionDefineNode, ReturnNode, IfNode, IfContainerNode, SetItemNode
+from .statementclass import StatementNode, ExpressionNode, BinaryOperationNode, UnaryOperationNode, NumberNode, VariableAccessNode, VariableDeclareNode, VariableAssignNode, WhileNode, FunctionCallNode, StringNode, ListNode, GetItemNode, FunctionDefineNode, ReturnNode, IfNode, IfContainerNode, SetItemNode, ImportNode
 
 ########################################
 #	PARSER
@@ -137,6 +137,16 @@ class Parser:
 
 			return ReturnNode(returnToken.position.start.createStartEndPosition(value.position.end), value), None
 
+		elif self.currentToken.isKeyword("IMPORT"):
+			startPosition = self.currentToken.position.start.copy()
+
+			self.advance()
+
+			importName, error = self.compExpression()
+			if error:
+				return None, error
+			
+			return ImportNode(startPosition.createStartEndPosition(importName.position.end), importName), None
 
 		compExpression, error = self.binaryOperation(self.compExpression, (TokenTypes.PLUS, TokenTypes.MINUS))
 		if error:
