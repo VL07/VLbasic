@@ -6,4 +6,4 @@ a["abc"] = 123
 
 PRINT(a)
 
-PRINT(a[123])
+PRINT("a" == "a")

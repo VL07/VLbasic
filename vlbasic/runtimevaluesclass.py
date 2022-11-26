@@ -41,10 +41,10 @@ class RuntimeValue:
 		return None, RTError(f"Unable to modulus {type(self).__name__} by {type(by).__name__}", position.copy(), self.context)
 
 	def equals(self, other: RuntimeValue, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
-		return None, RTError(f"Unable to check equality between {type(self).__name__} and {type(other).__name__}", position.copy(), self.context)
+		return Boolean(False, position.copy(), self.context), None
 
 	def notEquals(self, other: RuntimeValue, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
-		return None, RTError(f"Unable to check inequality between {type(self).__name__} and {type(other).__name__}", position.copy(), self.context)
+		return Boolean(True, position.copy(), self.context), None
 
 	def graterThan(self, other: RuntimeValue, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
 		return None, RTError(f"Unable to compare size between {type(self).__name__} and {type(other).__name__}", position.copy(), self.context)
@@ -328,6 +328,18 @@ class Boolean(RuntimeValue):
 		
 		return super().divided(by, position)
 
+	def equals(self, other: RuntimeValue, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
+		if isinstance(other, Boolean):
+			return Boolean(self.value == other.value, position.copy(), self.context), None
+
+		return super().equals(other, position)
+
+	def notEquals(self, other: RuntimeValue, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
+		if isinstance(other, Boolean):
+			return Boolean(self.value != other.value, position.copy(), self.context), None
+
+		return super().notEquals(other, position)
+
 	def notted(self, position: StartEndPosition) -> tuple[Boolean, RTError]:
 		return Boolean(not self.value, position.copy(), self.context), None
 
@@ -348,6 +360,18 @@ class Null(RuntimeValue):
 
 	def __repr__(self) -> str:
 		return f"NULL()"
+
+	def equals(self, other: RuntimeValue, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
+		if isinstance(other, Null):
+			return Boolean(True, position.copy(), self.context), None
+
+		return super().equals(other, position)
+
+	def notEquals(self, other: RuntimeValue, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
+		if isinstance(other, Null):
+			return Boolean(False, position.copy(), self.context), None
+
+		return super().notEquals(other, position)
 
 	def toString(self, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
 		return String("NULL" if self.value else "FALSE", position.copy(), self.context), None
@@ -377,6 +401,32 @@ class List(RuntimeValue):
 			listAsString = "[]"
 
 		return String(listAsString, position.copy(), self.context), None
+
+	def equals(self, other: RuntimeValue, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
+		if isinstance(other, List):
+			if len(self.value) != len(other.value):
+				return Boolean(False, position.copy(), self.context), None
+
+			for item1, item2 in zip(self.value, other.value):
+				if not item1.equals(item2, position.copy()):
+					return Boolean(False, position.copy(), self.context), None
+
+			return Boolean(True, position.copy(), self.context), None
+
+		return super().equals(other, position)
+
+	def notEquals(self, other: RuntimeValue, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
+		if isinstance(other, List):
+			if len(self.value) != len(other.value):
+				return Boolean(True, position.copy(), self.context), None
+
+			for item1, item2 in zip(self.value, other.value):
+				if not item1.equals(item2, position.copy()):
+					return Boolean(True, position.copy(), self.context), None
+
+			return Boolean(False, position.copy(), self.context), None
+
+		return super().notEquals(other, position)
 
 	def getItem(self, item: RuntimeValue, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
 		if isinstance(item, Number):
@@ -439,6 +489,38 @@ class Dictionary(RuntimeValue):
 
 		return String(dictionaryAsString, position.copy(), self.context), None
 
+	def equals(self, other: RuntimeValue, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
+		if isinstance(other, Dictionary):
+			if len(self.value) != len(other.value):
+				return Boolean(False, position.copy(), self.context), None
+
+			for item1, item2 in zip(self.value.keys(), other.value.keys()):
+				if not item1.equals(item2, position.copy()):
+					return Boolean(False, position.copy(), self.context), None
+
+				if not self.value[item1].equals(other.value[item2], position.copy()):
+					return Boolean(False, position.copy(), self.context), None
+
+			return Boolean(True, position.copy(), self.context), None
+
+		return super().equals(other, position)
+
+	def notEquals(self, other: RuntimeValue, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
+		if isinstance(other, Dictionary):
+			if len(self.value) != len(other.value):
+				return Boolean(True, position.copy(), self.context), None
+
+			for item1, item2 in zip(self.value.keys(), other.value.keys()):
+				if not item1.equals(item2, position.copy(), position.copy()):
+					return Boolean(True, position.copy(), self.context), None
+
+				if not self.value[item1].equals(other.value[item2], position.copy()):
+					return Boolean(True, position.copy(), self.context), None
+
+			return Boolean(False, position.copy(), self.context), None
+
+		return super().equals(other, position)
+
 	def getItem(self, item: RuntimeValue, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
 		for key in self.value.keys():
 			equals, error = item.equals(key, position.copy())
@@ -484,6 +566,18 @@ class BuiltInFunction(RuntimeValue):
 	def __repr__(self) -> str:
 		return f"BUILT_IN_FUNCTION({self.name})"
 
+	def equals(self, other: RuntimeValue, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
+		if isinstance(other, BuiltInFunction):
+			return Boolean(self == other, position.copy())
+
+		return super().equals(other, position)
+
+	def notEquals(self, other: RuntimeValue, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
+		if isinstance(other, BuiltInFunction):
+			return Boolean(self != other, position.copy())
+
+		return super().notEquals(other, position)
+
 	def toString(self, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
 		return String(f"{self.name}()", position.copy(), self.context), None
 
@@ -499,6 +593,18 @@ class Function(RuntimeValue):
 
 	def __repr__(self) -> str:
 		return f"FUNCTION({self.name})"
+
+	def equals(self, other: RuntimeValue, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
+		if isinstance(other, Function):
+			return Boolean(self == other, position.copy())
+
+		return super().equals(other, position)
+
+	def notEquals(self, other: RuntimeValue, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
+		if isinstance(other, Function):
+			return Boolean(self != other, position.copy())
+
+		return super().notEquals(other, position)
 
 	def toString(self, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
 		return String(f"{self.name}()", position.copy(), self.context), None
