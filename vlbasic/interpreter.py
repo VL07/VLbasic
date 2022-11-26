@@ -271,11 +271,15 @@ class Interpreter:
 		return None, None
 
 	def visit_FunctionDefineNode(self, node: FunctionDefineNode, context: Context) -> tuple[Function,  RTError]:
-		func = Function(node.variable, node.arguments, node.body, node.position, context)
-		value, error = context.variableTable.declareVariable(node.variable, func, True, node.position.copy())
-		if error:
-			return None, error
-		return None, None
+		func = Function(node.variable, node.arguments, node.body, node.position, node.anonymous, context)
+
+		if not node.anonymous:
+			value, error = context.variableTable.declareVariable(node.variable, func, True, node.position.copy())
+			if error:
+				return None, error
+			return Null(node.position.copy(), context), None
+
+		return func, None
 
 	def visit_ReturnNode(self, node: ReturnNode, context: Context) -> tuple[RuntimeValue,  RTError]:
 		if not self.isAFunction:

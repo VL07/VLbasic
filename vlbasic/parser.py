@@ -334,12 +334,14 @@ class Parser:
 
 		self.advance()
 
-		if self.currentToken.type != TokenTypes.IDENTIFIER:
-			return None, InvalidSyntaxError(f"Expected identifier, not {str(self.currentToken.type)}", self.currentToken.position.copy())
+		anonymous = True
+		functionName = None
 
-		functionName = self.currentToken.value
+		if self.currentToken.type == TokenTypes.IDENTIFIER:
+			anonymous = False
+			functionName = self.currentToken.value
 
-		self.advance()
+			self.advance()
 
 		if self.currentToken.type != TokenTypes.LEFT_PARENTHESES:
 			return None, InvalidSyntaxError(f"Expected (, not {str(self.currentToken.type)}", self.currentToken.position.copy())
@@ -386,7 +388,7 @@ class Parser:
 
 		self.advance()
 
-		return FunctionDefineNode(startPosition.createStartEndPosition(endPosition), functionName, arguments, body), None
+		return FunctionDefineNode(startPosition.createStartEndPosition(endPosition), functionName, arguments, body, anonymous), None
 
 	def makeSubGetItemCall(self, base: GetItemNode | FunctionCallNode) -> tuple[GetItemNode | FunctionCallNode, Error]:
 		startPosition = self.currentToken.position.start.copy()

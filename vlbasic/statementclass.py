@@ -133,11 +133,12 @@ class SetItemNode:
 		return f"SET_ITEM_NODE({str(self.variable)}, {str(self.item)}, {str(self.value)})"
 
 class FunctionDefineNode:
-	def __init__(self, position: StartEndPosition, variable: str, arguments: list[ExpressionNode], body: list[ExpressionNode]) -> None:
+	def __init__(self, position: StartEndPosition, variable: str, arguments: list[ExpressionNode], body: list[ExpressionNode], anonymous: bool) -> None:
 		self.position = position
 		self.variable = variable
 		self.arguments = arguments
 		self.body = body
+		self.anonymous = anonymous
 
 	def __repr__(self) -> str:
 		return f"FUNCTION_DEFINE_NODE({str(self.variable)}, {str(self.arguments)})"

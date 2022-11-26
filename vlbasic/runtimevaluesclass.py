@@ -420,13 +420,14 @@ class BuiltInFunction(RuntimeValue):
 		return String(f"{self.name}()", position.copy(), self.context), None
 
 class Function(RuntimeValue):
-	def __init__(self, name: str, arguments: list[str], body: list[ExpressionNode], position: StartEndPosition, context: Context) -> None:
+	def __init__(self, name: str, arguments: list[str], body: list[ExpressionNode], position: StartEndPosition, anonymous: bool, context: Context) -> None:
 		self.name = name
 		self.arguments = arguments
 		self.body = body
 		self.position = position
 		self.context = context
 		self.value = "FUNCTION"
+		self.anonymous = anonymous
 
 	def __repr__(self) -> str:
 		return f"FUNCTION({self.name})"

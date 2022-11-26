@@ -28,6 +28,7 @@
   - [x] Return
   - [x] Function context
   - [ ] Constant functions
+  - [x] Anonymous functions
 - [x] Variables
   - [x] Assign
   - [x] Access

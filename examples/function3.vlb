@@ -1,0 +1,9 @@
+FUNCTION run(func)
+	func()
+END
+
+FUNCTION a()
+	PRINT("YES")
+END
+
+run(a)

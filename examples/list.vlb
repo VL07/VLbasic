@@ -13,9 +13,3 @@ a[3] = "d"
 a[4] = "e"
 
 PRINT(a)
-
-CONST b = FUNCTION abc()
-	PRINT("WHAT")
-END
-
-b()
