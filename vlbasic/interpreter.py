@@ -83,6 +83,10 @@ class Interpreter:
 			result, error = left.multiplied(right, position)
 		elif node.operationToken.type == TokenTypes.DIVIDE:
 			result, error = left.divided(right, position)
+		elif node.operationToken.type == TokenTypes.POWER:
+			result, error = left.power(right, position)
+		elif node.operationToken.type == TokenTypes.MODULUS:
+			result, error = left.modulus(right, position)
 		elif node.operationToken.type == TokenTypes.DOUBLE_EQUALS:
 			result, error = left.equals(right, position)
 		elif node.operationToken.type == TokenTypes.NOT_EQUALS:

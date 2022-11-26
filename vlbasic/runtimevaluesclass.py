@@ -34,6 +34,12 @@ class RuntimeValue:
 	def divided(self, by: RuntimeValue, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
 		return None, RTError(f"Unable to divide {type(self).__name__} by {type(by).__name__}", position.copy(), self.context)
 
+	def power(self, by: RuntimeValue, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
+		return None, RTError(f"Unable to power {type(self).__name__} by {type(by).__name__}", position.copy(), self.context)
+
+	def modulus(self, by: RuntimeValue, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
+		return None, RTError(f"Unable to modulus {type(self).__name__} by {type(by).__name__}", position.copy(), self.context)
+
 	def equals(self, other: RuntimeValue, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
 		return None, RTError(f"Unable to check equality between {type(self).__name__} and {type(other).__name__}", position.copy(), self.context)
 
@@ -121,6 +127,18 @@ class Number(RuntimeValue):
 			if not by.value:
 				return None, RTError("Cannot divide by zero", position.copy(), self.context)
 			return Number(self.value - (1 if by.value else 0), position.copy(), self.context), None
+		
+		return super().divided(by, position)
+
+	def power(self, by: RuntimeValue, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
+		if isinstance(by, Number):
+			return Number(self.value ** by.value, position.copy(), self.context), None
+		
+		return super().divided(by, position)
+
+	def modulus(self, by: RuntimeValue, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
+		if isinstance(by, Number):
+			return Number(self.value % by.value, position.copy(), self.context), None
 		
 		return super().divided(by, position)
 

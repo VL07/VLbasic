@@ -33,12 +33,13 @@
   - [x] Access
   - [x] Set
   - [x] Constants
-- [ ] Arithmetics
+- [x] Arithmetics
   - [x] Addition
   - [x] Subtraction
   - [x] Multiplication
   - [x] Division
-  - [ ] Power
+  - [x] Power
+  - [x] Modulus
   - [x] Order of operations
 - [ ] Import
 - [ ] Modules

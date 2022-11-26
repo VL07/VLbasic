@@ -170,7 +170,14 @@ class Parser:
 		return node, None
 
 	def term(self) -> tuple[BinaryOperationNode, Error]:
-		factor, error = self.binaryOperation(self.factor, (TokenTypes.MULTIPLY, TokenTypes.DIVIDE))
+		factor, error = self.binaryOperation(self.power, (TokenTypes.MULTIPLY, TokenTypes.DIVIDE, TokenTypes.MODULUS))
+		if error:
+			return None, error
+
+		return factor, None
+
+	def power(self) -> tuple[BinaryOperationNode, Error]:
+		factor, error = self.binaryOperation(self.factor, [TokenTypes.POWER])
 		if error:
 			return None, error
 

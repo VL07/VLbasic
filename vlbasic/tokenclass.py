@@ -20,6 +20,8 @@ class TokenTypes(Enum):
 	MINUS = 			auto()
 	MULTIPLY = 			auto()
 	DIVIDE =			auto()
+	POWER =				auto()
+	MODULUS =			auto()
 
 	LEFT_PARENTHESES = 	auto()
 	RIGHT_PARENTHESES = auto()

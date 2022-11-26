@@ -79,6 +79,12 @@ class Tokenizer:
 			elif self.currentCharacter == "/":
 				tokens.append(Token(TokenTypes.DIVIDE, self.position.asStartEndPosition()))
 				self.advance()
+			elif self.currentCharacter == "^":
+				tokens.append(Token(TokenTypes.POWER, self.position.asStartEndPosition()))
+				self.advance()
+			elif self.currentCharacter == "%":
+				tokens.append(Token(TokenTypes.MODULUS, self.position.asStartEndPosition()))
+				self.advance()
 			elif self.currentCharacter == "(":
 				tokens.append(Token(TokenTypes.LEFT_PARENTHESES, self.position.asStartEndPosition()))
 				self.advance()
