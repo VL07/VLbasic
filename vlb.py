@@ -159,7 +159,7 @@ def main():
 				print(f"run parameter --debug only accepts stages, all as its value, not {debug}")
 				return
 
-		debug = measureTime = None
+		measureTime = None
 		if "--time" in arguments.keys():
 			measureTime = True
 
