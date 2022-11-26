@@ -4,7 +4,7 @@
 
 from .tokenclass import Token, TokenTypes
 from .error import Error, InvalidSyntaxError
-from .statementclass import StatementNode, ExpressionNode, BinaryOperationNode, UnaryOperationNode, NumberNode, VariableAccessNode, VariableDeclareNode, VariableAssignNode, WhileNode, FunctionCallNode, StringNode, ListNode, GetItemNode, FunctionDefineNode
+from .statementclass import StatementNode, ExpressionNode, BinaryOperationNode, UnaryOperationNode, NumberNode, VariableAccessNode, VariableDeclareNode, VariableAssignNode, WhileNode, FunctionCallNode, StringNode, ListNode, GetItemNode, FunctionDefineNode, ReturnNode
 
 ########################################
 #	PARSER
@@ -86,7 +86,7 @@ class Parser:
 
 			self.advance()
 
-			if self.currentToken.type == TokenTypes.EOF:
+			if self.currentToken.type in [TokenTypes.EOF, TokenTypes.NEW_LINE]:
 				return None, InvalidSyntaxError(f"Expected expression, not {str(self.currentToken.type)}", self.currentToken.position.copy())
 
 			expression, error = self.expression()
@@ -106,6 +106,21 @@ class Parser:
 				return None, error
 
 			return VariableAssignNode(varName, expression), None
+
+		elif self.currentToken.isKeyword("RETURN"):
+			returnToken = self.currentToken
+
+			self.advance()
+
+			if self.currentToken.type in [TokenTypes.EOF, TokenTypes.NEW_LINE]:
+				return ReturnNode(returnToken.position.copy(), None), None
+
+			value, error = self.binaryOperation(self.compExpression, (TokenTypes.PLUS, TokenTypes.MINUS))
+			if error:
+				return None, error
+
+			return ReturnNode(returnToken.position.start.createStartEndPosition(value.position.end), value), None
+
 
 		compExpression, error = self.binaryOperation(self.compExpression, (TokenTypes.PLUS, TokenTypes.MINUS))
 		if error:

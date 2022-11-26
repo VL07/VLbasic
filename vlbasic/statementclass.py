@@ -132,3 +132,10 @@ class FunctionDefineNode:
 	def __repr__(self) -> str:
 		return f"FUNCTION_DEFINE_NODE({str(self.variable)}, {str(self.arguments)})"
 		
+class ReturnNode:
+	def __init__(self, position: StartEndPosition, value: ExpressionNode) -> None:
+		self.position = position
+		self.value = value
+
+	def __repr__(self) -> str:
+		return f"RETURN({str(self.value)})"

@@ -2,7 +2,7 @@
 #	IMPORTS
 ########################################
 
-from .statementclass import StatementNode, NumberNode, BinaryOperationNode, UnaryOperationNode, VariableAccessNode, VariableAssignNode, VariableDeclareNode, WhileNode, FunctionCallNode, StringNode, ListNode, GetItemNode, FunctionDefineNode
+from .statementclass import StatementNode, NumberNode, BinaryOperationNode, UnaryOperationNode, VariableAccessNode, VariableAssignNode, VariableDeclareNode, WhileNode, FunctionCallNode, StringNode, ListNode, GetItemNode, FunctionDefineNode, ReturnNode
 from .contextclass import Context, VariableTable
 from .runtimevaluesclass import RuntimeValue, Number, Boolean, Null, BuiltInFunction, String, List, Function
 from .tokenclass import TokenTypes
@@ -15,8 +15,10 @@ from .builtInfunctions import funcPrint, funcToString, funcToNumber
 ########################################
 
 class Interpreter:
-	def __init__(self, statements: list[StatementNode]) -> None:
+	def __init__(self, statements: list[StatementNode], isAFunction: bool = False) -> None:
 		self.statements = statements
+		self.isAFunction = isAFunction
+		self.returnValue = None
 	
 	def interpret(self, context: Context) -> tuple[list[RuntimeValue], RTError]:
 		values: list[RuntimeValue] = []
@@ -26,6 +28,13 @@ class Interpreter:
 				return None, error
 
 			values.append(value)
+
+			if self.returnValue:
+				return values, None
+
+		if self.isAFunction:
+			file = File("<DEFAULT_VARIABLE>", "")
+			self.returnValue = Null(StartEndPosition(file, Position(-1, -1, -1, file)), context)
 
 		return values, None
 
@@ -189,23 +198,24 @@ class Interpreter:
 			if len(func.arguments) != len(node.arguments):
 				return None, RTError(f"FUNCTION {func.name} expected {str(len(func.arguments))}, not {str(len(node.arguments))} arguments", node.position.copy(), context)
 
-			executeContext = Context(f"<FUNCTION {func.name}>", context)
+			executeContext = Context(f"<FUNCTION {func.name}>", func.context)
 			executeContext.setVariableTable(VariableTable())
 
-			interpreter = Interpreter(func.body)
+			interpreter = Interpreter(func.body, True)
 			interpreter.addDefaultVariables(executeContext)
 
 			for argumentName, argument in zip(func.arguments, argumentsVisited):
 				executeContext.variableTable.declareVariable(argumentName, argument, False, argument.position)
 
-			returnValue, error = interpreter.interpret(executeContext)
+			_, error = interpreter.interpret(executeContext)
 			if error:
 				return None, error
 
-			# returnValue.context = self.context
-			# returnValue.position = position.copy()
+			returnValue = interpreter.returnValue
 
-			return Null(func.position.copy(), context), None
+			returnValue.position = node.position.copy()
+
+			return returnValue, None
 
 		elif isinstance(func, BuiltInFunction):
 			returnValue, error = func.execute(argumentsVisited, node.position.copy())
@@ -213,7 +223,7 @@ class Interpreter:
 				return None, error
 
 		else:
-			returnValue, error = func.execute(argumentsVisited, func.position.copy())
+			returnValue, error = func.execute(argumentsVisited, node.position.copy())
 			if error:
 				return None, error
 			return returnValue, None
@@ -251,3 +261,18 @@ class Interpreter:
 		if error:
 			return None, error
 		return None, None
+
+	def visit_ReturnNode(self, node: ReturnNode, context: Context) -> tuple[RuntimeValue,  RTError]:
+		if not self.isAFunction:
+			return None, RTError("RETURN can only be used inside of functions", node.position.copy(), context)
+
+		if node.value:
+			value, error = self.visit(node.value, context)
+			if error:
+				return None, error
+
+			self.returnValue = value
+			return value, None
+
+		self.returnValue = Null(node.position.copy(), context)
+		return self.returnValue, None
