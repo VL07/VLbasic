@@ -6,5 +6,8 @@ KEYWORDS = [
 	"THEN",
 	"END",
 	"FUNCTION",
-	"RETURN"
+	"RETURN",
+	"IF",
+	"ELSEIF",
+	"ELSE"
 ]

@@ -4,7 +4,7 @@
 
 from .tokenclass import Token, TokenTypes
 from .error import Error, InvalidSyntaxError
-from .statementclass import StatementNode, ExpressionNode, BinaryOperationNode, UnaryOperationNode, NumberNode, VariableAccessNode, VariableDeclareNode, VariableAssignNode, WhileNode, FunctionCallNode, StringNode, ListNode, GetItemNode, FunctionDefineNode, ReturnNode
+from .statementclass import StatementNode, ExpressionNode, BinaryOperationNode, UnaryOperationNode, NumberNode, VariableAccessNode, VariableDeclareNode, VariableAssignNode, WhileNode, FunctionCallNode, StringNode, ListNode, GetItemNode, FunctionDefineNode, ReturnNode, IfNode, IfContainerNode
 
 ########################################
 #	PARSER
@@ -58,6 +58,22 @@ class Parser:
 
 		if self.currentToken.type == TokenTypes.EOF:
 			return None, InvalidSyntaxError(f"Expected keyword END, not {str(self.currentToken.type)}", self.currentToken.position.copy())
+		
+		return statements, None
+
+	def parseIf(self) -> tuple[list[ExpressionNode], Error]:
+		statements: list[StatementNode] = []
+
+		while self.currentToken.type != TokenTypes.EOF and not self.currentToken.isOneOfKeywords(["END", "ELSE", "ELSEIF"]):
+			statement, error = self.statement()
+			if error:
+				return None, error
+
+			if statement:
+				statements.append(statement)
+
+		if self.currentToken.type == TokenTypes.EOF:
+			return None, InvalidSyntaxError(f"Expected keyword END, ELSE or ELSEIF, not {str(self.currentToken.type)}", self.currentToken.position.copy())
 		
 		return statements, None
 
@@ -243,9 +259,75 @@ class Parser:
 				return None, error
 			return expression, None
 
+		elif startToken.isKeyword("IF"):
+			expression, error = self.ifExpression()
+			if error:
+				return None, error
+			return expression, None
+
 		return None, InvalidSyntaxError(f"Expected number or identifier, not {str(self.currentToken.type)}", self.currentToken.position.copy())
 
 	######################################
+
+	def ifExpression(self) -> tuple[ListNode, Error]:
+		startPosition = self.currentToken.position.start.copy()
+
+		self.advance()
+
+		condition, error = self.compExpression()
+		if error:
+			return None, error
+
+		if not self.currentToken.isKeyword("THEN"):
+			return None, InvalidSyntaxError(f"Expected THEN, not {str(self.currentToken.type)}", self.currentToken.position.copy())
+
+		self.advance()
+
+		body, error = self.parseIf()
+		if error:
+			return None, error
+
+		mainIf = IfNode(startPosition.createStartEndPosition(self.currentToken.position.end), condition, body)
+
+		elseifNodes = []
+
+		while self.currentToken.isKeyword("ELSEIF"):
+			elifStart = self.currentToken.position.start.copy()
+
+			self.advance()
+
+			condition, error = self.compExpression()
+			if error:
+				return None, error
+
+			if not self.currentToken.isKeyword("THEN"):
+				return None, InvalidSyntaxError(f"Expected THEN, not {str(self.currentToken.type)}", self.currentToken.position.copy())
+
+			self.advance()
+
+			body, error = self.parseIf()
+			if error:
+				return None, error
+
+			elseifNodes.append(IfNode(elifStart.createStartEndPosition(self.currentToken.position.end), condition, body))
+
+		elseNode = None
+		if self.currentToken.isKeyword("ELSE"):
+			elseStartPosition = self.currentToken.position.start.copy()
+
+			self.advance()
+
+			body, error = self.parseEnd()
+			if error:
+				return None, error
+
+			elseNode = IfNode(elseStartPosition.createStartEndPosition(self.currentToken.position.end), None, body)
+
+		endPosition = startPosition.createStartEndPosition(self.currentToken.position.end)
+
+		self.advance()
+		
+		return IfContainerNode(endPosition, mainIf, elseifNodes, elseNode), None
 
 	def functionDefinition(self) -> tuple[ListNode, Error]:
 		startPosition = self.currentToken.position.start.copy()

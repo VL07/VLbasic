@@ -139,3 +139,22 @@ class ReturnNode:
 
 	def __repr__(self) -> str:
 		return f"RETURN({str(self.value)})"
+
+class IfNode:
+	def __init__(self, position: StartEndPosition, condition: ExpressionNode, body: list[ExpressionNode]) -> None:
+		self.condition = condition
+		self.body = body
+		self.position = position
+
+	def __repr__(self) -> str:
+		return f"IF({str(self.condition)})"
+
+class IfContainerNode:
+	def __init__(self, position: StartEndPosition, ifNode: IfNode, elseIfNodes: list[IfNode], elseNode: IfNode) -> None:
+		self.position = position
+		self.ifNode = ifNode
+		self.elseIfNodes = elseIfNodes
+		self.elseNode = elseNode
+
+	def __repr__(self) -> str:
+		return f"IF_CONTAINER({str(self.ifNode)}, {str(self.elseIfNodes)}, {str(self.elseNode)})"

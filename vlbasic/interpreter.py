@@ -2,7 +2,7 @@
 #	IMPORTS
 ########################################
 
-from .statementclass import StatementNode, NumberNode, BinaryOperationNode, UnaryOperationNode, VariableAccessNode, VariableAssignNode, VariableDeclareNode, WhileNode, FunctionCallNode, StringNode, ListNode, GetItemNode, FunctionDefineNode, ReturnNode
+from .statementclass import StatementNode, NumberNode, BinaryOperationNode, UnaryOperationNode, VariableAccessNode, VariableAssignNode, VariableDeclareNode, WhileNode, FunctionCallNode, StringNode, ListNode, GetItemNode, FunctionDefineNode, ReturnNode, IfContainerNode
 from .contextclass import Context, VariableTable
 from .runtimevaluesclass import RuntimeValue, Number, Boolean, Null, BuiltInFunction, String, List, Function
 from .tokenclass import TokenTypes
@@ -276,3 +276,48 @@ class Interpreter:
 
 		self.returnValue = Null(node.position.copy(), context)
 		return self.returnValue, None
+
+	def visit_IfContainerNode(self, node: IfContainerNode, context: Context) -> tuple[None,  RTError]:
+		ifCondition, error = self.visit(node.ifNode.condition, context)
+		if error:
+			return None, error
+
+		ifConditionAsBoolean, error = ifCondition.toBoolean(node.ifNode.condition.position.copy())
+		if error:
+			return None, error
+
+		if ifConditionAsBoolean.value:
+			for statement in node.ifNode.body:
+				statementVisited, error = self.visit(statement, context)
+				if error:
+					return None, error
+
+			return None, None
+
+		for elseIfNode in node.elseIfNodes:
+			elseIfCondition, error = self.visit(elseIfNode.condition, context)
+			if error:
+				return None, error
+
+			elseIfConditionAsBoolean, error = elseIfCondition.toBoolean(elseIfNode.condition.position.copy())
+			if error:
+				return None, error
+
+			if not elseIfConditionAsBoolean.value:
+				continue
+			
+			for statement in elseIfNode.body:
+				statementVisited, error = self.visit(statement, context)
+				if error:
+					return None, error 
+
+			return None, None
+
+		if node.elseNode:
+			for statement in node.elseNode.body:
+				statementVisited, error = self.visit(statement, context)
+				if error:
+					return None, error 
+
+			return None, None
+		return None, None
