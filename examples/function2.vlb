@@ -1,0 +1,7 @@
+FUNCTION add(a, b)
+	RETURN a + b
+END
+
+PRINT(add(1, 2))
+PRINT(add(10, 10))
+PRINT(add("Hello ", "World!"))
