@@ -22,12 +22,11 @@
   - [ ] For loops
   - [ ] Break
   - [ ] Continue
-- [ ] Functions
+- [x] Functions
   - [x] Function call
   - [x] Function define
   - [x] Return
   - [x] Function context
-  - [ ] Constant functions
   - [x] Anonymous functions
 - [x] Variables
   - [x] Assign
