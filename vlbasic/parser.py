@@ -338,11 +338,8 @@ class Parser:
 
 			self.advance()
 
-			print("FUNCTION CALL NODE")
-
 			return FunctionCallNode(base.position.start.createStartEndPosition(endPosition), base, arguments), None
 		elif self.currentToken.type == TokenTypes.LEFT_SQUARE:
-			print("YES")
 			self.advance()
 
 			if self.currentToken.type == TokenTypes.RIGHT_SQUARE:
@@ -371,8 +368,6 @@ class Parser:
 
 		if self.currentToken.type == TokenTypes.RIGHT_SQUARE:
 			return ListNode(startPosition.createStartEndPosition(self.currentToken.position.end.copy()), expressions), None
-
-		print("1")
 
 		firstExpression, error = self.compExpression()
 		if error:

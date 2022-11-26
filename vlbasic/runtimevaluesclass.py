@@ -200,7 +200,6 @@ class String(RuntimeValue):
 
 	def added(self, to: Number | RuntimeValue, position: StartEndPosition) -> tuple[Number, RTError]:
 		if isinstance(to, String):
-			print(self.value, to.value)
 			return String(self.value + to.value, position.copy(), self.context), None
 
 		return super().added(to, position.copy())
