@@ -215,7 +215,7 @@ class Parser:
 		if error:
 			return None, error
 
-		while self.currentToken.type in [TokenTypes.LEFT_PARENTHESES, TokenTypes.LEFT_SQUARE]:
+		while self.currentToken.type in [TokenTypes.LEFT_PARENTHESES, TokenTypes.LEFT_SQUARE, TokenTypes.DOT]:
 			atom, error = self.makeSubGetItemCall(atom)
 			if error:
 				return None, error
@@ -468,6 +468,18 @@ class Parser:
 				return None, error
 
 			return SetItemNode(startPosition.createStartEndPosition(value.position.end), base, indexNode, value), None
+
+		elif self.currentToken.type == TokenTypes.DOT:
+			self.advance()
+
+			if self.currentToken.type != TokenTypes.IDENTIFIER:
+				return None, InvalidSyntaxError(f"Expected IDENTIFIER, not {str(self.currentToken.type)}", self.currentToken.position.copy())
+
+			index = StringNode(self.currentToken)
+
+			self.advance()
+
+			return GetItemNode(startPosition.createStartEndPosition(index.position.end), base, index), None
 
 	def listExpression(self) -> tuple[ListNode, Error]:
 		startPosition = self.currentToken.position.start.copy()

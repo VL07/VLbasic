@@ -30,6 +30,7 @@ class TokenTypes(Enum):
 	RIGHT_SQUARE =		auto()
 
 	COMMA = 			auto()
+	DOT = 				auto()
 
 	INTEGER =			auto()
 	FLOAT = 			auto()

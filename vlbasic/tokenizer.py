@@ -100,6 +100,9 @@ class Tokenizer:
 			elif self.currentCharacter == ",":
 				tokens.append(Token(TokenTypes.COMMA, self.position.asStartEndPosition()))
 				self.advance()
+			elif self.currentCharacter == ".":
+				tokens.append(Token(TokenTypes.DOT, self.position.asStartEndPosition()))
+				self.advance()
 			elif self.currentCharacter == "=":
 				token, error = self.makeEquals()
 				tokens.append(token)
