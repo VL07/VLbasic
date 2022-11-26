@@ -2,7 +2,7 @@ FUNCTION a(text, times)
 	FUNCTION b()
 		PRINT(text * times)
 	END
-	b()
+	RETURN b
 END
 
-a("HELLO WORLD!", 3)
+a("HELLO WORLD!", 3)()
