@@ -2,7 +2,7 @@
 #	IMPORTS
 ########################################
 
-from .statementclass import StatementNode, NumberNode, BinaryOperationNode, UnaryOperationNode, VariableAccessNode, VariableAssignNode, VariableDeclareNode, WhileNode, FunctionCallNode, StringNode, ListNode, GetItemNode, FunctionDefineNode, ReturnNode, IfContainerNode
+from .statementclass import StatementNode, NumberNode, BinaryOperationNode, UnaryOperationNode, VariableAccessNode, VariableAssignNode, VariableDeclareNode, WhileNode, FunctionCallNode, StringNode, ListNode, GetItemNode, FunctionDefineNode, ReturnNode, IfContainerNode, SetItemNode
 from .contextclass import Context, VariableTable
 from .runtimevaluesclass import RuntimeValue, Number, Boolean, Null, BuiltInFunction, String, List, Function
 from .tokenclass import TokenTypes
@@ -242,7 +242,7 @@ class Interpreter:
 
 		return List(expressions, node.position.copy(), context), None
 		
-	def visit_GetItemNode(self, node: GetItemNode, context: Context) -> tuple[Number,  RTError]:
+	def visit_GetItemNode(self, node: GetItemNode, context: Context) -> tuple[RuntimeValue,  RTError]:
 		variable, error = self.visit(node.variable, context)
 		if error:
 			return None, error
@@ -254,6 +254,21 @@ class Interpreter:
 			return None, error
 
 		return value, None
+
+	def visit_SetItemNode(self, node: SetItemNode, context: Context) -> tuple[None,  RTError]:
+		variable, error = self.visit(node.variable, context)
+		if error:
+			return None, error
+
+		item, error = self.visit(node.item, context)
+
+		value, error = self.visit(node.value, context)
+
+		_, error = variable.setItem(item, value, node.position.copy())
+		if error:
+			return None, error
+
+		return None, None
 
 	def visit_FunctionDefineNode(self, node: FunctionDefineNode, context: Context) -> tuple[Function,  RTError]:
 		func = Function(node.variable, node.arguments, node.body, node.position, context)

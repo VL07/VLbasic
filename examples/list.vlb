@@ -1,0 +1,21 @@
+CONST a = [0, 1, 2, 3, 4]
+
+PRINT(a[0])
+PRINT(a[1])
+PRINT(a[2])
+PRINT(a[3])
+PRINT(a[4])
+
+a[0] = "a"
+a[1] = "b"
+a[2] = "c"
+a[3] = "d"
+a[4] = "e"
+
+PRINT(a)
+
+CONST b = FUNCTION abc()
+	PRINT("WHAT")
+END
+
+b()

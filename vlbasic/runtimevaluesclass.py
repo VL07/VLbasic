@@ -70,6 +70,9 @@ class RuntimeValue:
 	def getItem(self, item: RuntimeValue, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
 		return None, RTError(f"Unable to get item {str(item)} of {type(self).__name__}", position.copy(), self.context)
 
+	def setItem(self, item: RuntimeValue, value: RuntimeValue, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
+		return None, RTError(f"Unable to set item {str(item)} of {type(self).__name__} to {str(value)}", position.copy(), self.context)
+
 	def getLength(self, position: StartEndPosition) -> tuple[Number, RTError]:
 		return None, RTError(f"Unable to get length of a {type(self).__name__}", position.copy(), self.context)
 
@@ -370,6 +373,21 @@ class List(RuntimeValue):
 
 		return super().getItem(item, position)
 
+	def setItem(self, item: RuntimeValue, value: RuntimeValue, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
+		if isinstance(item, Number):
+			length, error = self.getLength(position)
+			if error:
+				return None, error
+
+			if item.value + 1 > length.value:
+				return None, RTError("List is out of range", position.copy(), self.context)
+
+			self.value[item.value] = value
+
+			return Null(position.copy(), self.context), None
+
+		return super().getItem(item, position)
+
 	def getLength(self, position: StartEndPosition) -> tuple[Number, RTError]:
 		return Number(len(self.value), position.copy(), self.context), None
 
@@ -412,9 +430,6 @@ class Function(RuntimeValue):
 
 	def __repr__(self) -> str:
 		return f"FUNCTION({self.name})"
-
-	def execute(self, arguments: list[RuntimeValue], position: StartEndPosition, executeFunction: function) -> tuple[RuntimeValue, RTError]:
-		return None, None
 
 	def toString(self, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
 		return String(f"{self.name}()", position.copy(), self.context), None

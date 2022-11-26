@@ -122,6 +122,16 @@ class GetItemNode:
 	def __repr__(self) -> str:
 		return f"GET_ITEM_NODE({str(self.variable)}, {str(self.item)})"
 
+class SetItemNode:
+	def __init__(self, position: StartEndPosition, variable: ExpressionNode, item: VariableAccessNode, value: ExpressionNode) -> None:
+		self.position = position
+		self.variable = variable
+		self.item = item
+		self.value = value
+
+	def __repr__(self) -> str:
+		return f"SET_ITEM_NODE({str(self.variable)}, {str(self.item)}, {str(self.value)})"
+
 class FunctionDefineNode:
 	def __init__(self, position: StartEndPosition, variable: str, arguments: list[ExpressionNode], body: list[ExpressionNode]) -> None:
 		self.position = position
