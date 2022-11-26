@@ -7,8 +7,8 @@
   - [x] Sting
   - [x] Null
   - [x] Boolean
-  - [ ] List
-    - [ ] Set item
+  - [x] List
+    - [x] Set item
     - [x] Get item
   - [ ] Dictionaries
     - [ ] Set item
