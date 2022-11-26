@@ -2,9 +2,9 @@
 #	IMPORTS
 ########################################
 
-from .statementclass import StatementNode, NumberNode, BinaryOperationNode, UnaryOperationNode, VariableAccessNode, VariableAssignNode, VariableDeclareNode, WhileNode, FunctionCallNode, StringNode, ListNode, GetItemNode, FunctionDefineNode, ReturnNode, IfContainerNode, SetItemNode, ImportNode
+from .statementclass import StatementNode, NumberNode, BinaryOperationNode, UnaryOperationNode, VariableAccessNode, VariableAssignNode, VariableDeclareNode, WhileNode, FunctionCallNode, StringNode, ListNode, GetItemNode, FunctionDefineNode, ReturnNode, IfContainerNode, SetItemNode, ImportNode, DictionaryNode
 from .contextclass import Context, VariableTable
-from .runtimevaluesclass import RuntimeValue, Number, Boolean, Null, BuiltInFunction, String, List, Function
+from .runtimevaluesclass import RuntimeValue, Number, Boolean, Null, BuiltInFunction, String, List, Function, Dictionary
 from .tokenclass import TokenTypes
 from .error import RTError
 from .utils import StartEndPosition, Position, File, InterpretFile
@@ -416,3 +416,20 @@ class Interpreter:
 
 		return Null(node.position.copy(), context), None
 		
+	def visit_DictionaryNode(self, node: DictionaryNode, context: Context) -> tuple[Null,  RTError]:
+		valuesVisited = {}
+
+		for key, value in node.expressions.items():
+			keyVisited, error = self.visit(key, context)
+			if error:
+				return None, error
+
+			valueVisited, error = self.visit(value, context)
+			if error:
+				return None, error
+
+			valuesVisited[keyVisited] = valueVisited
+
+		return Dictionary(valuesVisited, node.position.copy(), context), None
+
+			

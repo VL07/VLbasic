@@ -384,7 +384,7 @@ class List(RuntimeValue):
 			if error:
 				return None, error
 
-			if item.value + 1 > length.value:
+			if item.value + 1 > length.value or item.value < 0:
 				return None, RTError("List is out of range", position.copy(), self.context)
 
 			return self.value[item.value], None
@@ -397,7 +397,7 @@ class List(RuntimeValue):
 			if error:
 				return None, error
 
-			if item.value + 1 > length.value:
+			if item.value + 1 > length.value or item.value < 0:
 				return None, RTError("List is out of range", position.copy(), self.context)
 
 			self.value[item.value] = value
@@ -408,6 +408,56 @@ class List(RuntimeValue):
 
 	def getLength(self, position: StartEndPosition) -> tuple[Number, RTError]:
 		return Number(len(self.value), position.copy(), self.context), None
+
+class Dictionary(RuntimeValue):
+	def __init__(self, expressions: dict[RuntimeValue, RuntimeValue], position: StartEndPosition, context: Context) -> None:
+		self.position = position
+		self.context = context
+		self.value = expressions
+
+	def __repr__(self) -> str:
+		return f"DICTIONARY({self.value})"
+
+	def toString(self, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
+		dictionaryAsString = "{"
+
+		for key, value in self.value.items():
+			keyAsString, error = key.toString(position.copy())
+			if error:
+				return None, error
+
+			valueAsString, error = value.toString(position.copy())
+			if error:
+				return None, error
+
+			dictionaryAsString += f"{keyAsString.value}: {valueAsString.value}, "
+
+		if len(self.value):
+			dictionaryAsString = dictionaryAsString[:-2] + "}"
+		else:
+			dictionaryAsString = "{}"
+
+		return String(dictionaryAsString, position.copy(), self.context), None
+
+	def getItem(self, item: RuntimeValue, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
+		for key in self.value.keys():
+			equals, error = item.equals(key, position.copy())
+			if error:
+				return None, error
+
+			if equals.value:
+				return self.value[key], None
+
+		return None, RTError(f"Invalid key {item}", position.copy(), self.context)
+
+	def setItem(self, item: RuntimeValue, value: RuntimeValue, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
+		self.value[item] = value
+
+		return Null(position.copy(), self.context), None
+
+	def getLength(self, position: StartEndPosition) -> tuple[Number, RTError]:
+		return Number(len(self.value), position.copy(), self.context), None
+
 
 class BuiltInFunction(RuntimeValue):
 	def __init__(self, name: str, executeFunction: Callable[[list[RuntimeValue], Context], tuple[RuntimeValue, RTError]], position: StartEndPosition, context: Context) -> None:

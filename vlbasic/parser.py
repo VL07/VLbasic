@@ -4,7 +4,7 @@
 
 from .tokenclass import Token, TokenTypes
 from .error import Error, InvalidSyntaxError
-from .statementclass import StatementNode, ExpressionNode, BinaryOperationNode, UnaryOperationNode, NumberNode, VariableAccessNode, VariableDeclareNode, VariableAssignNode, WhileNode, FunctionCallNode, StringNode, ListNode, GetItemNode, FunctionDefineNode, ReturnNode, IfNode, IfContainerNode, SetItemNode, ImportNode
+from .statementclass import StatementNode, ExpressionNode, BinaryOperationNode, UnaryOperationNode, NumberNode, VariableAccessNode, VariableDeclareNode, VariableAssignNode, WhileNode, FunctionCallNode, StringNode, ListNode, GetItemNode, FunctionDefineNode, ReturnNode, IfNode, IfContainerNode, SetItemNode, ImportNode, DictionaryNode
 
 ########################################
 #	PARSER
@@ -254,6 +254,15 @@ class Parser:
 			
 			return expression, None
 
+		elif startToken.type == TokenTypes.LEFT_CURLY:
+			expression, error = self.dictionaryExpression()
+			if error:
+				return None, error
+
+			self.advance()
+
+			return expression, None
+
 		elif startToken.type == TokenTypes.IDENTIFIER:
 			self.advance()
 			
@@ -261,7 +270,7 @@ class Parser:
 
 		elif startToken.type == TokenTypes.NEW_LINE:
 			self.advance()
-			
+
 			return None, None
 
 		elif startToken.isKeyword("WHILE"):
@@ -510,6 +519,47 @@ class Parser:
 			return None, InvalidSyntaxError(f"Expected , or ], not {str(self.currentToken.type)}", self.currentToken.position.copy())
 
 		return ListNode(startPosition.createStartEndPosition(self.currentToken.position.end.copy()), expressions), None
+
+	def dictionaryExpression(self) -> tuple[WhileNode, Error]:
+		startPosition = self.currentToken.position.start.copy()
+
+		self.advance()
+
+		expressions = {}
+
+		if self.currentToken.type == TokenTypes.RIGHT_CURLY:
+			return DictionaryNode(startPosition.createStartEndPosition(self.currentToken.position.end), expressions), None
+
+		first = True
+		while self.currentToken.type == TokenTypes.COMMA or first:
+			if not first:
+				self.advance()
+
+			first = False
+
+			key, error = self.compExpression()
+			if error:
+				return None, error
+
+			if self.currentToken.type != TokenTypes.COLON:
+				return None, InvalidSyntaxError(f"Expected :, not {str(self.currentToken.type)}", self.currentToken.position.copy())
+
+			self.advance()
+
+			value, error = self.compExpression()
+			if error:
+				return None, error
+
+			expressions[key] = value
+
+		if self.currentToken.type != TokenTypes.RIGHT_CURLY:
+			return None, InvalidSyntaxError(f"Expected }}, not {str(self.currentToken.type)}", self.currentToken.position.copy())
+		
+		endPosition = self.currentToken.position.end.copy()
+
+		self.advance()
+
+		return DictionaryNode(startPosition.createStartEndPosition(endPosition), expressions), None
 
 	def whileExpression(self) -> tuple[WhileNode, Error]:
 		startPosition = self.currentToken.position.start.copy()

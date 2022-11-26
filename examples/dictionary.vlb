@@ -1,0 +1,9 @@
+CONST a = {1: 2, 3: 4}
+
+PRINT(a[1])
+
+a["abc"] = 123
+
+PRINT(a)
+
+PRINT(a[123])

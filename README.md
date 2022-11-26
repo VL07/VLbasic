@@ -2,7 +2,7 @@
 
 ## Roadmap
 
-- [ ] Types
+- [x] Types
   - [x] Number
   - [x] Sting
   - [x] Null
@@ -10,9 +10,9 @@
   - [x] List
     - [x] Set item
     - [x] Get item
-  - [ ] Dictionaries
-    - [ ] Set item
-    - [ ] Get item
+  - [x] Dictionaries
+    - [x] Set item
+    - [x] Get item
 - [ ] Controll flow
   - [x] If statements
     - [x] If

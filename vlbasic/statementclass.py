@@ -113,6 +113,14 @@ class ListNode:
 	def __repr__(self) -> str:
 		return f"LIST_NODE({str(self.expressions)})"
 
+class DictionaryNode:
+	def __init__(self, position: StartEndPosition, expressions: dict[ExpressionNode, ExpressionNode]) -> None:
+		self.position = position
+		self.expressions = expressions
+
+	def __repr__(self) -> str:
+		return f"DICTIONARY_NODE({str(self.expressions)})"
+
 class GetItemNode:
 	def __init__(self, position: StartEndPosition, variable: ExpressionNode, item: VariableAccessNode) -> None:
 		self.position = position

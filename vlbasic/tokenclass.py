@@ -29,8 +29,12 @@ class TokenTypes(Enum):
 	LEFT_SQUARE =		auto()
 	RIGHT_SQUARE =		auto()
 
+	LEFT_CURLY =		auto()
+	RIGHT_CURLY =		auto()
+
 	COMMA = 			auto()
 	DOT = 				auto()
+	COLON = 			auto()
 
 	INTEGER =			auto()
 	FLOAT = 			auto()
