@@ -26,7 +26,7 @@
   - [x] Elseif
   - [x] Else
 - [x] While loops
-- [ ] For loops
+- [x] For loops
 - [x] Break
 - [x] Continue
   
@@ -80,6 +80,7 @@
 
 - [ ] Built in
 - [x] Creatable
+- [ ] Python
 
 </details>
 

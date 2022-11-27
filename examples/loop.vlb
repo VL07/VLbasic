@@ -2,6 +2,9 @@ LET a = ["a", 2, "c"]
 LET item = 2
 
 FOR item IN a THEN
+	IF item == 2 THEN
+		BREAK
+	END
 	PRINT(item)
 END
 
