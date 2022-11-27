@@ -71,6 +71,7 @@
 <summary>Import</summary>
 
 - [x] Circular import detection
+- [x] Import as
 
 </details>
 
