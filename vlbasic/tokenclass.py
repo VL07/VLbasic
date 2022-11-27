@@ -41,6 +41,10 @@ class TokenTypes(Enum):
 	STRING =			auto()
 
 	EQUALS =			auto()
+	PLUS_EQUALS =		auto()
+	MINUS_EQUALS = 		auto()
+	MULTIPLY_EQUALS = 	auto()
+	DIVIDE_EQUALS = 	auto()
 
 	DOUBLE_EQUALS = 	auto()
 	NOT_EQUALS =		auto()

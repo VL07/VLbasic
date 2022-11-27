@@ -67,14 +67,15 @@ class VariableAccessNode:
 		return f"VARIABLE_ACCESS_NODE({str(self.token.value)})"
 		
 class VariableAssignNode:
-	def __init__(self, token: Token, valueNode: ExpressionNode) -> None:
+	def __init__(self, token: Token, valueNode: ExpressionNode, type_: str) -> None:
 		self.token = token
 		self.valueNode = valueNode
+		self.type = type_
 
 		self.position = self.token.position.start.createStartEndPosition(valueNode.position.end)
 
 	def __repr__(self) -> str:
-		return f"VARIABLE_ASSIGN_NODE({str(self.token.value)})"
+		return f"VARIABLE_ASSIGN_NODE({str(self.token.value)}, {self.type})"
 
 class VariableDeclareNode:
 	def __init__(self, token: Token, valueNode: ExpressionNode, declareToken: Token) -> None:

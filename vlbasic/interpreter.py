@@ -196,7 +196,41 @@ class Interpreter:
 		if error:
 			return None, error
 			
-		value, error = context.variableTable.assignVariable(node.token.value, result, node.position.copy())
+		assignTo = result
+		if node.type == "+=":
+			variableValue, error = context.variableTable.lookupVariable(node.token.value, node.token.position.copy())
+			if error:
+				return None, error
+
+			assignTo, error = variableValue.added(assignTo, node.position.copy())
+			if error:
+				return None, error
+		elif node.type == "-=":
+			variableValue, error = context.variableTable.lookupVariable(node.token.value, node.token.position.copy())
+			if error:
+				return None, error
+
+			assignTo, error = variableValue.subtracted(assignTo, node.position.copy())
+			if error:
+				return None, error
+		elif node.type == "*=":
+			variableValue, error = context.variableTable.lookupVariable(node.token.value, node.token.position.copy())
+			if error:
+				return None, error
+
+			assignTo, error = variableValue.multiplied(assignTo, node.position.copy())
+			if error:
+				return None, error
+		elif node.type == "/=":
+			variableValue, error = context.variableTable.lookupVariable(node.token.value, node.token.position.copy())
+			if error:
+				return None, error
+
+			assignTo, error = variableValue.divided(assignTo, node.position.copy())
+			if error:
+				return None, error
+			
+		value, error = context.variableTable.assignVariable(node.token.value, assignTo, node.position.copy())
 		if error:
 			return None, error
 

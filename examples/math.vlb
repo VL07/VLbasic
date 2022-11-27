@@ -4,3 +4,16 @@ PRINT(2 * 2)
 PRINT(2 / 2)
 PRINT(2 ^ 10)
 PRINT(2 % 10)
+
+LET a = 100
+a /= 10
+PRINT(a)
+
+a *= 99
+PRINT(a)
+
+a -= a
+PRINT(a)
+
+a += 10921
+PRINT(a)

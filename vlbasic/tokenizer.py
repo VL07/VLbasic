@@ -68,17 +68,17 @@ class Tokenizer:
 				token, error = self.makeString()
 				tokens.append(token)
 			elif self.currentCharacter == "+":
-				tokens.append(Token(TokenTypes.PLUS, self.position.asStartEndPosition()))
-				self.advance()
+				token, error = self.makePlusEquals()
+				tokens.append(token)
 			elif self.currentCharacter == "-":
-				tokens.append(Token(TokenTypes.MINUS, self.position.asStartEndPosition()))
-				self.advance()
+				token, error = self.makeMinusEquals()
+				tokens.append(token)
 			elif self.currentCharacter == "*":
-				tokens.append(Token(TokenTypes.MULTIPLY, self.position.asStartEndPosition()))
-				self.advance()
+				token, error = self.makeMultiplyEquals()
+				tokens.append(token)
 			elif self.currentCharacter == "/":
-				tokens.append(Token(TokenTypes.DIVIDE, self.position.asStartEndPosition()))
-				self.advance()
+				token, error = self.makeDivideEquals()
+				tokens.append(token)
 			elif self.currentCharacter == "^":
 				tokens.append(Token(TokenTypes.POWER, self.position.asStartEndPosition()))
 				self.advance()
@@ -142,6 +142,58 @@ class Tokenizer:
 		tokens.append(Token(TokenTypes.EOF, position.asStartEndPosition()))
 
 		return tokens, None
+
+	def makePlusEquals(self) -> tuple[Token | None, Error | None]:
+		startPosition = self.position.copy()
+
+		self.advance()
+
+		if self.currentCharacter == "=":
+			endPosition = self.position.copy()
+
+			self.advance()
+
+			return Token(TokenTypes.PLUS_EQUALS, startPosition.createStartEndPosition(endPosition)), None
+		return Token(TokenTypes.PLUS, startPosition.asStartEndPosition()), None
+
+	def makeMinusEquals(self) -> tuple[Token | None, Error | None]:
+		startPosition = self.position.copy()
+
+		self.advance()
+
+		if self.currentCharacter == "=":
+			endPosition = self.position.copy()
+
+			self.advance()
+
+			return Token(TokenTypes.MINUS_EQUALS, startPosition.createStartEndPosition(endPosition)), None
+		return Token(TokenTypes.MINUS, startPosition.asStartEndPosition()), None
+
+	def makeMultiplyEquals(self) -> tuple[Token | None, Error | None]:
+		startPosition = self.position.copy()
+
+		self.advance()
+
+		if self.currentCharacter == "=":
+			endPosition = self.position.copy()
+
+			self.advance()
+
+			return Token(TokenTypes.MULTIPLY_EQUALS, startPosition.createStartEndPosition(endPosition)), None
+		return Token(TokenTypes.MULTIPLY, startPosition.asStartEndPosition()), None
+
+	def makeDivideEquals(self) -> tuple[Token | None, Error | None]:
+		startPosition = self.position.copy()
+
+		self.advance()
+
+		if self.currentCharacter == "=":
+			endPosition = self.position.copy()
+
+			self.advance()
+
+			return Token(TokenTypes.DIVIDE_EQUALS, startPosition.createStartEndPosition(endPosition)), None
+		return Token(TokenTypes.DIVIDE, startPosition.asStartEndPosition()), None
 
 	def makeEquals(self) -> tuple[Token | None, Error | None]:
 		startPosition = self.position.copy()

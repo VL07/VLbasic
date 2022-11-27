@@ -111,17 +111,28 @@ class Parser:
 
 			return VariableDeclareNode(varName, expression, declareToken), None
 		
-		elif self.currentToken.type == TokenTypes.IDENTIFIER and self.getNextToken().type == TokenTypes.EQUALS:
+		elif self.currentToken.type == TokenTypes.IDENTIFIER and self.getNextToken().type in [TokenTypes.EQUALS, TokenTypes.PLUS_EQUALS, TokenTypes.MINUS_EQUALS, TokenTypes.MULTIPLY_EQUALS, TokenTypes.DIVIDE_EQUALS]:
 			varName = self.currentToken
 
 			self.advance()
+
+			assignType = "="
+			if self.currentToken.type == TokenTypes.PLUS_EQUALS:
+				assignType = "+="
+			elif self.currentToken.type == TokenTypes.MINUS_EQUALS:
+				assignType = "-="
+			elif self.currentToken.type == TokenTypes.MULTIPLY_EQUALS:
+				assignType = "*="
+			elif self.currentToken.type == TokenTypes.DIVIDE_EQUALS:
+				assignType = "/="
+
 			self.advance()
 
 			expression, error = self.expression()
 			if error:
 				return None, error
 
-			return VariableAssignNode(varName, expression), None
+			return VariableAssignNode(varName, expression, assignType), None
 
 		elif self.currentToken.isKeyword("RETURN"):
 			returnToken = self.currentToken

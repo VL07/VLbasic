@@ -18,8 +18,8 @@ WHILE a < 100 THEN
 		IF b > 10 THEN
 			BREAK
 		END
-		a = a + 1
-		b = b + 1
+		a += 1
+		b += 1
 	END
 	PRINT("BREAKED")
 END
