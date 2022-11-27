@@ -604,6 +604,50 @@ class BuiltInFunction(RuntimeValue):
 	def toString(self, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
 		return String(f"{self.name}()", position.copy(), self.context), None
 
+class PythonFunction(RuntimeValue):
+	def __init__(self, name: str, executeFunction: Callable[[list[RuntimeValue], Context, RTError], tuple[RuntimeValue, RTError]], position: StartEndPosition, context: Context, path: str, parameters: list[int, int]) -> None:
+		self.name = name
+		self.position = position
+		self.context = context
+		self.executeFunction = executeFunction
+		self.value = "BUILT_IN_FUNCTION"
+		self.continueLoop = False
+		self.breakLoop = False
+		self.path = path
+		self.parameters = parameters
+
+	def execute(self, arguments: list[RuntimeValue], position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
+		executeContext = Context(self.name, self.context)
+
+		if len(arguments) < self.parameters[0] or len(arguments) > self.parameters[1]:
+			return None, RTError(f"Function {self.name} expected {str(self.parameters[0])} to {str(self.parameters[1])} arguments, not {str(len(arguments))}", position.copy(), self.context)
+
+		returnValue, error = self.executeFunction(arguments, executeContext, RTError)
+		if error:
+			error.position = position.copy()
+			error.context = self.context
+			return None, error
+		
+		return returnValue, None
+
+	def __repr__(self) -> str:
+		return f"PYTHON_FUNCTION({self.name})"
+
+	def equals(self, other: RuntimeValue, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
+		if isinstance(other, PythonFunction):
+			return Boolean(self == other, position.copy())
+
+		return super().equals(other, position)
+
+	def notEquals(self, other: RuntimeValue, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
+		if isinstance(other, PythonFunction):
+			return Boolean(self != other, position.copy())
+
+		return super().notEquals(other, position)
+
+	def toString(self, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
+		return String(f"{self.name}()", position.copy(), self.context), None
+
 class Function(RuntimeValue):
 	def __init__(self, name: str, arguments: list[str], body: list[ExpressionNode], position: StartEndPosition, anonymous: bool, context: Context) -> None:
 		self.name = name

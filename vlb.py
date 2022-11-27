@@ -4,11 +4,11 @@
 
 import sys
 import time
-from vlbasic.tokenizer import Tokenizer
-from vlbasic.parser import Parser
-from vlbasic.contextclass import Context, VariableTable
-from vlbasic.interpreter import Interpreter
-from vlbasic.utils import InterpretFile
+from vlbasic.vlbasic.tokenizer import Tokenizer
+from vlbasic.vlbasic.parser import Parser
+from vlbasic.vlbasic.contextclass import Context, VariableTable
+from vlbasic.vlbasic.interpreter import Interpreter
+from vlbasic.vlbasic.utils import InterpretFile
 
 ########################################
 #	COMMAND LINE TOOL

@@ -1,0 +1,5 @@
+IMPORT "testmodule" AS *
+
+PRINT(abc)
+
+PRINT(ADD(1, 2))

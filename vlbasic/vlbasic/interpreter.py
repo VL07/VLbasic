@@ -4,7 +4,7 @@
 
 from .statementclass import StatementNode, NumberNode, BinaryOperationNode, UnaryOperationNode, VariableAccessNode, VariableAssignNode, VariableDeclareNode, WhileNode, FunctionCallNode, StringNode, ListNode, GetItemNode, FunctionDefineNode, ReturnNode, IfContainerNode, SetItemNode, ImportNode, DictionaryNode, ContinueNode, BreakNode, ForNode
 from .contextclass import Context, VariableTable
-from .runtimevaluesclass import RuntimeValue, Number, Boolean, Null, BuiltInFunction, String, List, Function, Dictionary
+from .runtimevaluesclass import RuntimeValue, Number, Boolean, Null, BuiltInFunction, String, List, Function, Dictionary, PythonFunction
 from .tokenclass import TokenTypes
 from .error import RTError
 from .utils import StartEndPosition, Position, File, InterpretFile
@@ -12,6 +12,7 @@ from .builtInfunctions import funcPrint, funcToString, funcToNumber
 from .tokenizer import Tokenizer
 from .parser import Parser
 import os
+import importlib
 
 ########################################
 #	INTERPRETER
@@ -53,6 +54,85 @@ class Interpreter:
 		context.variableTable.declareVariable("STRING", BuiltInFunction("STRING", funcToString, position, context), True, position, True)
 		context.variableTable.declareVariable("NUMBER", BuiltInFunction("NUMBER", funcToNumber, position, context), True, position, True)
 
+	def convertValue(self, value: any, position: StartEndPosition, context: Context, path: str, variableName: str = "", data: dict = {}) -> tuple[RuntimeValue, RuntimeError]:
+		if isinstance(value, int) or isinstance(value, float):
+			return Number(value, position.copy(), context), None
+		elif isinstance(value, bool):
+			return Boolean(value, position.copy(), context), None
+		elif isinstance(value, str):
+			return String(value, position.copy(), context), None
+		elif isinstance(value, list):
+			convertedList = []
+			for item in value:
+				convertedItem, error = self.convertValue(item, position, context, path)
+				if error:
+					return None, error
+				
+				convertedList.append(convertedItem)
+
+			return List(convertedList, position.copy(), context), None
+		elif isinstance(value, dict):
+			convertedDict = {}
+			for key, value in value.items():
+				convertedKey, error = self.convertValue(key, position, context, path)
+				if error:
+					return None, error
+				
+				convertedValue, error = self.convertValue(key, position, context, path)
+				if error:
+					return None, error
+
+				convertedDict[convertedKey] = convertedValue
+
+			return Dictionary(convertedDict, position.copy(), context), None
+		elif callable(value):
+			parameters = [0, 999]
+
+			if not data:
+				return None, RTError("Cannot nest functions inside of dicts in python modules", position.copy(), context)
+
+			if "parameters" in data.keys():
+				parameters = data["parameters"]
+
+			return PythonFunction(variableName, value, position.copy(), context, path, parameters), None
+		else:
+			return None, RTError(f"Error while trying to import module {path}\nCannot convert {type(value)} to a runtime value", position.copy(), context)
+
+	def importPythonModule(self, path: str, context: Context, position: StartEndPosition, importAs: str) -> tuple[Null, RTError]:
+		try:
+			pyModule = importlib.import_module(".".join(path.replace("/", ".").split(".")[:-1]))
+		except Exception as error:
+			print(error)
+			return None, RTError(f"Error while trying to import module {path}", position.copy(), context)
+
+		try:
+			variables: dict[str, dict[str, any]] = pyModule.variables
+		except AttributeError:
+			return None, RTError(f"Module {path} dose not have a global variable variables", position.copy(), context)
+
+		variableDictionary = Dictionary({}, position.copy(), context)
+
+		for variableName, variableData in variables.items():
+			variable = variableData["value"]
+			
+			convertedValue, error = self.convertValue(variable, position, context, path, variableName, variableData)
+			if error:
+				return None, error
+
+			variableDictionary.value[String(variableName, position.copy(), context)] = convertedValue
+
+			if importAs == "*":
+				context.variableTable.declareVariable(variableName, convertedValue, variableData["constant"], position.copy(), False)
+
+		if not importAs:
+			importAs = path.split("/")[-1][:-3]
+
+		if importAs != "*":
+			context.variableTable.declareVariable(importAs, variableDictionary, True, position.copy(), False)
+
+		return Null(position.copy(), context), None
+
+
 	def importModule(self, moduleName: str, context: Context, position: StartEndPosition, importAs: str) -> tuple[Null, RTError]:
 		circularImport = self.interpretFile.findCircularImport(moduleName)
 		if circularImport:
@@ -61,12 +141,20 @@ class Interpreter:
 		path = None
 		if os.path.exists(os.path.join(os.path.dirname(self.interpretFile.filepath), "vlbasic/modules/", moduleName + ".vlb")):
 			path = os.path.join(os.path.dirname(self.interpretFile.filepath), "vlbasic/modules/", moduleName + ".vlb")
-		elif os.path.join(os.path.dirname(self.interpretFile.filepath), moduleName + ".vlb"):
+		elif os.path.exists(os.path.join(os.path.dirname(self.interpretFile.filepath), moduleName + ".vlb")):
 			path = os.path.join(os.path.dirname(self.interpretFile.filepath), moduleName + ".vlb")
+		elif os.path.exists(os.path.join(os.path.dirname(self.interpretFile.filepath), "vlbasic/modules/", moduleName + ".py")):
+			_, error = self.importPythonModule(os.path.join(os.path.dirname(self.interpretFile.filepath), "vlbasic/modules/", moduleName + ".py"), context, position, importAs)
+			if error:
+				return None, error
+
+			return Null(position.copy(), context), None
 
 		if not path:
 			return None, RTError(f"Module {moduleName} was not found ({os.path.join(os.path.dirname(self.interpretFile.filepath), moduleName + '.vlb')})", position.copy(), context)
 
+
+		print(path)
 		with open(path, "r") as f:
 			inputText = f.read()
 
@@ -391,6 +479,17 @@ class Interpreter:
 			returnValue, error = func.execute(argumentsVisited, node.position.copy())
 			if error:
 				return None, error
+
+		elif isinstance(func, PythonFunction):
+			returnValue, error = func.execute(argumentsVisited, node.position.copy())
+			if error:
+				return None, error
+			
+			returnValueConverted, error = self.convertValue(returnValue, func.position.copy(), context, func.path)
+			if error:
+				return None, error
+
+			return returnValueConverted, None
 
 		else:
 			returnValue, error = func.execute(argumentsVisited, node.position.copy())

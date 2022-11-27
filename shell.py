@@ -1,7 +1,18 @@
-from vlbasic.tokenizer import Tokenizer
-from vlbasic.parser import Parser
-from vlbasic.interpreter import Interpreter
-from vlbasic.contextclass import Context, VariableTable
+#      _                               _           _
+#   __| | ___ _ __  _ __ ___  ___ __ _| |_ ___  __| |
+#  / _` |/ _ \ '_ \| '__/ _ \/ __/ _` | __/ _ \/ _` |
+# | (_| |  __/ |_) | | |  __/ (_| (_| | ||  __/ (_| |
+#  \__,_|\___| .__/|_|  \___|\___\__,_|\__\___|\__,_|
+#            |_|
+
+######## DEPRECATED ########
+#    use vlb.py instead
+############################
+
+from vlbasic.vlbasic.tokenizer import Tokenizer
+from vlbasic.vlbasic.parser import Parser
+from vlbasic.vlbasic.interpreter import Interpreter
+from vlbasic.vlbasic.contextclass import Context, VariableTable
 
 v = VariableTable()
 
