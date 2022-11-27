@@ -7,3 +7,4 @@ a["abc"] = 123
 PRINT(a)
 
 PRINT("a" == "a")
+PRINT(a.abc)
