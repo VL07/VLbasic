@@ -1,0 +1,27 @@
+LET a = 0
+
+WHILE TRUE THEN
+	a = a + 1
+	IF a % 10 == 0 THEN
+		PRINT(a)
+	ELSEIF a > 1000 THEN
+		BREAK
+	END
+END
+
+a = 0
+LET b = 0
+
+WHILE a < 100 THEN
+	b = 0
+	WHILE TRUE THEN
+		IF b > 10 THEN
+			BREAK
+		END
+		a = a + 1
+		b = b + 1
+	END
+	PRINT("BREAKED")
+END
+
+PRINT(a)

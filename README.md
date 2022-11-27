@@ -27,8 +27,8 @@
   - [x] Else
 - [x] While loops
 - [ ] For loops
-- [ ] Break
-- [ ] Continue
+- [x] Break
+- [x] Continue
   
 </details>
 
@@ -50,6 +50,7 @@
 - [x] Access
 - [x] Set
 - [x] Constants
+- [ ] +=
 
 </details>
   

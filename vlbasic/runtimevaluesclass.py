@@ -18,9 +18,19 @@ class RuntimeValue:
 		self.value = value
 		self.position = position
 		self.context = context
+		self.continueLoop = False
+		self.breakLoop = False
 
 	def __repr__(self) -> str:
 		return f"RUNTIME_VALUE({self.value})"
+	
+	def setContinue(self, value: bool = True) -> RuntimeValue:
+		self.continueLoop = value
+		return self
+
+	def setBreak(self, value: bool = True) -> RuntimeValue:
+		self.breakLoop = value
+		return self
 
 	def added(self, to: RuntimeValue, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
 		return None, RTError(f"Unable to add {type(self).__name__} to {type(to).__name__}", position.copy(), self.context)
@@ -87,6 +97,8 @@ class Number(RuntimeValue):
 		self.value = value
 		self.position = position
 		self.context = context
+		self.continueLoop = False
+		self.breakLoop = False
 
 	def __repr__(self) -> str:
 		return f"NUMBER({self.value})"
@@ -215,6 +227,8 @@ class String(RuntimeValue):
 		self.value = value
 		self.position = position
 		self.context = context
+		self.continueLoop = False
+		self.breakLoop = False
 
 	def __repr__(self) -> str:
 		return f"STRING({self.value})" 
@@ -297,6 +311,8 @@ class Boolean(RuntimeValue):
 		self.value = value
 		self.position = position
 		self.context = context
+		self.continueLoop = False
+		self.breakLoop = False
 
 	def __repr__(self) -> str:
 		return f"BOOLEAN({self.value})"
@@ -357,6 +373,8 @@ class Null(RuntimeValue):
 		self.position = position
 		self.context = context
 		self.value = "NULL"
+		self.continueLoop = False
+		self.breakLoop = False
 
 	def __repr__(self) -> str:
 		return f"NULL()"
@@ -381,6 +399,8 @@ class List(RuntimeValue):
 		self.position = position
 		self.context = context
 		self.value = expressions
+		self.continueLoop = False
+		self.breakLoop = False
 
 	def __repr__(self) -> str:
 		return f"LIST({self.value})"
@@ -464,6 +484,8 @@ class Dictionary(RuntimeValue):
 		self.position = position
 		self.context = context
 		self.value = expressions
+		self.continueLoop = False
+		self.breakLoop = False
 
 	def __repr__(self) -> str:
 		return f"DICTIONARY({self.value})"
@@ -540,7 +562,6 @@ class Dictionary(RuntimeValue):
 	def getLength(self, position: StartEndPosition) -> tuple[Number, RTError]:
 		return Number(len(self.value), position.copy(), self.context), None
 
-
 class BuiltInFunction(RuntimeValue):
 	def __init__(self, name: str, executeFunction: Callable[[list[RuntimeValue], Context], tuple[RuntimeValue, RTError]], position: StartEndPosition, context: Context) -> None:
 		self.name = name
@@ -548,6 +569,8 @@ class BuiltInFunction(RuntimeValue):
 		self.context = context
 		self.executeFunction = executeFunction
 		self.value = "BUILT_IN_FUNCTION"
+		self.continueLoop = False
+		self.breakLoop = False
 
 	def execute(self, arguments: list[RuntimeValue], position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
 		executeContext = Context(self.name, self.context)
@@ -590,6 +613,8 @@ class Function(RuntimeValue):
 		self.context = context
 		self.value = "FUNCTION"
 		self.anonymous = anonymous
+		self.continueLoop = False
+		self.breakLoop = False
 
 	def __repr__(self) -> str:
 		return f"FUNCTION({self.name})"

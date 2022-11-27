@@ -159,6 +159,20 @@ class ReturnNode:
 	def __repr__(self) -> str:
 		return f"RETURN_NODE({str(self.value)})"
 
+class ContinueNode:
+	def __init__(self, position: StartEndPosition) -> None:
+		self.position = position
+
+	def __repr__(self) -> str:
+		return "CONTINUE_NODE()"
+
+class BreakNode:
+	def __init__(self, position: StartEndPosition) -> None:
+		self.position = position
+
+	def __repr__(self) -> str:
+		return "BREAK_NODE()"
+
 class IfNode:
 	def __init__(self, position: StartEndPosition, condition: ExpressionNode, body: list[ExpressionNode]) -> None:
 		self.condition = condition

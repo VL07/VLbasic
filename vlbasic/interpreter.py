@@ -2,7 +2,7 @@
 #	IMPORTS
 ########################################
 
-from .statementclass import StatementNode, NumberNode, BinaryOperationNode, UnaryOperationNode, VariableAccessNode, VariableAssignNode, VariableDeclareNode, WhileNode, FunctionCallNode, StringNode, ListNode, GetItemNode, FunctionDefineNode, ReturnNode, IfContainerNode, SetItemNode, ImportNode, DictionaryNode
+from .statementclass import StatementNode, NumberNode, BinaryOperationNode, UnaryOperationNode, VariableAccessNode, VariableAssignNode, VariableDeclareNode, WhileNode, FunctionCallNode, StringNode, ListNode, GetItemNode, FunctionDefineNode, ReturnNode, IfContainerNode, SetItemNode, ImportNode, DictionaryNode, ContinueNode, BreakNode
 from .contextclass import Context, VariableTable
 from .runtimevaluesclass import RuntimeValue, Number, Boolean, Null, BuiltInFunction, String, List, Function, Dictionary
 from .tokenclass import TokenTypes
@@ -105,23 +105,23 @@ class Interpreter:
 
 			context.variableTable.declareVariable(variableName, variable.value, variable.constant, position.copy(), False)
 
-		return None, None
+		return Null(position.copy(), context), None
 
-	def visit(self, statement: StatementNode, context: Context) -> tuple[RuntimeValue | Number, RTError]:
+	def visit(self, statement: StatementNode, context: Context, insideLoop: bool = False) -> tuple[RuntimeValue | Number, RTError]:
 		functionName = f"visit_{type(statement).__name__}"
 		func = getattr(self, functionName, self.visitFunctionNotFound)
-		return func(statement, context)
+		return func(statement, context, insideLoop)
 
-	def visitFunctionNotFound(self, statement: StatementNode, context: Context) -> None:
+	def visitFunctionNotFound(self, statement: StatementNode, context: Context, insideLoop: bool) -> None:
 		raise NotImplementedError(f"visit_{type(statement).__name__} is not implemented")
 
-	def visit_NumberNode(self, node: NumberNode, context: Context) -> tuple[Number, RTError]:
+	def visit_NumberNode(self, node: NumberNode, context: Context, insideLoop: bool) -> tuple[Number, RTError]:
 		return Number(node.token.value, node.position.copy(), context), None
 
-	def visit_StringNode(self, node: StringNode, context: Context) -> tuple[String, RTError]:
+	def visit_StringNode(self, node: StringNode, context: Context, insideLoop: bool) -> tuple[String, RTError]:
 		return String(node.token.value, node.position.copy(), context), None
 
-	def visit_BinaryOperationNode(self, node: BinaryOperationNode, context: Context) -> tuple[Number, RTError]:
+	def visit_BinaryOperationNode(self, node: BinaryOperationNode, context: Context, insideLoop: bool) -> tuple[Number, RTError]:
 		left, error = self.visit(node.left, context)
 		if error:
 			return None, error
@@ -164,7 +164,7 @@ class Interpreter:
 		
 		return result, None
 
-	def visit_UnaryOperationNode(self, node: UnaryOperationNode, context: Context) -> tuple[Number, RTError]:
+	def visit_UnaryOperationNode(self, node: UnaryOperationNode, context: Context, insideLoop: bool) -> tuple[Number, RTError]:
 		number, error = self.visit(node.expression, context)
 		if error:
 			return None, error
@@ -182,7 +182,7 @@ class Interpreter:
 
 		return number, None
 
-	def visit_VariableAccessNode(self, node: VariableAccessNode, context: Context) -> tuple[Number,  RTError]:
+	def visit_VariableAccessNode(self, node: VariableAccessNode, context: Context, insideLoop: bool) -> tuple[Number,  RTError]:
 		value, error = context.variableTable.lookupVariable(node.token.value, node.position.copy())
 		if error:
 			return None, error
@@ -191,7 +191,7 @@ class Interpreter:
 
 		return value, None
 
-	def visit_VariableAssignNode(self, node: VariableAssignNode, context: Context) -> tuple[Number,  RTError]:
+	def visit_VariableAssignNode(self, node: VariableAssignNode, context: Context, insideLoop: bool) -> tuple[Number,  RTError]:
 		result, error = self.visit(node.valueNode, context)
 		if error:
 			return None, error
@@ -202,7 +202,7 @@ class Interpreter:
 
 		return value, None
 
-	def visit_VariableDeclareNode(self, node: VariableDeclareNode, context: Context) -> tuple[Number,  RTError]:
+	def visit_VariableDeclareNode(self, node: VariableDeclareNode, context: Context, insideLoop: bool) -> tuple[Number,  RTError]:
 		isConstant = node.declareToken.isKeyword("CONST")
 
 		result, error = self.visit(node.valueNode, context)
@@ -215,7 +215,7 @@ class Interpreter:
 
 		return value, None
 	
-	def visit_WhileNode(self, node: WhileNode, context: Context) -> tuple[Number,  RTError]:
+	def visit_WhileNode(self, node: WhileNode, context: Context, insideLoop: bool) -> tuple[Number,  RTError]:
 		condition, error = self.visit(node.condition, context)
 		if error:
 			return None, error
@@ -225,10 +225,28 @@ class Interpreter:
 			return None, error
 
 		while conditionBoolean.value:
+			breakLoop = False
+			continueLoop = False
+
 			for statement in node.body:
-				statementVisited, error = self.visit(statement, context)
+				if isinstance(statement, ContinueNode):
+					continue
+				elif isinstance(statement, BreakNode):
+					break
+
+				statementVisited, error = self.visit(statement, context, True)
 				if error: 
 					return None, error
+
+				if statementVisited.breakLoop:
+					breakLoop = True
+					break
+				elif statementVisited.continueLoop:
+					continueLoop = True
+					break
+
+			if breakLoop:
+				break
 
 			condition, error = self.visit(node.condition, context)
 			if error:
@@ -238,9 +256,9 @@ class Interpreter:
 			if error:
 				return None, error
 
-		return None, None
+		return Null(node.position.copy(), context), None
 
-	def visit_FunctionCallNode(self, node: FunctionCallNode, context: Context) -> tuple[Number,  RTError]:
+	def visit_FunctionCallNode(self, node: FunctionCallNode, context: Context, insideLoop: bool) -> tuple[Number,  RTError]:
 		func, error = self.visit(node.func, context)
 		if error:
 			return None, error
@@ -291,7 +309,7 @@ class Interpreter:
 
 		return returnValue, None
 
-	def visit_ListNode(self, node: ListNode, context: Context) -> tuple[Number,  RTError]:
+	def visit_ListNode(self, node: ListNode, context: Context, insideLoop: bool) -> tuple[Number,  RTError]:
 		expressions = []
 
 		for expression in node.expressions:
@@ -303,7 +321,7 @@ class Interpreter:
 
 		return List(expressions, node.position.copy(), context), None
 		
-	def visit_GetItemNode(self, node: GetItemNode, context: Context) -> tuple[RuntimeValue,  RTError]:
+	def visit_GetItemNode(self, node: GetItemNode, context: Context, insideLoop: bool) -> tuple[RuntimeValue,  RTError]:
 		variable, error = self.visit(node.variable, context)
 		if error:
 			return None, error
@@ -316,7 +334,7 @@ class Interpreter:
 
 		return value, None
 
-	def visit_SetItemNode(self, node: SetItemNode, context: Context) -> tuple[None,  RTError]:
+	def visit_SetItemNode(self, node: SetItemNode, context: Context, insideLoop: bool) -> tuple[None,  RTError]:
 		variable, error = self.visit(node.variable, context)
 		if error:
 			return None, error
@@ -329,9 +347,9 @@ class Interpreter:
 		if error:
 			return None, error
 
-		return None, None
+		return Null(node.position.copy(), context), None
 
-	def visit_FunctionDefineNode(self, node: FunctionDefineNode, context: Context) -> tuple[Function,  RTError]:
+	def visit_FunctionDefineNode(self, node: FunctionDefineNode, context: Context, insideLoop: bool) -> tuple[Function,  RTError]:
 		func = Function(node.variable, node.arguments, node.body, node.position, node.anonymous, context)
 
 		if not node.anonymous:
@@ -342,7 +360,7 @@ class Interpreter:
 
 		return func, None
 
-	def visit_ReturnNode(self, node: ReturnNode, context: Context) -> tuple[RuntimeValue,  RTError]:
+	def visit_ReturnNode(self, node: ReturnNode, context: Context, insideLoop: bool) -> tuple[RuntimeValue,  RTError]:
 		if not self.isAFunction:
 			return None, RTError("RETURN can only be used inside of functions", node.position.copy(), context)
 
@@ -357,22 +375,27 @@ class Interpreter:
 		self.returnValue = Null(node.position.copy(), context)
 		return self.returnValue, None
 
-	def visit_IfContainerNode(self, node: IfContainerNode, context: Context) -> tuple[Null,  RTError]:
+	def visit_IfContainerNode(self, node: IfContainerNode, context: Context, insideLoop: bool) -> tuple[Null,  RTError]:
 		ifCondition, error = self.visit(node.ifNode.condition, context)
 		if error:
 			return None, error
 
-		ifConditionAsBoolean, error = ifCondition.toBoolean(node.ifNode.condition.position.copy(), context)
+		ifConditionAsBoolean, error = ifCondition.toBoolean(node.ifNode.condition.position.copy())
 		if error:
 			return None, error
 
 		if ifConditionAsBoolean.value:
 			for statement in node.ifNode.body:
-				statementVisited, error = self.visit(statement, context)
+				statementVisited, error = self.visit(statement, context, insideLoop)
 				if error:
 					return None, error
 
-			return Null(node.ifNode.position.copy()), None
+				if statementVisited.breakLoop:
+					return Null(node.ifNode.position.copy(), context).setBreak(), None
+				elif statementVisited.continueLoop:
+					return Null(node.ifNode.position.copy(), context).setContinue(), None
+
+			return Null(node.ifNode.position.copy(), context), None
 
 		for elseIfNode in node.elseIfNodes:
 			elseIfCondition, error = self.visit(elseIfNode.condition, context)
@@ -387,22 +410,32 @@ class Interpreter:
 				continue
 			
 			for statement in elseIfNode.body:
-				statementVisited, error = self.visit(statement, context)
+				statementVisited, error = self.visit(statement, context, insideLoop)
 				if error:
 					return None, error 
+
+				if statementVisited.breakLoop:
+					return Null(node.ifNode.position.copy(), context).setBreak(), None
+				elif statementVisited.continueLoop:
+					return Null(node.ifNode.position.copy(), context).setContinue(), None
 
 			return Null(elseIfNode.position.copy(), context), None
 
 		if node.elseNode:
 			for statement in node.elseNode.body:
-				statementVisited, error = self.visit(statement, context)
+				statementVisited, error = self.visit(statement, context, insideLoop)
 				if error:
-					return None, error 
+					return None, error
+				
+				if statementVisited.breakLoop:
+					return Null(node.ifNode.position.copy(), context).setBreak(), None
+				elif statementVisited.continueLoop:
+					return Null(node.ifNode.position.copy(), context).setContinue(), None
 
 			return Null(node.elseNode.position.copy(), context), None
 		return Null(node.position.copy(), context), None
 
-	def visit_ImportNode(self, node: ImportNode, context: Context) -> tuple[Null,  RTError]:
+	def visit_ImportNode(self, node: ImportNode, context: Context, insideLoop: bool) -> tuple[Null,  RTError]:
 		moduleName, error = self.visit(node.moduleName, context)
 		if error:
 			return None, error
@@ -416,7 +449,7 @@ class Interpreter:
 
 		return Null(node.position.copy(), context), None
 		
-	def visit_DictionaryNode(self, node: DictionaryNode, context: Context) -> tuple[Null,  RTError]:
+	def visit_DictionaryNode(self, node: DictionaryNode, context: Context, insideLoop: bool) -> tuple[Null,  RTError]:
 		valuesVisited = {}
 
 		for key, value in node.expressions.items():
@@ -432,4 +465,19 @@ class Interpreter:
 
 		return Dictionary(valuesVisited, node.position.copy(), context), None
 
+	def visit_BreakNode(self, node: DictionaryNode, context: Context, insideLoop: bool) -> tuple[Null,  RTError]:
+		if not insideLoop:
+			return None, RTError("BREAK can only be used inside of loops", node.position.copy(), context)
+
+		newNode = Null(node.position.copy(), context)
+		newNode.breakLoop = True
+		return newNode, None
+
+	def visit_ContinueNode(self, node: DictionaryNode, context: Context, insideLoop: bool) -> tuple[Null,  RTError]:
+		if not insideLoop:
+			return None, RTError("CONTINUE can only be used inside of loops", node.position.copy(), context)
+
+		newNode = Null(node.position.copy(), context)
+		newNode.continueLoop = True
+		return newNode, None
 			

@@ -10,5 +10,7 @@ KEYWORDS = [
 	"IF",
 	"ELSEIF",
 	"ELSE",
-	"IMPORT"
+	"IMPORT",
+	"CONTINUE",
+	"BREAK"
 ]
