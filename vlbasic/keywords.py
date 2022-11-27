@@ -12,5 +12,6 @@ KEYWORDS = [
 	"ELSE",
 	"IMPORT",
 	"CONTINUE",
-	"BREAK"
+	"BREAK",
+	"AS"
 ]

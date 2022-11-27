@@ -148,6 +148,7 @@ class Parser:
 
 			return ReturnNode(returnToken.position.start.createStartEndPosition(value.position.end), value), None
 
+
 		elif self.currentToken.isKeyword("CONTINUE"):
 			token = self.currentToken
 
@@ -170,8 +171,23 @@ class Parser:
 			importName, error = self.compExpression()
 			if error:
 				return None, error
-			
-			return ImportNode(startPosition.createStartEndPosition(importName.position.end), importName), None
+
+			if not self.currentToken.isKeyword("AS"):
+				return ImportNode(startPosition.createStartEndPosition(importName.position.end), importName, None), None
+
+			self.advance()
+
+			if self.currentToken.type not in [TokenTypes.IDENTIFIER, TokenTypes.MULTIPLY]:
+				return None, InvalidSyntaxError(f"Expected IDENTIFIER, not {str(self.currentToken.type)}", self.currentToken.position.copy())
+
+			asName = self.currentToken
+
+			if self.currentToken.type == TokenTypes.MULTIPLY:
+				self.currentToken.value = "*"
+
+			self.advance()
+
+			return ImportNode(startPosition.createStartEndPosition(asName.position.end), importName, asName.value), None
 
 		compExpression, error = self.binaryOperation(self.compExpression, (TokenTypes.PLUS, TokenTypes.MINUS))
 		if error:

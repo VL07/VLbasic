@@ -53,7 +53,7 @@ class Interpreter:
 		context.variableTable.declareVariable("STRING", BuiltInFunction("STRING", funcToString, position, context), True, position, True)
 		context.variableTable.declareVariable("NUMBER", BuiltInFunction("NUMBER", funcToNumber, position, context), True, position, True)
 
-	def importModule(self, moduleName: str, context: Context, position: StartEndPosition) -> tuple[Null, RTError]:
+	def importModule(self, moduleName: str, context: Context, position: StartEndPosition, importAs: str) -> tuple[Null, RTError]:
 		circularImport = self.interpretFile.findCircularImport(moduleName)
 		if circularImport:
 			return None, RTError(f"Circular import for {self.interpretFile.filepath}, while trying to import {moduleName}", position.copy(), context)
@@ -97,13 +97,24 @@ class Interpreter:
 			error.importStack.append(f"Error while trying to import module {moduleName}")
 			return None, error
 
+		variableDictionary = Dictionary({}, position.copy(), context)
+
 		for variableName in importFileContext.variableTable.variables.keys():
 			variable = importFileContext.variableTable.variables[variableName]
 
 			if variable.builtIn:
 				continue
 
-			context.variableTable.declareVariable(variableName, variable.value, variable.constant, position.copy(), False)
+			variableDictionary.value[String(variableName, variable.value.position.copy(), context)] = variable.value
+
+			if importAs == "*":
+				context.variableTable.declareVariable(variableName, variable.value, variable.constant, position.copy(), False)
+
+		if not importAs:
+			importAs = moduleName.split("/")[-1]
+
+		if importAs != "*":
+			context.variableTable.declareVariable(importAs, variableDictionary, True, position.copy(), False)
 
 		return Null(position.copy(), context), None
 
@@ -477,7 +488,7 @@ class Interpreter:
 		if not isinstance(moduleName, String):
 			return None, RTError(f"Module name must be a STRING, not {str(moduleName)}")
 
-		imported, error = self.importModule(moduleName.value, context, node.position.copy())
+		imported, error = self.importModule(moduleName.value, context, node.position.copy(), node.asName)
 		if error:
 			return None, error
 

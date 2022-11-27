@@ -194,9 +194,10 @@ class IfContainerNode:
 		return f"IF_CONTAINER_NODE({str(self.ifNode)}, {str(self.elseIfNodes)}, {str(self.elseNode)})"
 
 class ImportNode:
-	def __init__(self, position: StartEndPosition, moduleName: ExpressionNode) -> None:
+	def __init__(self, position: StartEndPosition, moduleName: ExpressionNode, asName: str) -> None:
 		self.position = position
 		self.moduleName = moduleName
+		self.asName = asName
 
 	def __repr__(self) -> str:
-		return f"IMPORT_NODE({self.moduleName})"
+		return f"IMPORT_NODE({self.moduleName}, {self.asName})"
