@@ -2,7 +2,7 @@
 #	IMPORTS
 ########################################
 
-from .statementclass import StatementNode, NumberNode, BinaryOperationNode, UnaryOperationNode, VariableAccessNode, VariableAssignNode, VariableDeclareNode, WhileNode, FunctionCallNode, StringNode, ListNode, GetItemNode, FunctionDefineNode, ReturnNode, IfContainerNode, SetItemNode, ImportNode, DictionaryNode, ContinueNode, BreakNode
+from .statementclass import StatementNode, NumberNode, BinaryOperationNode, UnaryOperationNode, VariableAccessNode, VariableAssignNode, VariableDeclareNode, WhileNode, FunctionCallNode, StringNode, ListNode, GetItemNode, FunctionDefineNode, ReturnNode, IfContainerNode, SetItemNode, ImportNode, DictionaryNode, ContinueNode, BreakNode, ForNode
 from .contextclass import Context, VariableTable
 from .runtimevaluesclass import RuntimeValue, Number, Boolean, Null, BuiltInFunction, String, List, Function, Dictionary
 from .tokenclass import TokenTypes
@@ -302,6 +302,52 @@ class Interpreter:
 				return None, error
 
 		return Null(node.position.copy(), context), None
+
+	def visit_ForNode(self, node: ForNode, context: Context, insideLoop: bool) -> tuple[Number,  RTError]:
+		iteratorVisited, error = self.visit(node.iterator, context)
+		if error:
+			return None, error
+
+		if not isinstance(iteratorVisited, List):
+			return None, RTError(f"Iterator inside of for loops can only be a list", node.iterator.position.copy(), context)
+
+		if node.item.value in context.variableTable.variables.keys():
+			variableAssigned, error = context.variableTable.assignVariable(node.item.value, Null(node.item.position.copy(), context), node.item.position.copy())
+			if error:
+				return None, error
+		else:
+			variableDeclared, error = context.variableTable.declareVariable(node.item.value, Null(node.item.position.copy(), context), False, node.item.position.copy())
+			if error:
+				return None, error
+
+		for item in iteratorVisited.value:
+			variableAssigned, error = context.variableTable.assignVariable(node.item.value, item, node.item.position.copy())
+
+			breakLoop = False
+			continueLoop = False
+
+			for statement in node.body:
+				if isinstance(statement, ContinueNode):
+					continue
+				elif isinstance(statement, BreakNode):
+					break
+
+				statementVisited, error = self.visit(statement, context, True)
+				if error: 
+					return None, error
+
+				if statementVisited.breakLoop:
+					breakLoop = True
+					break
+				elif statementVisited.continueLoop:
+					continueLoop = True
+					break
+
+			if breakLoop:
+				break
+
+		return Null(node.position.copy(), context), None
+
 
 	def visit_FunctionCallNode(self, node: FunctionCallNode, context: Context, insideLoop: bool) -> tuple[Number,  RTError]:
 		func, error = self.visit(node.func, context)

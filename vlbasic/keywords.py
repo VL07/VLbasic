@@ -13,5 +13,7 @@ KEYWORDS = [
 	"IMPORT",
 	"CONTINUE",
 	"BREAK",
-	"AS"
+	"AS",
+	"FOR",
+	"IN"
 ]

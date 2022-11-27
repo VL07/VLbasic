@@ -97,6 +97,16 @@ class WhileNode:
 	def __repr__(self) -> str:
 		return "WHILE_NODE()"
 
+class ForNode:
+	def __init__(self, position: StartEndPosition, item: Token, iterator: ExpressionNode, body: list[ExpressionNode]) -> None:
+		self.position = position
+		self.body = body
+		self.item = item
+		self.iterator = iterator
+
+	def __repr__(self) -> str:
+		return f"FOR_NODE({self.item}, {self.iterator})"
+
 class FunctionCallNode:
 	def __init__(self, position: StartEndPosition, func: VariableAccessNode, arguments: list[ExpressionNode]) -> None:
 		self.position = position

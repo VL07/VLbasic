@@ -1,4 +1,11 @@
-LET a = 0
+LET a = ["a", 2, "c"]
+LET item = 2
+
+FOR item IN a THEN
+	PRINT(item)
+END
+
+a = 0
 
 WHILE TRUE THEN
 	a = a + 1
@@ -23,5 +30,7 @@ WHILE a < 100 THEN
 	END
 	PRINT("BREAKED")
 END
+
+
 
 PRINT(a)

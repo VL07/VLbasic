@@ -4,7 +4,7 @@
 
 from .tokenclass import Token, TokenTypes
 from .error import Error, InvalidSyntaxError
-from .statementclass import StatementNode, ExpressionNode, BinaryOperationNode, UnaryOperationNode, NumberNode, VariableAccessNode, VariableDeclareNode, VariableAssignNode, WhileNode, FunctionCallNode, StringNode, ListNode, GetItemNode, FunctionDefineNode, ReturnNode, IfNode, IfContainerNode, SetItemNode, ImportNode, DictionaryNode, ContinueNode, BreakNode
+from .statementclass import StatementNode, ExpressionNode, BinaryOperationNode, UnaryOperationNode, NumberNode, VariableAccessNode, VariableDeclareNode, VariableAssignNode, WhileNode, FunctionCallNode, StringNode, ListNode, GetItemNode, FunctionDefineNode, ReturnNode, IfNode, IfContainerNode, SetItemNode, ImportNode, DictionaryNode, ContinueNode, BreakNode, ForNode
 
 ########################################
 #	PARSER
@@ -320,6 +320,12 @@ class Parser:
 				return None, error
 			return expression, None
 
+		elif startToken.isKeyword("FOR"):
+			expression, error = self.forExpression()
+			if error:
+				return None, error
+			return expression, None
+
 		elif startToken.isKeyword("FUNCTION"):
 			expression, error = self.functionDefinition()
 			if error:
@@ -601,6 +607,47 @@ class Parser:
 		self.advance()
 
 		return DictionaryNode(startPosition.createStartEndPosition(endPosition), expressions), None
+
+	def forExpression(self) -> tuple[ForNode, Error]:
+		startPosition = self.currentToken.position.start.copy()
+
+		self.advance()
+
+		if self.currentToken.type != TokenTypes.IDENTIFIER:
+			return None, InvalidSyntaxError(f"Expected identifier, not {str(self.currentToken.type)}", self.currentToken.position.copy())
+
+		item = self.currentToken
+
+		self.advance()
+
+		if not self.currentToken.isKeyword("IN"):
+			return None, InvalidSyntaxError(f"Expected keyword IN, not {str(self.currentToken.type)}", self.currentToken.position.copy())
+
+		self.advance()
+
+		iterator, error = self.compExpression()
+		if error:
+			return None, error
+
+		if not self.currentToken.isKeyword("THEN"):
+			return None, InvalidSyntaxError(f"Expected keyword THEN, not {str(self.currentToken.type)}", self.currentToken.position.copy())
+
+		self.advance()
+
+		if not self.currentToken.type == TokenTypes.NEW_LINE:
+			return None, InvalidSyntaxError(f"Expected new line, not {str(self.currentToken.type)}", self.currentToken.position.copy())
+
+		self.advance()
+
+		body, error = self.parseEnd()
+		if error:
+			return None, error
+
+		endPosition = self.currentToken.position.end.copy()
+
+		self.advance()
+
+		return ForNode(startPosition.createStartEndPosition(endPosition), item, iterator, body), None
 
 	def whileExpression(self) -> tuple[WhileNode, Error]:
 		startPosition = self.currentToken.position.start.copy()
