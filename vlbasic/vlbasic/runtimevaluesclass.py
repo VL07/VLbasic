@@ -394,6 +394,9 @@ class Null(RuntimeValue):
 	def toString(self, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
 		return String("NULL" if self.value else "FALSE", position.copy(), self.context), None
 
+	def toBoolean(self, position: StartEndPosition) -> tuple[Boolean, RTError]:
+		return Boolean(False, position.copy(), self.context), None
+
 class List(RuntimeValue):
 	def __init__(self, expressions: list[RuntimeValue], position: StartEndPosition, context: Context) -> None:
 		self.position = position
@@ -479,6 +482,9 @@ class List(RuntimeValue):
 	def getLength(self, position: StartEndPosition) -> tuple[Number, RTError]:
 		return Number(len(self.value), position.copy(), self.context), None
 
+	def toBoolean(self, position: StartEndPosition) -> tuple[Boolean, RTError]:
+		return Boolean(False if len(self.value) == 0 else True, position.copy(), self.context), None
+
 class Dictionary(RuntimeValue):
 	def __init__(self, expressions: dict[RuntimeValue, RuntimeValue], position: StartEndPosition, context: Context) -> None:
 		self.position = position
@@ -561,6 +567,9 @@ class Dictionary(RuntimeValue):
 
 	def getLength(self, position: StartEndPosition) -> tuple[Number, RTError]:
 		return Number(len(self.value), position.copy(), self.context), None
+
+	def toBoolean(self, position: StartEndPosition) -> tuple[Boolean, RTError]:
+		return Boolean(False if len(self.value) == 0 else True, position.copy(), self.context), None
 
 class BuiltInFunction(RuntimeValue):
 	def __init__(self, name: str, executeFunction: Callable[[list[RuntimeValue], Context], tuple[RuntimeValue, RTError]], position: StartEndPosition, context: Context) -> None:

@@ -1,3 +1,7 @@
 IMPORT "list" AS *
 
 PRINT("FROM MAIN", STRING(a))
+
+IF a THEN
+	IMPORT "contribute"
+END

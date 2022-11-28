@@ -1,0 +1,3 @@
+PRINT("Well hello there!")
+PRINT("If you want to contribute to this project you can do so by clicking the link bellow")
+PRINT("https://github.com/VL07/VLbasic")
