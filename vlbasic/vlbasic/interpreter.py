@@ -141,14 +141,25 @@ class Interpreter:
 		path = None
 		if os.path.exists(os.path.join(os.path.dirname(self.interpretFile.filepath), "vlbasic/modules/", moduleName + ".vlb")):
 			path = os.path.join(os.path.dirname(self.interpretFile.filepath), "vlbasic/modules/", moduleName + ".vlb")
+		elif os.path.exists(os.path.join("vlbasic/modules/", moduleName + ".vlb")):
+			path = os.path.join("vlbasic/modules/", moduleName + ".vlb")
 		elif os.path.exists(os.path.join(os.path.dirname(self.interpretFile.filepath), moduleName + ".vlb")):
 			path = os.path.join(os.path.dirname(self.interpretFile.filepath), moduleName + ".vlb")
+		elif os.path.exists(moduleName + ".vlb"):
+			path = os.path.join(moduleName + ".vlb")
 		elif os.path.exists(os.path.join(os.path.dirname(self.interpretFile.filepath), "vlbasic/modules/", moduleName + ".py")):
 			_, error = self.importPythonModule(os.path.join(os.path.dirname(self.interpretFile.filepath), "vlbasic/modules/", moduleName + ".py"), context, position, importAs)
 			if error:
 				return None, error
 
 			return Null(position.copy(), context), None
+		elif os.path.exists(os.path.join("vlbasic/modules/", moduleName + ".py")):
+			_, error = self.importPythonModule(os.path.join("vlbasic/modules/", moduleName + ".py"), context, position, importAs)
+			if error:
+				return None, error
+
+			return Null(position.copy(), context), None
+
 
 		if not path:
 			return None, RTError(f"Module {moduleName} was not found ({os.path.join(os.path.dirname(self.interpretFile.filepath), moduleName + '.vlb')})", position.copy(), context)
