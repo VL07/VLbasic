@@ -18,6 +18,9 @@ class Tokenizer:
 		self.position = Position(-1, 1, -1, self.file)
 		self.currentCharacter = None
 
+		if not fileText:
+			self.file.text = " "
+
 		self.advance()
 
 	def getCharacterAtIndex(self, index: Optional[str] = None) -> str:
@@ -56,6 +59,9 @@ class Tokenizer:
 			if self.currentCharacter in ["\n", ";"]:
 				tokens.append(Token(TokenTypes.NEW_LINE, self.position.asStartEndPosition()))
 				self.advance()
+			elif self.currentCharacter == "#":
+				while self.currentCharacter and self.currentCharacter != "\n":
+					self.advance()
 			elif self.currentCharacter in [" ", "\t"]:
 				self.advance()
 			elif self.currentCharacter in NUMBERS:

@@ -1,0 +1,7 @@
+# THIS IS A COMMENT
+
+CONST notacomment = "abc" # A variable
+
+# ANOTHER COMMENT
+
+PRINT(notacomment)
