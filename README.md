@@ -78,9 +78,9 @@
 <details>
 <summary>Modules</summary>
 
-- [ ] Built in
+- [x] Built in
 - [x] Creatable
-- [ ] Python
+- [x] Python
 
 </details>
 
