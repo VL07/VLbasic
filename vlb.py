@@ -4,6 +4,8 @@
 
 import sys
 import time
+import os
+import glob
 from vlbasic.vlbasic.tokenizer import Tokenizer
 from vlbasic.vlbasic.parser import Parser
 from vlbasic.vlbasic.contextclass import Context, VariableTable
@@ -157,12 +159,16 @@ def main():
 		if "--debug" in arguments.keys():
 			debug = arguments["--debug"]
 			if debug not in ["stages", "all"]:
-				print(f"run parameter --debug only accepts stages, all as its value, not {debug}")
+				print(f"run parameter --debug only accepts stages, all as its value, not {debug}, use --help to get help")
 				return
 
 		measureTime = None
 		if "--time" in arguments.keys():
 			measureTime = True
+
+		if not os.path.exists(filename):
+			print(f"file not found, {filename}, use --help to get help")
+			return
 
 		print(f"Running {filename}...")
 		startTime = time.time()
@@ -174,8 +180,44 @@ def main():
 			print(f"Finished in {str(endTime - startTime)}s")
 		else:
 			print("Finished")
-			
 
+	elif action == "modules":
+		arguments, onlyUnnamedArgs, error = makeArguments(args[1:])
+		if error:
+			print(error, "use --help to get help")
+			return
+
+		modulesAction = None
+		if "--action" in arguments.keys():
+			modulesAction = arguments["--action"]
+		elif 0 in arguments.keys():
+			modulesAction = arguments[0]
+		else:
+			print("run missing required argument action, use --help to get help")
+			return
+
+		if modulesAction == "list":
+			if not os.path.isdir("./vlbasic/modules"):
+				print("modules folder not found(/vlbasic/modules)")
+				return
+
+			vlbFiles = glob.glob("./vlbasic/modules/*.vlb")
+			pyFiles = glob.glob("./vlbasic/modules/*.py")
+
+			outData = ""
+			
+			for file in vlbFiles:
+				outData += ".".join(os.path.basename(file).split(".")[:-1]) + "\n"
+
+			for file in pyFiles:
+				outData += ".".join(os.path.basename(file).split(".")[:-1]) + "(py)\n"
+
+			print("Currently installed modules: \n" + outData[:-1])
+
+		else:
+			print(f"argument action is invalid, expected list, not {modulesAction}")
+			return
+			
 	elif action == "--help":
 		print(helpText)
 
