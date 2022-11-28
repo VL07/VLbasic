@@ -89,7 +89,7 @@
 
 - [x] Help
 - [x] Run code
-- [ ] Create file with boilerplate code
+- [x] Create file with boilerplate code
 - [ ] Update CLI
 - [ ] Modules
   - [ ] Install

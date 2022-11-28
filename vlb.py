@@ -217,6 +217,64 @@ def main():
 		else:
 			print(f"argument action is invalid, expected list, not {modulesAction}")
 			return
+
+	elif action == "add":
+		arguments, onlyUnnamedArgs, error = makeArguments(args[1:])
+		if error:
+			print(error, "use --help to get help")
+			return
+
+		template = "default"
+		if "--template" in arguments.keys():
+			template = arguments["--template"]
+		elif 0 in arguments.keys():
+			template = arguments[0]
+		else:
+			print("run missing required argument template, use --help to get help")
+			return
+
+		filename = None
+		if "--file" in arguments.keys():
+			filename = arguments["--file"]
+		elif 1 in arguments.keys():
+			filename = arguments[1]
+		else:
+			print("run missing required argument file, use --help to get help")
+			return
+
+		force = None
+		if "--force" in arguments.keys():
+			force = True
+
+		if not os.path.isdir("./vlbasic/templates"):
+			print("templates folder not found(/vlbasic/templates)")
+			return
+
+		templateFiles = glob.glob("./vlbasic/templates/*.vlb")
+		templateFilesKeys = list(map(lambda file : ".".join(os.path.basename(file).split(".")[:-1]), templateFiles))
+
+		templateFilesDict = {}
+
+		for index, key in enumerate(templateFilesKeys):
+			templateFilesDict[key] = templateFiles[index]
+
+		if template not in templateFilesDict.keys():
+			print("invalid template, use --help to get help")
+			return
+
+		if os.path.exists(filename) and not force:
+			print("a file at specified path already exists, use --force to overwrite file, use --help to get help")
+			return
+
+		templateText = None
+
+		with open(templateFilesDict[template], "r") as file:
+			templateText = file.read()
+
+		with open(filename, "w") as file:
+			file.write(templateText)
+
+		print(f"successfully created template {template} at {filename}")
 			
 	elif action == "--help":
 		print(helpText)
