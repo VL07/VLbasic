@@ -1,0 +1,5 @@
+PRINT("abc\ndef")
+PRINT("abc\"def")
+PRINT("abc\rdef")
+PRINT("abc\tdef")
+PRINT("abc\bdef")

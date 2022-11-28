@@ -291,6 +291,33 @@ class Tokenizer:
 		if text in KEYWORDS:
 			return Token(TokenTypes.KEYWORD, startPosition.createStartEndPosition(self.position), text), None
 		return Token(TokenTypes.IDENTIFIER, startPosition.createStartEndPosition(self.position), text), None
+
+	def makeEscapeCharacter(self, startingQuote: str) -> tuple[str | None, Error | None]:
+		if not self.currentCharacter == "\\":
+			return None, ExpectedCharacterError(f"Expected character \\, not {self.currentCharacter}", self.position.copy())
+
+		self.advance()
+
+		escapeCharacter = None
+
+		if self.currentCharacter == "\\":
+			escapeCharacter = "\\"
+		elif self.currentCharacter == "n":
+			escapeCharacter = "\n"
+		elif self.currentCharacter == "r":
+			escapeCharacter = "\r"
+		elif self.currentCharacter == "t":
+			escapeCharacter = "\t"
+		elif self.currentCharacter == "b":
+			escapeCharacter = "\b"
+		elif self.currentCharacter == startingQuote:
+			escapeCharacter = startingQuote
+		else:
+			return None, ExpectedCharacterError(f"Expected escape a valid escape character, not {self.currentCharacter}", self.position.copy())
+
+		self.advance()
+		
+		return escapeCharacter, None
 	
 	def makeString(self) -> tuple[Token | None, Error | None]:
 		startPosition = self.position.copy()
@@ -300,8 +327,18 @@ class Tokenizer:
 		self.advance()
 
 		while self.currentCharacter and self.currentCharacter not in [startStringChar, "\n"]:
-			text += self.currentCharacter
-			self.advance()
+			escapeCharacter = None
+
+			if self.currentCharacter == "\\":
+				escapeCharacter, error = self.makeEscapeCharacter(startStringChar)
+				if error:
+					return None, error
+
+
+			text += escapeCharacter if escapeCharacter else self.currentCharacter
+
+			if not escapeCharacter:
+				self.advance()
 
 		if self.currentCharacter == startStringChar:
 			self.advance()
