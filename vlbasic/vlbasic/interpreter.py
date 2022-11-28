@@ -61,6 +61,8 @@ class Interpreter:
 			return Boolean(value, position.copy(), context), None
 		elif isinstance(value, str):
 			return String(value, position.copy(), context), None
+		elif value is None:
+			return Null(position.copy(), context), None
 		elif isinstance(value, list):
 			convertedList = []
 			for item in value:
