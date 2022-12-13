@@ -6,7 +6,7 @@
 - [ ] Swap operator
 - [ ] Updated default types
 - [ ] Add support for colors
-- [ ] Better errors
+- [x] Better errors
 - [ ] Docs?
 - [ ] Class?
 - [ ] Events?

@@ -4,7 +4,7 @@
 
 from .tokenclass import Token, TokenTypes
 from .error import Error, InvalidSyntaxError
-from .statementclass import StatementNode, ExpressionNode, BinaryOperationNode, UnaryOperationNode, NumberNode, VariableAccessNode, VariableDeclareNode, VariableAssignNode, WhileNode, FunctionCallNode, StringNode, ListNode, GetItemNode, FunctionDefineNode, ReturnNode, IfNode, IfContainerNode, SetItemNode, ImportNode, DictionaryNode, ContinueNode, BreakNode, ForNode
+from .statementclass import StatementNode, ExpressionNode, BinaryOperationNode, UnaryOperationNode, NumberNode, VariableAccessNode, VariableDeclareNode, VariableAssignNode, WhileNode, FunctionCallNode, StringNode, ListNode, GetItemNode, FunctionDefineNode, ReturnNode, IfNode, IfContainerNode, SetItemNode, ImportNode, DictionaryNode, ContinueNode, BreakNode, ForNode, RangeNode
 
 ########################################
 #	PARSER
@@ -552,6 +552,30 @@ class Parser:
 			return None, error
 
 		expressions.append(firstExpression)
+
+		if self.currentToken.type == TokenTypes.RIGHT_ARROW:
+			self.advance()
+
+			endExpression, error = self.compExpression()
+			if error:
+				return None, error
+
+			if self.currentToken.type != TokenTypes.RIGHT_ARROW:
+				if self.currentToken.type != TokenTypes.RIGHT_SQUARE:
+					return None, InvalidSyntaxError(f"Expected ], not {str(self.currentToken.type)}", self.currentToken.position.copy())
+
+				return RangeNode(startPosition.createStartEndPosition(self.currentToken.position.end), firstExpression, endExpression, NumberNode(Token(TokenTypes.INTEGER, self.currentToken.position.copy(), 1))), None
+
+			self.advance()
+
+			stepExpression, error = self.compExpression()
+			if error:
+				return None, error
+			
+			if self.currentToken.type != TokenTypes.RIGHT_SQUARE:
+				return None, InvalidSyntaxError(f"Expected ], not {str(self.currentToken.type)}", self.currentToken.position.copy())
+
+			return RangeNode(startPosition.createStartEndPosition(self.currentToken.position.end), firstExpression, endExpression, stepExpression), None
 		
 		while self.currentToken.type == TokenTypes.COMMA:
 			self.advance()

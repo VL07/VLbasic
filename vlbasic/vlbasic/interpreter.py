@@ -2,7 +2,7 @@
 #	IMPORTS
 ########################################
 
-from .statementclass import StatementNode, NumberNode, BinaryOperationNode, UnaryOperationNode, VariableAccessNode, VariableAssignNode, VariableDeclareNode, WhileNode, FunctionCallNode, StringNode, ListNode, GetItemNode, FunctionDefineNode, ReturnNode, IfContainerNode, SetItemNode, ImportNode, DictionaryNode, ContinueNode, BreakNode, ForNode
+from .statementclass import StatementNode, NumberNode, BinaryOperationNode, UnaryOperationNode, VariableAccessNode, VariableAssignNode, VariableDeclareNode, WhileNode, FunctionCallNode, StringNode, ListNode, GetItemNode, FunctionDefineNode, ReturnNode, IfContainerNode, SetItemNode, ImportNode, DictionaryNode, ContinueNode, BreakNode, ForNode, RangeNode
 from .contextclass import Context, VariableTable
 from .runtimevaluesclass import RuntimeValue, Number, Boolean, Null, BuiltInFunction, String, List, Function, Dictionary, PythonFunction
 from .tokenclass import TokenTypes
@@ -687,3 +687,29 @@ class Interpreter:
 		newNode.continueLoop = True
 		return newNode, None
 			
+	def visit_RangeNode(self, node: RangeNode, context: Context, insideLoop: bool) -> tuple[List,  RTError]:
+		startValue, error = self.visit(node.start, context)
+		if error:
+			return None, error
+
+		stopValue, error = self.visit(node.end, context)
+		if error:
+			return None, error
+
+		stepValue, error = self.visit(node.step, context)
+		if error:
+			return None, error
+		
+		if not isinstance(startValue, Number) or "." in str(startValue.value):
+			return None, ValueError_(["number(integer)"], startValue.__class__.__name__, startValue.position.copy(), context)
+		elif not isinstance(stopValue, Number) or "." in str(stopValue.value):
+			return None, ValueError_(["number(integer)"], stopValue.__class__.__name__, stopValue.position.copy(), context)
+		elif not isinstance(stepValue, Number) or "." in str(stepValue.value):
+			return None, ValueError_(["number(integer)"], stepValue.__class__.__name__, stepValue.position.copy(), context)
+
+		rangeAsRange = range(startValue.value, stopValue.value, stepValue.value)
+		
+		def toNumber(n: int):
+			return Number(n, node.position.copy(), context)
+
+		return List(list(map(toNumber, rangeAsRange)), node.position.copy(), context), None

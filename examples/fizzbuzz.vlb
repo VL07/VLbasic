@@ -1,0 +1,16 @@
+CONST fizzbuzz = {}
+
+FOR item IN [0->100] THEN
+	IF item % 15 == 0 THEN
+		PRINT("FizzBuzz")
+		fizzbuzz[item] = item
+	ELSEIF item % 5 == 0 THEN
+		PRINT("Fizz")
+	ELSEIF item % 3 == 0 THEN
+		PRINT("Buzz")
+	ELSE
+		PRINT(item)
+	END
+END
+
+PRINT(fizzbuzz)

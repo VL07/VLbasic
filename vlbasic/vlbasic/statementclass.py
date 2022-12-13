@@ -211,3 +211,13 @@ class ImportNode:
 
 	def __repr__(self) -> str:
 		return f"IMPORT_NODE({self.moduleName}, {self.asName})"
+
+class RangeNode:
+	def __init__(self, position: StartEndPosition, start: ExpressionNode, end: ExpressionNode, step: ExpressionNode) -> None:
+		self.position = position
+		self.start = start
+		self.end = end
+		self.step = step
+
+	def __repr__(self) -> str:
+		return f"RANGE_NODE({self.start}->{self.end}->{self.step})"
