@@ -2,6 +2,17 @@
 
 ## Roadmap
 
+- [ ] Ranges
+- [ ] Swap operator
+- [ ] Updated default types
+- [ ] Add support for colors
+- [ ] Docs?
+- [ ] Class?
+- [ ] Events?
+
+<details>
+<summary>V1</summary>
+
 <details>
 <summary>Types</summary>
 
@@ -107,5 +118,4 @@
 
 </details>
   
- 
-
+</details>
