@@ -5,7 +5,7 @@
 from __future__ import annotations
 from .utils import StartEndPosition, NUMBERS
 from .contextclass import Context, VariableTable
-from .error import RTError
+from .error import RTError, DivisionByZeroError, RangeError, KeyError_, ArgumentError
 from typing import Callable
 from .statementclass import ExpressionNode
 
@@ -33,22 +33,22 @@ class RuntimeValue:
 		return self
 
 	def added(self, to: RuntimeValue, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
-		return None, RTError(f"Unable to add {type(self).__name__} to {type(to).__name__}", position.copy(), self.context)
+		return None, RTError(f"Unable to add {type(self).__name__} to {type(to).__name__}", position.copy(), self.context, "ValueError")
 
 	def subtracted(self, by: RuntimeValue, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
-		return None, RTError(f"Unable to subtract {type(self).__name__} by {type(by).__name__}", position.copy(), self.context)
+		return None, RTError(f"Unable to subtract {type(self).__name__} by {type(by).__name__}", position.copy(), self.context, "ValueError")
 
 	def multiplied(self, by: RuntimeValue, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
-		return None, RTError(f"Unable to multiply {type(self).__name__} by {type(by).__name__}", position.copy(), self.context)
+		return None, RTError(f"Unable to multiply {type(self).__name__} by {type(by).__name__}", position.copy(), self.context, "ValueError")
 
 	def divided(self, by: RuntimeValue, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
-		return None, RTError(f"Unable to divide {type(self).__name__} by {type(by).__name__}", position.copy(), self.context)
+		return None, RTError(f"Unable to divide {type(self).__name__} by {type(by).__name__}", position.copy(), self.context, "ValueError")
 
 	def power(self, by: RuntimeValue, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
-		return None, RTError(f"Unable to power {type(self).__name__} by {type(by).__name__}", position.copy(), self.context)
+		return None, RTError(f"Unable to power {type(self).__name__} by {type(by).__name__}", position.copy(), self.context, "ValueError")
 
 	def modulus(self, by: RuntimeValue, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
-		return None, RTError(f"Unable to modulus {type(self).__name__} by {type(by).__name__}", position.copy(), self.context)
+		return None, RTError(f"Unable to modulus {type(self).__name__} by {type(by).__name__}", position.copy(), self.context, "ValueError")
 
 	def equals(self, other: RuntimeValue, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
 		return Boolean(False, position.copy(), self.context), None
@@ -57,40 +57,40 @@ class RuntimeValue:
 		return Boolean(True, position.copy(), self.context), None
 
 	def graterThan(self, other: RuntimeValue, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
-		return None, RTError(f"Unable to compare size between {type(self).__name__} and {type(other).__name__}", position.copy(), self.context)
+		return None, RTError(f"Unable to compare size between {type(self).__name__} and {type(other).__name__}", position.copy(), self.context, "ValueError")
 
 	def lessThan(self, other: RuntimeValue, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
-		return None, RTError(f"Unable to compare size between {type(self).__name__} and {type(other).__name__}", position.copy(), self.context)
+		return None, RTError(f"Unable to compare size between {type(self).__name__} and {type(other).__name__}", position.copy(), self.context, "ValueError")
 
 	def graterThanEquals(self, other: RuntimeValue, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
-		return None, RTError(f"Unable to compare size between {type(self).__name__} and {type(other).__name__}", position.copy(), self.context)
+		return None, RTError(f"Unable to compare size between {type(self).__name__} and {type(other).__name__}", position.copy(), self.context, "ValueError")
 
 	def lessThanEquals(self, other: RuntimeValue, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
-		return None, RTError(f"Unable to compare size between {type(self).__name__} and {type(other).__name__}", position.copy(), self.context)
+		return None, RTError(f"Unable to compare size between {type(self).__name__} and {type(other).__name__}", position.copy(), self.context, "ValueError")
 
 	def notted(self, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
-		return None, RTError(f"Unable to invert {type(self).__name__}", position.copy(), self.context)
+		return None, RTError(f"Unable to invert {type(self).__name__}", position.copy(), self.context, "ValueError")
 
 	def toBoolean(self, position: StartEndPosition) -> tuple[Boolean, RTError]:
-		return None, RTError(f"Unable to convert a {type(self).__name__} by a Boolean", position.copy(), self.context)
+		return None, RTError(f"Unable to convert a {type(self).__name__} by a Boolean", position.copy(), self.context, "ValueError")
 
 	def toString(self, position: StartEndPosition) -> tuple[String, RTError]:
-		return None, RTError(f"Unable to convert a {type(self).__name__} by a String", position.copy(), self.context)
+		return None, RTError(f"Unable to convert a {type(self).__name__} by a String", position.copy(), self.context, "ValueError")
 
 	def toNumber(self, position: StartEndPosition) -> tuple[Number, RTError]:
-		return None, RTError(f"Unable to convert a {type(self).__name__} by a Number", position.copy(), self.context)
+		return None, RTError(f"Unable to convert a {type(self).__name__} by a Number", position.copy(), self.context, "ValueError")
 
 	def execute(self, arguments: list[RuntimeValue], position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
-		return None, RTError(f"Unable to call a {type(self).__name__}", position.copy(), self.context)
+		return None, RTError(f"Unable to call a {type(self).__name__}", position.copy(), self.context, "ValueError")
 
 	def getItem(self, item: RuntimeValue, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
-		return None, RTError(f"Unable to get item {str(item)} of {type(self).__name__}", position.copy(), self.context)
+		return None, RTError(f"Unable to get item {str(item)} of {type(self).__name__}", position.copy(), self.context, "ValueError")
 
 	def setItem(self, item: RuntimeValue, value: RuntimeValue, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
-		return None, RTError(f"Unable to set item {str(item)} of {type(self).__name__} to {str(value)}", position.copy(), self.context)
+		return None, RTError(f"Unable to set item {str(item)} of {type(self).__name__} to {str(value)}", position.copy(), self.context, "ValueError")
 
 	def getLength(self, position: StartEndPosition) -> tuple[Number, RTError]:
-		return None, RTError(f"Unable to get length of a {type(self).__name__}", position.copy(), self.context)
+		return None, RTError(f"Unable to get length of a {type(self).__name__}", position.copy(), self.context, "ValueError")
 
 class Number(RuntimeValue):
 	def __init__(self, value: int | float, position: StartEndPosition, context: Context) -> None:
@@ -132,12 +132,12 @@ class Number(RuntimeValue):
 	def divided(self, by: Number | RuntimeValue, position: StartEndPosition) -> tuple[Number, RTError]:
 		if isinstance(by, Number):
 			if by.value == 0:
-				return None, RTError("Cannot divide by zero", position, self.context)
+				return None, DivisionByZeroError(position, self.context)
 
 			return Number(self.value / by.value, position.copy(), self.context), None
 		elif isinstance(bool, Boolean):
 			if not by.value:
-				return None, RTError("Cannot divide by zero", position.copy(), self.context)
+				return None, DivisionByZeroError(position.copy(), self.context)
 			return Number(self.value - (1 if by.value else 0), position.copy(), self.context), None
 		
 		return super().divided(by, position)
@@ -281,7 +281,7 @@ class String(RuntimeValue):
 				return None, error
 
 			if item.value + 1 > length.value:
-				return None, RTError("String is out of range", position.copy(), self.context)
+				return None, RangeError("string", position.copy(), self.context)
 
 			return String(self.value[item.value], position.copy(), self.context), None
 
@@ -300,7 +300,7 @@ class String(RuntimeValue):
 				dots += 1
 				continue
 
-			return None, RTError("Unable to convert this String, to a number", position.copy(), self.context)
+			return None, RTError("Unable to convert this String, to a number", position.copy(), self.context, "ValueError")
 
 		if not dots:
 			return Number(int(self.value), position.copy(), self.context), None
@@ -338,7 +338,7 @@ class Boolean(RuntimeValue):
 	def divided(self, by: Number | RuntimeValue, position: StartEndPosition) -> tuple[Number, RTError]:
 		if isinstance(by, Number):
 			if by.value == 0:
-				return None, RTError("Cannot divide by zero", position.copy(), self.context)
+				return None, DivisionByZeroError(position.copy(), self.context)
 
 			return Number((1 if self.value else 0) / by.value, position.copy(), self.context), None
 		
@@ -458,7 +458,7 @@ class List(RuntimeValue):
 				return None, error
 
 			if item.value + 1 > length.value or item.value < 0:
-				return None, RTError("List is out of range", position.copy(), self.context)
+				return None, RangeError("list", position.copy(), self.context)
 
 			return self.value[item.value], None
 
@@ -471,7 +471,7 @@ class List(RuntimeValue):
 				return None, error
 
 			if item.value + 1 > length.value or item.value < 0:
-				return None, RTError("List is out of range", position.copy(), self.context)
+				return None, RangeError("list", position.copy(), self.context)
 
 			self.value[item.value] = value
 
@@ -558,7 +558,7 @@ class Dictionary(RuntimeValue):
 			if equals.value:
 				return self.value[key], None
 
-		return None, RTError(f"Invalid key {item}", position.copy(), self.context)
+		return None, KeyError_(item.value,  position.copy(), self.context)
 
 	def setItem(self, item: RuntimeValue, value: RuntimeValue, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
 		self.value[item] = value
@@ -629,7 +629,7 @@ class PythonFunction(RuntimeValue):
 		executeContext = Context(self.name, self.context)
 
 		if len(arguments) < self.parameters[0] or len(arguments) > self.parameters[1]:
-			return None, RTError(f"Function {self.name} expected {str(self.parameters[0])} to {str(self.parameters[1])} arguments, not {str(len(arguments))}", position.copy(), self.context)
+			return None, RTError(f"Function {self.name} expected {str(self.parameters[0])} to {str(self.parameters[1])} arguments, not {str(len(arguments))}", position.copy(), self.context, "ArgumentError")
 
 		returnValue, error = self.executeFunction(arguments, executeContext, RTError)
 		if error:

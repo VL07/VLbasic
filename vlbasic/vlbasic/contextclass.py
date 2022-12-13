@@ -3,7 +3,7 @@
 ########################################
 
 from __future__ import annotations
-from .error import RTError, Error
+from .error import RTError, Error, VariableDeclarationError, VariableConstantAssignmentError, VariableNotDefinedError
 from .utils import StartEndPosition
 
 ########################################
@@ -28,7 +28,7 @@ class VariableTable:
 	
 	def declareVariable(self, key: str, value: any, constant: bool, position: StartEndPosition, builtIn: bool = False) -> tuple[any, Error]:
 		if key in self.variables.keys():
-			return None, RTError(f"Variable {key} is already declared", position.copy(), self.context)
+			return None, VariableDeclarationError(key, position.copy(), self.context)
 
 		self.variables[key] = Variable(value, constant, builtIn)
 
@@ -43,7 +43,7 @@ class VariableTable:
 
 		variable = environment.variables[key]
 		if variable.constant:
-			return None, RTError(f"Variable {key} is a constant, and can therefor not be assigned to", position.copy(), self.context)
+			return None, VariableConstantAssignmentError(key, position.copy(), self.context)
 
 		variable.value = value
 
@@ -61,7 +61,7 @@ class VariableTable:
 			return self, None
 
 		if not self.parent:
-			return None, RTError(f"Variable {key} is not defined", position.copy(), self.context)
+			return None, VariableNotDefinedError(key, position.copy(), self.context)
 
 		parentResolve, error = self.parent.resolve(key, position)
 		if error:

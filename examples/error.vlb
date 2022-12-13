@@ -1,0 +1,5 @@
+FUNCTION a(a, b, c)
+	PRINT(a, b, "a"[c])
+END
+
+a(1, 2, 3)

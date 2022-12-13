@@ -6,7 +6,7 @@ from .statementclass import StatementNode, NumberNode, BinaryOperationNode, Unar
 from .contextclass import Context, VariableTable
 from .runtimevaluesclass import RuntimeValue, Number, Boolean, Null, BuiltInFunction, String, List, Function, Dictionary, PythonFunction
 from .tokenclass import TokenTypes
-from .error import RTError
+from .error import RTError, CircularImportError, InvalidIteratorError, ArgumentError, ReturnOutsideFunctionError, ContinueOutsideLoopError, BreakOutsideLoopError, ValueError_
 from .utils import StartEndPosition, Position, File, InterpretFile
 from .builtInfunctions import funcPrint, funcToString, funcToNumber
 from .tokenizer import Tokenizer
@@ -138,7 +138,7 @@ class Interpreter:
 	def importModule(self, moduleName: str, context: Context, position: StartEndPosition, importAs: str) -> tuple[Null, RTError]:
 		circularImport = self.interpretFile.findCircularImport(moduleName)
 		if circularImport:
-			return None, RTError(f"Circular import for {self.interpretFile.filepath}, while trying to import {moduleName}", position.copy(), context)
+			return None, CircularImportError(self.interpretFile.filepath, moduleName, position.copy(), context)
 
 		path = None
 		if os.path.exists(os.path.join(os.path.dirname(self.interpretFile.filepath), "vlbasic/modules/", moduleName + ".vlb")):
@@ -269,7 +269,7 @@ class Interpreter:
 		elif node.operationToken.type == TokenTypes.LESS_EQUALS:
 			result, error = left.lessThanEquals(right, position)
 		else:
-			return None, RTError(f"Expected operation token, not {node.operationToken}", node.operationToken.position.copy(), context)
+			raise f"{node.operationToken.type} is not implemented!"
 
 		if error:
 			return None, error
@@ -290,7 +290,7 @@ class Interpreter:
 		elif node.operationToken.isKeyword("NOT"):
 			number, error = number.notted(position)
 		else:
-			return None, RTError(f"Expected operation token, not {node.operationToken}", number.position, context)
+			raise f"{node.operationToken.type} is not implemented!"
 
 		return number, None
 
@@ -410,7 +410,7 @@ class Interpreter:
 			return None, error
 
 		if not isinstance(iteratorVisited, List):
-			return None, RTError(f"Iterator inside of for loops can only be a list", node.iterator.position.copy(), context)
+			return None, InvalidIteratorError(node.iterator.position.copy(), context)
 
 		if node.item.value in context.variableTable.variables.keys():
 			variableAssigned, error = context.variableTable.assignVariable(node.item.value, Null(node.item.position.copy(), context), node.item.position.copy())
@@ -467,7 +467,7 @@ class Interpreter:
 		
 		if isinstance(func, Function):
 			if len(func.arguments) != len(node.arguments):
-				return None, RTError(f"FUNCTION {func.name} expected {str(len(func.arguments))}, not {str(len(node.arguments))} arguments", node.position.copy(), context)
+				return None, ArgumentError(len(func.arguments), len(node.arguments), func.name, node.position.copy(), context)
 
 			executeContext = Context(f"<FUNCTION {func.name}>", func.context)
 			executeContext.setVariableTable(VariableTable())
@@ -483,6 +483,9 @@ class Interpreter:
 				return None, error
 
 			returnValue = interpreter.returnValue
+
+			if not returnValue:
+				returnValue = Null(node.position.copy(), context)
 
 			returnValue.position = node.position.copy()
 
@@ -565,7 +568,7 @@ class Interpreter:
 
 	def visit_ReturnNode(self, node: ReturnNode, context: Context, insideLoop: bool) -> tuple[RuntimeValue,  RTError]:
 		if not self.isAFunction:
-			return None, RTError("RETURN can only be used inside of functions", node.position.copy(), context)
+			return None, ReturnOutsideFunctionError(node.position.copy(), context)
 
 		if node.value:
 			value, error = self.visit(node.value, context)
@@ -644,7 +647,7 @@ class Interpreter:
 			return None, error
 
 		if not isinstance(moduleName, String):
-			return None, RTError(f"Module name must be a STRING, not {str(moduleName)}")
+			return None, ValueError_(["string"], moduleName.__class__.__name__, moduleName.position.copy(), context)
 
 		imported, error = self.importModule(moduleName.value, context, node.position.copy(), node.asName)
 		if error:
@@ -670,7 +673,7 @@ class Interpreter:
 
 	def visit_BreakNode(self, node: DictionaryNode, context: Context, insideLoop: bool) -> tuple[Null,  RTError]:
 		if not insideLoop:
-			return None, RTError("BREAK can only be used inside of loops", node.position.copy(), context)
+			return None, BreakOutsideLoopError(node.position.copy(), context)
 
 		newNode = Null(node.position.copy(), context)
 		newNode.breakLoop = True
@@ -678,7 +681,7 @@ class Interpreter:
 
 	def visit_ContinueNode(self, node: DictionaryNode, context: Context, insideLoop: bool) -> tuple[Null,  RTError]:
 		if not insideLoop:
-			return None, RTError("CONTINUE can only be used inside of loops", node.position.copy(), context)
+			return None, ContinueOutsideLoopError(node.position.copy(), context)
 
 		newNode = Null(node.position.copy(), context)
 		newNode.continueLoop = True
