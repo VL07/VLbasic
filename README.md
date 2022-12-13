@@ -2,7 +2,7 @@
 
 ## Roadmap
 
-- [ ] Ranges
+- [x] Ranges
 - [ ] Swap operator
 - [ ] Updated default types
 - [ ] Add support for colors
