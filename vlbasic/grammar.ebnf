@@ -1,3 +1,5 @@
+(* DEPRICATED *)
+
 <statements> 				= NEWLINE* <statement> (NEWLINE* <statement>)* NEWLINE*;
 
 <statement>					= KEYWORD:RETURN 
