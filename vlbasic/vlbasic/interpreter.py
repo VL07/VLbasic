@@ -2,7 +2,7 @@
 #	IMPORTS
 ########################################
 
-from .statementclass import StatementNode, NumberNode, BinaryOperationNode, UnaryOperationNode, VariableAccessNode, VariableAssignNode, VariableDeclareNode, WhileNode, FunctionCallNode, StringNode, ListNode, GetItemNode, FunctionDefineNode, ReturnNode, IfContainerNode, SetItemNode, ImportNode, DictionaryNode, ContinueNode, BreakNode, ForNode, RangeNode
+from .statementclass import StatementNode, NumberNode, BinaryOperationNode, UnaryOperationNode, VariableAccessNode, VariableAssignNode, VariableDeclareNode, WhileNode, FunctionCallNode, StringNode, ListNode, GetItemNode, FunctionDefineNode, ReturnNode, IfContainerNode, SetItemNode, ImportNode, DictionaryNode, ContinueNode, BreakNode, ForNode, RangeNode, GetAttributeNode
 from .contextclass import Context, VariableTable
 from .runtimevaluesclass import RuntimeValue, Number, Boolean, Null, BuiltInFunction, String, List, Function, Dictionary, PythonFunction
 from .tokenclass import TokenTypes
@@ -535,6 +535,19 @@ class Interpreter:
 		item, error = self.visit(node.item, context)
 
 		value, error = variable.getItem(item, node.position.copy())
+		if error:
+			return None, error
+
+		return value, None
+
+	def visit_GetAttributeNode(self, node: GetAttributeNode, context: Context, insideLoop: bool) -> tuple[RuntimeValue,  RTError]:
+		variable, error = self.visit(node.variable, context)
+		if error:
+			return None, error
+
+		item, error = self.visit(node.item, context)
+
+		value, error = variable.getAttribute(item, node.position.copy())
 		if error:
 			return None, error
 

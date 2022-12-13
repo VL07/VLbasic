@@ -4,7 +4,7 @@
 
 from .tokenclass import Token, TokenTypes
 from .error import Error, InvalidSyntaxError
-from .statementclass import StatementNode, ExpressionNode, BinaryOperationNode, UnaryOperationNode, NumberNode, VariableAccessNode, VariableDeclareNode, VariableAssignNode, WhileNode, FunctionCallNode, StringNode, ListNode, GetItemNode, FunctionDefineNode, ReturnNode, IfNode, IfContainerNode, SetItemNode, ImportNode, DictionaryNode, ContinueNode, BreakNode, ForNode, RangeNode
+from .statementclass import StatementNode, ExpressionNode, BinaryOperationNode, UnaryOperationNode, NumberNode, VariableAccessNode, VariableDeclareNode, VariableAssignNode, WhileNode, FunctionCallNode, StringNode, ListNode, GetItemNode, FunctionDefineNode, ReturnNode, IfNode, IfContainerNode, SetItemNode, ImportNode, DictionaryNode, ContinueNode, BreakNode, ForNode, RangeNode, GetAttributeNode
 
 ########################################
 #	PARSER
@@ -535,7 +535,7 @@ class Parser:
 
 			self.advance()
 
-			return GetItemNode(startPosition.createStartEndPosition(index.position.end), base, index), None
+			return GetAttributeNode(startPosition.createStartEndPosition(index.position.end), base, index), None
 
 	def listExpression(self) -> tuple[ListNode, Error]:
 		startPosition = self.currentToken.position.start.copy()
