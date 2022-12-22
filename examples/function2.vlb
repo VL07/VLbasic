@@ -1,7 +1,7 @@
-FUNCTION add(a, b)
-	RETURN a + b
-END
+function add(a, b)
+	return a + b
+end
 
-PRINT(add(1, 2))
-PRINT(add(10, 10))
-PRINT(add("Hello ", "World!"))
+print(add(1, 2))
+print(add(10, 10))
+print(add("Hello ", "World!"))

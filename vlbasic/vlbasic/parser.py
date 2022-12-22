@@ -48,7 +48,7 @@ class Parser:
 	def parseEnd(self) -> tuple[list[ExpressionNode], Error]:
 		statements: list[StatementNode] = []
 
-		while self.currentToken.type != TokenTypes.EOF and not self.currentToken.isKeyword("END"):
+		while self.currentToken.type != TokenTypes.EOF and not self.currentToken.isKeyword("end"):
 			statement, error = self.statement()
 			if error:
 				return None, error
@@ -57,14 +57,14 @@ class Parser:
 				statements.append(statement)
 
 		if self.currentToken.type == TokenTypes.EOF:
-			return None, InvalidSyntaxError(f"Expected keyword END, not {str(self.currentToken.type)}", self.currentToken.position.copy())
+			return None, InvalidSyntaxError(f"Expected keyword end, not {str(self.currentToken.type)}", self.currentToken.position.copy())
 		
 		return statements, None
 
 	def parseIf(self) -> tuple[list[ExpressionNode], Error]:
 		statements: list[StatementNode] = []
 
-		while self.currentToken.type != TokenTypes.EOF and not self.currentToken.isOneOfKeywords(["END", "ELSE", "ELSEIF"]):
+		while self.currentToken.type != TokenTypes.EOF and not self.currentToken.isOneOfKeywords(["end", "else", "elseif"]):
 			statement, error = self.statement()
 			if error:
 				return None, error
@@ -73,7 +73,7 @@ class Parser:
 				statements.append(statement)
 
 		if self.currentToken.type == TokenTypes.EOF:
-			return None, InvalidSyntaxError(f"Expected keyword END, ELSE or ELSEIF, not {str(self.currentToken.type)}", self.currentToken.position.copy())
+			return None, InvalidSyntaxError(f"Expected keyword end, elseif or else, not {str(self.currentToken.type)}", self.currentToken.position.copy())
 		
 		return statements, None
 
@@ -86,7 +86,7 @@ class Parser:
 		return expression, None
 
 	def expression(self) -> tuple[ExpressionNode, Error]:
-		if self.currentToken.isOneOfKeywords(["LET", "CONST"]):
+		if self.currentToken.isOneOfKeywords(["let", "const"]):
 			declareToken = self.currentToken
 
 			self.advance()
@@ -98,7 +98,7 @@ class Parser:
 			self.advance()
 
 			if self.currentToken.type != TokenTypes.EQUALS:
-				return None, InvalidSyntaxError(f"Expected =, not {str(self.currentToken.type)}", self.currentToken.position.copy())
+				return None, InvalidSyntaxError(f"Expected '=', not {str(self.currentToken.type)}", self.currentToken.position.copy())
 
 			self.advance()
 
@@ -134,7 +134,7 @@ class Parser:
 
 			return VariableAssignNode(varName, expression, assignType), None
 
-		elif self.currentToken.isKeyword("RETURN"):
+		elif self.currentToken.isKeyword("return"):
 			returnToken = self.currentToken
 
 			self.advance()
@@ -149,21 +149,21 @@ class Parser:
 			return ReturnNode(returnToken.position.start.createStartEndPosition(value.position.end), value), None
 
 
-		elif self.currentToken.isKeyword("CONTINUE"):
+		elif self.currentToken.isKeyword("continue"):
 			token = self.currentToken
 
 			self.advance()
 
 			return ContinueNode(token.position.copy()), None
 
-		elif self.currentToken.isKeyword("BREAK"):
+		elif self.currentToken.isKeyword("break"):
 			token = self.currentToken
 
 			self.advance()
 
 			return BreakNode(token.position.copy()), None
 
-		elif self.currentToken.isKeyword("IMPORT"):
+		elif self.currentToken.isKeyword("import"):
 			startPosition = self.currentToken.position.start.copy()
 
 			self.advance()
@@ -172,13 +172,13 @@ class Parser:
 			if error:
 				return None, error
 
-			if not self.currentToken.isKeyword("AS"):
+			if not self.currentToken.isKeyword("as"):
 				return ImportNode(startPosition.createStartEndPosition(importName.position.end), importName, None), None
 
 			self.advance()
 
 			if self.currentToken.type not in [TokenTypes.IDENTIFIER, TokenTypes.MULTIPLY]:
-				return None, InvalidSyntaxError(f"Expected IDENTIFIER, not {str(self.currentToken.type)}", self.currentToken.position.copy())
+				return None, InvalidSyntaxError(f"Expected identifier, not {str(self.currentToken.type)}", self.currentToken.position.copy())
 
 			asName = self.currentToken
 
@@ -198,7 +198,7 @@ class Parser:
 	def compExpression(self) -> tuple[BinaryOperationNode, Error]:
 		startToken = self.currentToken
 
-		if startToken.isKeyword("NOT"):
+		if startToken.isKeyword("not"):
 			self.advance()
 			factor, error = self.compExpression()
 			if error:
@@ -314,31 +314,31 @@ class Parser:
 
 			return None, None
 
-		elif startToken.isKeyword("WHILE"):
+		elif startToken.isKeyword("while"):
 			expression, error = self.whileExpression()
 			if error:
 				return None, error
 			return expression, None
 
-		elif startToken.isKeyword("FOR"):
+		elif startToken.isKeyword("for"):
 			expression, error = self.forExpression()
 			if error:
 				return None, error
 			return expression, None
 
-		elif startToken.isKeyword("FUNCTION"):
+		elif startToken.isKeyword("function"):
 			expression, error = self.functionDefinition()
 			if error:
 				return None, error
 			return expression, None
 
-		elif startToken.isKeyword("IF"):
+		elif startToken.isKeyword("if"):
 			expression, error = self.ifExpression()
 			if error:
 				return None, error
 			return expression, None
 
-		return None, InvalidSyntaxError(f"Expected number or identifier, not {str(self.currentToken.type)}", self.currentToken.position.copy())
+		return None, InvalidSyntaxError(f"Expected expression, not {str(self.currentToken.type)}", self.currentToken.position.copy())
 
 	######################################
 
@@ -351,8 +351,8 @@ class Parser:
 		if error:
 			return None, error
 
-		if not self.currentToken.isKeyword("THEN"):
-			return None, InvalidSyntaxError(f"Expected THEN, not {str(self.currentToken.type)}", self.currentToken.position.copy())
+		if not self.currentToken.isKeyword("then"):
+			return None, InvalidSyntaxError(f"Expected keyword then, not {str(self.currentToken.type)}", self.currentToken.position.copy())
 
 		self.advance()
 
@@ -364,7 +364,7 @@ class Parser:
 
 		elseifNodes = []
 
-		while self.currentToken.isKeyword("ELSEIF"):
+		while self.currentToken.isKeyword("elseif"):
 			elifStart = self.currentToken.position.start.copy()
 
 			self.advance()
@@ -373,8 +373,8 @@ class Parser:
 			if error:
 				return None, error
 
-			if not self.currentToken.isKeyword("THEN"):
-				return None, InvalidSyntaxError(f"Expected THEN, not {str(self.currentToken.type)}", self.currentToken.position.copy())
+			if not self.currentToken.isKeyword("then"):
+				return None, InvalidSyntaxError(f"Expected keyword then, not {str(self.currentToken.type)}", self.currentToken.position.copy())
 
 			self.advance()
 
@@ -385,7 +385,7 @@ class Parser:
 			elseifNodes.append(IfNode(elifStart.createStartEndPosition(self.currentToken.position.end), condition, body))
 
 		elseNode = None
-		if self.currentToken.isKeyword("ELSE"):
+		if self.currentToken.isKeyword("else"):
 			elseStartPosition = self.currentToken.position.start.copy()
 
 			self.advance()
@@ -417,7 +417,7 @@ class Parser:
 			self.advance()
 
 		if self.currentToken.type != TokenTypes.LEFT_PARENTHESES:
-			return None, InvalidSyntaxError(f"Expected (, not {str(self.currentToken.type)}", self.currentToken.position.copy())
+			return None, InvalidSyntaxError(f"Expected '(', not {str(self.currentToken.type)}", self.currentToken.position.copy())
 
 		self.advance()
 
@@ -425,7 +425,7 @@ class Parser:
 
 		if self.currentToken.type != TokenTypes.RIGHT_PARENTHESES:
 			if self.currentToken.type != TokenTypes.IDENTIFIER:
-				return None, InvalidSyntaxError(f"Expected IDENTIFIER, not {str(self.currentToken.type)}", self.currentToken.position.copy())
+				return None, InvalidSyntaxError(f"Expected identifier, not {str(self.currentToken.type)}", self.currentToken.position.copy())
 
 			firstArgument = self.currentToken.value
 
@@ -437,7 +437,7 @@ class Parser:
 				self.advance()
 				
 				if self.currentToken.type != TokenTypes.IDENTIFIER:
-					return None, InvalidSyntaxError(f"Expected IDENTIFIER, not {str(self.currentToken.type)}", self.currentToken.position.copy())
+					return None, InvalidSyntaxError(f"Expected identifier, not {str(self.currentToken.type)}", self.currentToken.position.copy())
 
 				argument = self.currentToken.value
 
@@ -446,12 +446,12 @@ class Parser:
 				self.advance()
 
 		if self.currentToken.type != TokenTypes.RIGHT_PARENTHESES:
-			return None, InvalidSyntaxError(f"Expected ), not {str(self.currentToken.type)}", self.currentToken.position.copy())
+			return None, InvalidSyntaxError(f"Expected ')', not {str(self.currentToken.type)}", self.currentToken.position.copy())
 
 		self.advance()
 
 		if self.currentToken.type != TokenTypes.NEW_LINE:
-			return None, InvalidSyntaxError(f"Expected , or new line, not {str(self.currentToken.type)}", self.currentToken.position.copy())
+			return None, InvalidSyntaxError(f"Expected ',' or new line, not {str(self.currentToken.type)}", self.currentToken.position.copy())
 
 		body, error = self.parseEnd()
 		if error:
@@ -488,7 +488,7 @@ class Parser:
 					arguments.append(argument)
 
 			if self.currentToken.type != TokenTypes.RIGHT_PARENTHESES:
-				return None, InvalidSyntaxError(f"Expected , or ), not {str(self.currentToken.type)}", self.currentToken.position.copy())
+				return None, InvalidSyntaxError(f"Expected ',' or ')', not {str(self.currentToken.type)}", self.currentToken.position.copy())
 
 			endPosition = self.currentToken.position.end.copy()
 			endPosition.column += 1
@@ -507,7 +507,7 @@ class Parser:
 				return None, error
 
 			if self.currentToken.type != TokenTypes.RIGHT_SQUARE:
-				return None, InvalidSyntaxError(f"Expected ], not {str(self.currentToken.type)}", self.currentToken.position.copy())
+				return None, InvalidSyntaxError(f"Expected ']', not {str(self.currentToken.type)}", self.currentToken.position.copy())
 			
 			endPosition = self.currentToken.position.end.copy()
 			endPosition.column += 1
@@ -529,7 +529,7 @@ class Parser:
 			self.advance()
 
 			if self.currentToken.type != TokenTypes.IDENTIFIER:
-				return None, InvalidSyntaxError(f"Expected IDENTIFIER, not {str(self.currentToken.type)}", self.currentToken.position.copy())
+				return None, InvalidSyntaxError(f"Expected identifier, not {str(self.currentToken.type)}", self.currentToken.position.copy())
 
 			index = StringNode(self.currentToken)
 
@@ -562,7 +562,7 @@ class Parser:
 
 			if self.currentToken.type != TokenTypes.RIGHT_ARROW:
 				if self.currentToken.type != TokenTypes.RIGHT_SQUARE:
-					return None, InvalidSyntaxError(f"Expected ], not {str(self.currentToken.type)}", self.currentToken.position.copy())
+					return None, InvalidSyntaxError(f"Expected ']', not {str(self.currentToken.type)}", self.currentToken.position.copy())
 
 				return RangeNode(startPosition.createStartEndPosition(self.currentToken.position.end), firstExpression, endExpression, NumberNode(Token(TokenTypes.INTEGER, self.currentToken.position.copy(), 1))), None
 
@@ -573,7 +573,7 @@ class Parser:
 				return None, error
 			
 			if self.currentToken.type != TokenTypes.RIGHT_SQUARE:
-				return None, InvalidSyntaxError(f"Expected ], not {str(self.currentToken.type)}", self.currentToken.position.copy())
+				return None, InvalidSyntaxError(f"Expected ']', not {str(self.currentToken.type)}", self.currentToken.position.copy())
 
 			return RangeNode(startPosition.createStartEndPosition(self.currentToken.position.end), firstExpression, endExpression, stepExpression), None
 		
@@ -587,7 +587,7 @@ class Parser:
 			expressions.append(expression)
 
 		if self.currentToken.type != TokenTypes.RIGHT_SQUARE:
-			return None, InvalidSyntaxError(f"Expected , or ], not {str(self.currentToken.type)}", self.currentToken.position.copy())
+			return None, InvalidSyntaxError(f"Expected ',' or ']', not {str(self.currentToken.type)}", self.currentToken.position.copy())
 
 		return ListNode(startPosition.createStartEndPosition(self.currentToken.position.end.copy()), expressions), None
 
@@ -613,7 +613,7 @@ class Parser:
 				return None, error
 
 			if self.currentToken.type != TokenTypes.COLON:
-				return None, InvalidSyntaxError(f"Expected :, not {str(self.currentToken.type)}", self.currentToken.position.copy())
+				return None, InvalidSyntaxError(f"Expected '*', not {str(self.currentToken.type)}", self.currentToken.position.copy())
 
 			self.advance()
 
@@ -624,7 +624,7 @@ class Parser:
 			expressions[key] = value
 
 		if self.currentToken.type != TokenTypes.RIGHT_CURLY:
-			return None, InvalidSyntaxError(f"Expected }}, not {str(self.currentToken.type)}", self.currentToken.position.copy())
+			return None, InvalidSyntaxError(f"Expected '}}', not {str(self.currentToken.type)}", self.currentToken.position.copy())
 		
 		endPosition = self.currentToken.position.end.copy()
 
@@ -644,8 +644,8 @@ class Parser:
 
 		self.advance()
 
-		if not self.currentToken.isKeyword("IN"):
-			return None, InvalidSyntaxError(f"Expected keyword IN, not {str(self.currentToken.type)}", self.currentToken.position.copy())
+		if not self.currentToken.isKeyword("in"):
+			return None, InvalidSyntaxError(f"Expected keyword in, not {str(self.currentToken.type)}", self.currentToken.position.copy())
 
 		self.advance()
 
@@ -653,8 +653,8 @@ class Parser:
 		if error:
 			return None, error
 
-		if not self.currentToken.isKeyword("THEN"):
-			return None, InvalidSyntaxError(f"Expected keyword THEN, not {str(self.currentToken.type)}", self.currentToken.position.copy())
+		if not self.currentToken.isKeyword("then"):
+			return None, InvalidSyntaxError(f"Expected keyword then, not {str(self.currentToken.type)}", self.currentToken.position.copy())
 
 		self.advance()
 
@@ -685,10 +685,10 @@ class Parser:
 		previousPosition = self.currentToken.position.copy()
 
 		if not self.currentToken:
-			return None, InvalidSyntaxError(f"Expected keyword THEN, not EOF", previousPosition)
+			return None, InvalidSyntaxError(f"Expected keyword then, not eof", previousPosition)
 
-		if not self.currentToken.isKeyword("THEN"):
-			return None, InvalidSyntaxError(f"Expected keyword THEN, not {str(self.currentToken.type)}", self.currentToken.position.copy())
+		if not self.currentToken.isKeyword("then"):
+			return None, InvalidSyntaxError(f"Expected keyword then, not {str(self.currentToken.type)}", self.currentToken.position.copy())
 
 		self.advance()
 

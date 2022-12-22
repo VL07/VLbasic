@@ -1,7 +1,7 @@
-IMPORT "list" AS *
+import "list" as *
 
-PRINT("FROM MAIN", STRING(a))
+print("FROM MAIN", string(a))
 
-IF a THEN
-	IMPORT "contribute"
-END
+if a then
+	import "contribute"
+end

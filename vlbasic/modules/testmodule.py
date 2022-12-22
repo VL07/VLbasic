@@ -4,7 +4,7 @@ def add(parameters, context, error):
 	return "abc", None
 
 variables = {
-	"PI": {
+	"pi": {
 		"value": math.pi,
 		"constant": True
 	},
@@ -16,7 +16,7 @@ variables = {
 		"value": {"a": 1, "b": 2},
 		"constant": True
 	},
-	"ADD": {
+	"add": {
 		"value": add,
 		"constant": True,
 		"parameters": [2, 2]

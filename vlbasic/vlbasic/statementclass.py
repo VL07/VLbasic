@@ -64,7 +64,7 @@ class VariableAccessNode:
 		self.position = token.position.copy()
 
 	def __repr__(self) -> str:
-		return f"VARIABLE_ACCESS_NODE({str(self.token.value)})"
+		return f"variableAccessNode({str(self.token.value)})"
 		
 class VariableAssignNode:
 	def __init__(self, token: Token, valueNode: ExpressionNode, type_: str) -> None:
@@ -75,7 +75,7 @@ class VariableAssignNode:
 		self.position = self.token.position.start.createStartEndPosition(valueNode.position.end)
 
 	def __repr__(self) -> str:
-		return f"VARIABLE_ASSIGN_NODE({str(self.token.value)}, {self.type})"
+		return f"variableAssignNode({str(self.token.value)}, {self.type})"
 
 class VariableDeclareNode:
 	def __init__(self, token: Token, valueNode: ExpressionNode, declareToken: Token) -> None:
@@ -86,7 +86,7 @@ class VariableDeclareNode:
 		self.position = self.declareToken.position.start.createStartEndPosition(valueNode.position.end)
 
 	def __repr__(self) -> str:
-		return f"VARIABLE_DECLARE_NODE({str(self.token.value)})"
+		return f"variableDeclarationNode({str(self.token.value)})"
 
 class WhileNode:
 	def __init__(self, position: StartEndPosition, condition: ExpressionNode, body: list[ExpressionNode]) -> None:
@@ -95,7 +95,7 @@ class WhileNode:
 		self.body = body
 
 	def __repr__(self) -> str:
-		return "WHILE_NODE()"
+		return "whileNode()"
 
 class ForNode:
 	def __init__(self, position: StartEndPosition, item: Token, iterator: ExpressionNode, body: list[ExpressionNode]) -> None:
@@ -105,7 +105,7 @@ class ForNode:
 		self.iterator = iterator
 
 	def __repr__(self) -> str:
-		return f"FOR_NODE({self.item}, {self.iterator})"
+		return f"forNode({self.item}, {self.iterator})"
 
 class FunctionCallNode:
 	def __init__(self, position: StartEndPosition, func: VariableAccessNode, arguments: list[ExpressionNode]) -> None:
@@ -114,7 +114,7 @@ class FunctionCallNode:
 		self.arguments = arguments
 
 	def __repr__(self) -> str:
-		return f"FUNCTION_CALL_NODE({str(self.func)}, {str(self.arguments)})"
+		return f"functionCallNode({str(self.func)}, {str(self.arguments)})"
 
 class ListNode:
 	def __init__(self, position: StartEndPosition, expressions: list[ExpressionNode]) -> None:
@@ -122,7 +122,7 @@ class ListNode:
 		self.expressions = expressions
 
 	def __repr__(self) -> str:
-		return f"LIST_NODE({str(self.expressions)})"
+		return f"listNode({str(self.expressions)})"
 
 class DictionaryNode:
 	def __init__(self, position: StartEndPosition, expressions: dict[ExpressionNode, ExpressionNode]) -> None:
@@ -130,7 +130,7 @@ class DictionaryNode:
 		self.expressions = expressions
 
 	def __repr__(self) -> str:
-		return f"DICTIONARY_NODE({str(self.expressions)})"
+		return f"dictionaryNode({str(self.expressions)})"
 
 class GetItemNode:
 	def __init__(self, position: StartEndPosition, variable: ExpressionNode, item: VariableAccessNode) -> None:
@@ -139,7 +139,7 @@ class GetItemNode:
 		self.item = item
 
 	def __repr__(self) -> str:
-		return f"GET_ITEM_NODE({str(self.variable)}, {str(self.item)})"
+		return f"getItemNode({str(self.variable)}, {str(self.item)})"
 
 class GetAttributeNode:
 	def __init__(self, position: StartEndPosition, variable: ExpressionNode, item: VariableAccessNode) -> None:
@@ -148,7 +148,7 @@ class GetAttributeNode:
 		self.item = item
 
 	def __repr__(self) -> str:
-		return f"GET_ATTRIBUTE_NODE({str(self.variable)}, {str(self.item)})"
+		return f"getAttributeNode({str(self.variable)}, {str(self.item)})"
 
 class SetItemNode:
 	def __init__(self, position: StartEndPosition, variable: ExpressionNode, item: VariableAccessNode, value: ExpressionNode) -> None:
@@ -158,7 +158,7 @@ class SetItemNode:
 		self.value = value
 
 	def __repr__(self) -> str:
-		return f"SET_ITEM_NODE({str(self.variable)}, {str(self.item)}, {str(self.value)})"
+		return f"setItemNode({str(self.variable)}, {str(self.item)}, {str(self.value)})"
 
 class FunctionDefineNode:
 	def __init__(self, position: StartEndPosition, variable: str, arguments: list[ExpressionNode], body: list[ExpressionNode], anonymous: bool) -> None:
@@ -169,7 +169,7 @@ class FunctionDefineNode:
 		self.anonymous = anonymous
 
 	def __repr__(self) -> str:
-		return f"FUNCTION_DEFINE_NODE({str(self.variable)}, {str(self.arguments)})"
+		return f"functionDefineNode({str(self.variable)}, {str(self.arguments)})"
 		
 class ReturnNode:
 	def __init__(self, position: StartEndPosition, value: ExpressionNode) -> None:
@@ -177,21 +177,21 @@ class ReturnNode:
 		self.value = value
 
 	def __repr__(self) -> str:
-		return f"RETURN_NODE({str(self.value)})"
+		return f"returnNode({str(self.value)})"
 
 class ContinueNode:
 	def __init__(self, position: StartEndPosition) -> None:
 		self.position = position
 
 	def __repr__(self) -> str:
-		return "CONTINUE_NODE()"
+		return "continueNode()"
 
 class BreakNode:
 	def __init__(self, position: StartEndPosition) -> None:
 		self.position = position
 
 	def __repr__(self) -> str:
-		return "BREAK_NODE()"
+		return "breakNode()"
 
 class IfNode:
 	def __init__(self, position: StartEndPosition, condition: ExpressionNode, body: list[ExpressionNode]) -> None:
@@ -200,7 +200,7 @@ class IfNode:
 		self.position = position
 
 	def __repr__(self) -> str:
-		return f"IF_NODE({str(self.condition)})"
+		return f"ifNode({str(self.condition)})"
 
 class IfContainerNode:
 	def __init__(self, position: StartEndPosition, ifNode: IfNode, elseIfNodes: list[IfNode], elseNode: IfNode) -> None:
@@ -210,7 +210,7 @@ class IfContainerNode:
 		self.elseNode = elseNode
 
 	def __repr__(self) -> str:
-		return f"IF_CONTAINER_NODE({str(self.ifNode)}, {str(self.elseIfNodes)}, {str(self.elseNode)})"
+		return f"ifContainerNode({str(self.ifNode)}, {str(self.elseIfNodes)}, {str(self.elseNode)})"
 
 class ImportNode:
 	def __init__(self, position: StartEndPosition, moduleName: ExpressionNode, asName: str) -> None:
@@ -219,7 +219,7 @@ class ImportNode:
 		self.asName = asName
 
 	def __repr__(self) -> str:
-		return f"IMPORT_NODE({self.moduleName}, {self.asName})"
+		return f"importNode({self.moduleName}, {self.asName})"
 
 class RangeNode:
 	def __init__(self, position: StartEndPosition, start: ExpressionNode, end: ExpressionNode, step: ExpressionNode) -> None:
@@ -229,4 +229,4 @@ class RangeNode:
 		self.step = step
 
 	def __repr__(self) -> str:
-		return f"RANGE_NODE({self.start}->{self.end}->{self.step})"
+		return f"rangeNode({self.start}->{self.end}->{self.step})"

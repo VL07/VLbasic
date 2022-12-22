@@ -1,5 +1,5 @@
-IMPORT "testmodule" AS *
+import "testmodule" as *
 
-PRINT(abc)
+print(abc)
 
-PRINT(ADD(1, 2))
+print(ADD(1, 2))

@@ -1,5 +1,5 @@
-FUNCTION a(a, b, c)
-	PRINT(a, b, "a"[c])
-END
+function a(a, b, c)
+	print(a, b, "a"[c])
+end
 
 a(1, 2, 3)

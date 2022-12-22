@@ -38,21 +38,21 @@ class Interpreter:
 				return values, None
 
 		if self.isAFunction:
-			file = File("<DEFAULT_VARIABLE>", "")
+			file = File("<defaultVariable>", "")
 			self.returnValue = Null(StartEndPosition(file, Position(-1, -1, -1, file)), context)
 
 		return values, None
 
 	def addDefaultVariables(self, context: Context) -> None:
-		file = File("<DEFAULT_VARIABLE>", "")
+		file = File("<defaultVariable>", "")
 		position = StartEndPosition(file, Position(-1, -1, -1, file))
 
-		context.variableTable.declareVariable("TRUE", Boolean(True, position, context), True, position, True)
-		context.variableTable.declareVariable("FALSE", Boolean(False, position, context), True, position, True)
-		context.variableTable.declareVariable("NULL", Null(position, context), True, position, True)
-		context.variableTable.declareVariable("PRINT", BuiltInFunction("PRINT", funcPrint, position, context), True, position, True)
-		context.variableTable.declareVariable("STRING", BuiltInFunction("STRING", funcToString, position, context), True, position, True)
-		context.variableTable.declareVariable("NUMBER", BuiltInFunction("NUMBER", funcToNumber, position, context), True, position, True)
+		context.variableTable.declareVariable("true", Boolean(True, position, context), True, position, True)
+		context.variableTable.declareVariable("false", Boolean(False, position, context), True, position, True)
+		context.variableTable.declareVariable("null", Null(position, context), True, position, True)
+		context.variableTable.declareVariable("print", BuiltInFunction("print", funcPrint, position, context), True, position, True)
+		context.variableTable.declareVariable("string", BuiltInFunction("string", funcToString, position, context), True, position, True)
+		context.variableTable.declareVariable("number", BuiltInFunction("number", funcToNumber, position, context), True, position, True)
 
 	def convertValue(self, value: any, position: StartEndPosition, context: Context, path: str, variableName: str = "", data: dict = {}) -> tuple[RuntimeValue, RuntimeError]:
 		if isinstance(value, int) or isinstance(value, float):
@@ -287,7 +287,7 @@ class Interpreter:
 			number, error = number.multiplied(Number(-1, number.position.copy(), context), position)
 		elif node.operationToken.type == TokenTypes.PLUS:
 			number, error = number.multiplied(Number(1, number.position.copy(), context), position)
-		elif node.operationToken.isKeyword("NOT"):
+		elif node.operationToken.isKeyword("not"):
 			number, error = number.notted(position)
 		else:
 			raise f"{node.operationToken.type} is not implemented!"
@@ -349,7 +349,7 @@ class Interpreter:
 		return value, None
 
 	def visit_VariableDeclareNode(self, node: VariableDeclareNode, context: Context, insideLoop: bool) -> tuple[Number,  RTError]:
-		isConstant = node.declareToken.isKeyword("CONST")
+		isConstant = node.declareToken.isKeyword("const")
 
 		result, error = self.visit(node.valueNode, context)
 		if error:
@@ -469,10 +469,10 @@ class Interpreter:
 			if len(func.arguments) != len(node.arguments):
 				return None, ArgumentError(len(func.arguments), len(node.arguments), func.name, node.position.copy(), context)
 
-			executeContext = Context(f"<FUNCTION {func.name}>", func.context)
+			executeContext = Context(f"<function {func.name}>", func.context)
 			executeContext.setVariableTable(VariableTable())
 
-			interpreter = Interpreter(func.body, True)
+			interpreter = Interpreter(func.body, True, True)
 			interpreter.addDefaultVariables(executeContext)
 
 			for argumentName, argument in zip(func.arguments, argumentsVisited):

@@ -1,23 +1,23 @@
-IMPORT "terminal"
+import "terminal"
 
-PRINT("abc\n" * 3)
+print("abc\n" * 3)
 
-terminal.clear()
+terminal["clear"]()
 
-terminal.print("abc")
-terminal.print("abc")
+terminal["print"]("abc")
+terminal["print"]("abc")
 
-terminal.printLine("abc")
-terminal.printLine("abc")
+terminal["printLine"]("abc")
+terminal["printLine"]("abc")
 
-CONST name = terminal.input("Enter your name: ")
-PRINT("Your name is " + name)
+const name = terminal["input"]("Enter your name: ")
+print("Your name is " + name)
 
-CONST age = terminal.input("Enter your age: ")
-PRINT("Your name is " + age)
+const age = terminal["input"]("Enter your age: ")
+print("Your age is " + age)
 
-IF NUMBER(age) >= 18 THEN
-	PRINT("Welcome")
-ELSE
-	PRINT("You're not welcome")
-END
+if number(age) >= 18 then
+	print("Welcome")
+else
+	print("You're not welcome")
+end

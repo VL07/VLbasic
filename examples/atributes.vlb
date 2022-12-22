@@ -1,4 +1,4 @@
-PRINT("avasdasd".GET(6))
-PRINT([1, 2, 3].GET(0))
-PRINT("avasdasd".GET_FROM_LAST(0))
-PRINT([1, 2, 3].GET_FROM_LAST(0))
+print("avasdasd".get(6))
+print([1, 2, 3].get(0))
+print("avasdasd".getFromLast(0))
+print([1, 2, 3].getFromLast(0))

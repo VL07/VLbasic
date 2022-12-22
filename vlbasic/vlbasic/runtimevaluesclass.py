@@ -22,7 +22,7 @@ class RuntimeValue:
 		self.breakLoop = False
 
 	def __repr__(self) -> str:
-		return f"RUNTIME_VALUE({self.value})"
+		return f"runtimeValue({self.value})"
 	
 	def setContinue(self, value: bool = True) -> RuntimeValue:
 		self.continueLoop = value
@@ -109,7 +109,7 @@ class Number(RuntimeValue):
 		self.breakLoop = False
 
 	def __repr__(self) -> str:
-		return f"NUMBER({self.value})"
+		return f"number({self.value})"
 
 	def added(self, to: Number | RuntimeValue, position: StartEndPosition) -> tuple[Number, RTError]:
 		if isinstance(to, Number):
@@ -239,7 +239,7 @@ class String(RuntimeValue):
 		self.breakLoop = False
 
 	def __repr__(self) -> str:
-		return f"STRING({self.value})" 
+		return f"string({self.value})" 
 
 	def added(self, to: Number | RuntimeValue, position: StartEndPosition) -> tuple[Number, RTError]:
 		if isinstance(to, String):
@@ -308,16 +308,16 @@ class String(RuntimeValue):
 				dots += 1
 				continue
 
-			return None, RTError("Unable to convert this String, to a number", position.copy(), self.context, "ValueError")
+			return None, RTError("Unable to convert this string, to a number", position.copy(), self.context, "ValueError")
 
 		if not dots:
 			return Number(int(self.value), position.copy(), self.context), None
 		return Number(float(self.value), position.copy(), self.context), None
 
-	def attribute_GET(self, position: StartEndPosition) -> tuple[BuiltInFunction, RTError]:
+	def attribute_get(self, position: StartEndPosition) -> tuple[BuiltInFunction, RTError]:
 		def func(arguments: list[RuntimeValue], executeContext: Context):
 			if len(arguments) != 1:
-				return None, ArgumentError(1, len(arguments), "GET", position.copy(), executeContext)
+				return None, ArgumentError(1, len(arguments), "get", position.copy(), executeContext)
 			elif not isinstance(arguments[0], Number) or "." in str(arguments[0].value):
 				return None, ValueError_(["number(integer)"], arguments[0].__class__.__name__, position.copy(), executeContext)
 
@@ -326,12 +326,12 @@ class String(RuntimeValue):
 			else:
 				return None, RangeError(arguments[0].__class__.__name__, position.copy(), executeContext)
 
-		return BuiltInFunction("GET", func, position.copy(), self.context), None
+		return BuiltInFunction("get", func, position.copy(), self.context), None
 
-	def attribute_GET_FROM_LAST(self, position: StartEndPosition) -> tuple[BuiltInFunction, RTError]:
+	def attribute_getFromLast(self, position: StartEndPosition) -> tuple[BuiltInFunction, RTError]:
 		def func(arguments: list[RuntimeValue], executeContext: Context):
 			if len(arguments) != 1:
-				return None, ArgumentError(1, len(arguments), "GET_FROM_LAST", position.copy(), executeContext)
+				return None, ArgumentError(1, len(arguments), "getFromLast", position.copy(), executeContext)
 			elif not isinstance(arguments[0], Number) or "." in str(arguments[0].value):
 				return None, ValueError_(["number(integer)"], arguments[0].__class__.__name__, position.copy(), executeContext)
 
@@ -340,7 +340,7 @@ class String(RuntimeValue):
 			else:
 				return None, RangeError(arguments[0].__class__.__name__, position.copy(), executeContext)
 
-		return BuiltInFunction("GET_FROM_LAST", func, position.copy(), self.context), None
+		return BuiltInFunction("getFromLast", func, position.copy(), self.context), None
 
 class Boolean(RuntimeValue):
 	def __init__(self, value: bool, position: StartEndPosition, context: Context) -> None:
@@ -351,7 +351,7 @@ class Boolean(RuntimeValue):
 		self.breakLoop = False
 
 	def __repr__(self) -> str:
-		return f"BOOLEAN({self.value})"
+		return f"boolean({self.value})"
 
 	def added(self, to: Boolean | RuntimeValue, position: StartEndPosition) -> tuple[Number, RTError]:
 		if isinstance(to, Number):
@@ -399,7 +399,7 @@ class Boolean(RuntimeValue):
 		return Boolean(self.value, self.position.copy(), self.context), None
 
 	def toString(self, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
-		return String("TRUE" if self.value else "FALSE", position.copy(), self.context), None
+		return String("true" if self.value else "false", position.copy(), self.context), None
 
 	def toNumber(self, position: StartEndPosition) -> tuple[Number, RTError]:
 		return Number(1 if self.value else 0, position.copy(), self.context), None
@@ -408,12 +408,12 @@ class Null(RuntimeValue):
 	def __init__(self, position: StartEndPosition, context: Context) -> None:
 		self.position = position
 		self.context = context
-		self.value = "NULL"
+		self.value = "null"
 		self.continueLoop = False
 		self.breakLoop = False
 
 	def __repr__(self) -> str:
-		return f"NULL()"
+		return f" null()"
 
 	def equals(self, other: RuntimeValue, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
 		if isinstance(other, Null):
@@ -428,7 +428,7 @@ class Null(RuntimeValue):
 		return super().notEquals(other, position)
 
 	def toString(self, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
-		return String("NULL" if self.value else "FALSE", position.copy(), self.context), None
+		return String("null", position.copy(), self.context), None
 
 	def toBoolean(self, position: StartEndPosition) -> tuple[Boolean, RTError]:
 		return Boolean(False, position.copy(), self.context), None
@@ -442,7 +442,7 @@ class List(RuntimeValue):
 		self.breakLoop = False
 
 	def __repr__(self) -> str:
-		return f"LIST({self.value})"
+		return f"list({self.value})"
 
 	def toString(self, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
 		listAsString = "["
@@ -521,10 +521,10 @@ class List(RuntimeValue):
 	def toBoolean(self, position: StartEndPosition) -> tuple[Boolean, RTError]:
 		return Boolean(False if len(self.value) == 0 else True, position.copy(), self.context), None
 
-	def attribute_GET(self, position: StartEndPosition) -> tuple[BuiltInFunction, RTError]:
+	def attribute_get(self, position: StartEndPosition) -> tuple[BuiltInFunction, RTError]:
 		def func(arguments: list[RuntimeValue], executeContext: Context):
 			if len(arguments) != 1:
-				return None, ArgumentError(1, len(arguments), "GET", position.copy(), executeContext)
+				return None, ArgumentError(1, len(arguments), "get", position.copy(), executeContext)
 			elif not isinstance(arguments[0], Number) or "." in str(arguments[0].value):
 				return None, ValueError_(["number(integer)"], arguments[0].__class__.__name__, position.copy(), executeContext)
 
@@ -533,12 +533,12 @@ class List(RuntimeValue):
 			else:
 				return None, RangeError(arguments[0].__class__.__name__, position.copy(), executeContext)
 
-		return BuiltInFunction("GET", func, position.copy(), self.context), None
+		return BuiltInFunction("get", func, position.copy(), self.context), None
 
-	def attribute_GET_FROM_LAST(self, position: StartEndPosition) -> tuple[BuiltInFunction, RTError]:
+	def attribute_getFromLast(self, position: StartEndPosition) -> tuple[BuiltInFunction, RTError]:
 		def func(arguments: list[RuntimeValue], executeContext: Context):
 			if len(arguments) != 1:
-				return None, ArgumentError(1, len(arguments), "GET_FROM_LAST", position.copy(), executeContext)
+				return None, ArgumentError(1, len(arguments), "getFromLast", position.copy(), executeContext)
 			elif not isinstance(arguments[0], Number) or "." in str(arguments[0].value):
 				return None, ValueError_(["number(integer)"], arguments[0].__class__.__name__, position.copy(), executeContext)
 
@@ -547,7 +547,7 @@ class List(RuntimeValue):
 			else:
 				return None, RangeError(arguments[0].__class__.__name__, position.copy(), executeContext)
 
-		return BuiltInFunction("GET_FROM_LAST", func, position.copy(), self.context), None
+		return BuiltInFunction("getFromLast", func, position.copy(), self.context), None
 
 class Dictionary(RuntimeValue):
 	def __init__(self, expressions: dict[RuntimeValue, RuntimeValue], position: StartEndPosition, context: Context) -> None:
@@ -558,7 +558,7 @@ class Dictionary(RuntimeValue):
 		self.breakLoop = False
 
 	def __repr__(self) -> str:
-		return f"DICTIONARY({self.value})"
+		return f"dictionary({self.value})"
 
 	def toString(self, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
 		dictionaryAsString = "{"
@@ -641,7 +641,7 @@ class BuiltInFunction(RuntimeValue):
 		self.position = position
 		self.context = context
 		self.executeFunction = executeFunction
-		self.value = "BUILT_IN_FUNCTION"
+		self.value = "builtInFunction"
 		self.continueLoop = False
 		self.breakLoop = False
 
@@ -660,7 +660,7 @@ class BuiltInFunction(RuntimeValue):
 		return returnValue, None
 
 	def __repr__(self) -> str:
-		return f"BUILT_IN_FUNCTION({self.name})"
+		return f"builtInFunction({self.name})"
 
 	def equals(self, other: RuntimeValue, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
 		if isinstance(other, BuiltInFunction):
@@ -683,7 +683,7 @@ class PythonFunction(RuntimeValue):
 		self.position = position
 		self.context = context
 		self.executeFunction = executeFunction
-		self.value = "BUILT_IN_FUNCTION"
+		self.value = "pythonFunction"
 		self.continueLoop = False
 		self.breakLoop = False
 		self.path = path
@@ -704,7 +704,7 @@ class PythonFunction(RuntimeValue):
 		return returnValue, None
 
 	def __repr__(self) -> str:
-		return f"PYTHON_FUNCTION({self.name})"
+		return f"pythonFunction({self.name})"
 
 	def equals(self, other: RuntimeValue, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
 		if isinstance(other, PythonFunction):
@@ -728,13 +728,13 @@ class Function(RuntimeValue):
 		self.body = body
 		self.position = position
 		self.context = context
-		self.value = "FUNCTION"
+		self.value = "function"
 		self.anonymous = anonymous
 		self.continueLoop = False
 		self.breakLoop = False
 
 	def __repr__(self) -> str:
-		return f"FUNCTION({self.name})"
+		return f"function({self.name})"
 
 	def equals(self, other: RuntimeValue, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
 		if isinstance(other, Function):

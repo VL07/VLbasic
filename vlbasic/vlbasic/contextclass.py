@@ -32,8 +32,6 @@ class VariableTable:
 
 		self.variables[key] = Variable(value, constant, builtIn)
 
-		self.test = "abc"
-
 		return value, None
 
 	def assignVariable(self, key: str, value: any, position: StartEndPosition) -> tuple[any, RTError]:
@@ -80,7 +78,7 @@ class Context:
 		self.variableTable: VariableTable = None
 
 	def __repr__(self) -> str:
-		return f"ENVIRONMENT(vars: {str(self.variableTable)}, parent: {str(self.parent)}, id: {str(self.id)})"
+		return f"environment(vars: {str(self.variableTable)}, parent: {str(self.parent)}, id: {str(self.id)})"
 
 	def setVariableTable(self, variableTable: VariableTable) -> None:
 		self.variableTable = variableTable

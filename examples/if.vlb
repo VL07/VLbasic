@@ -1,9 +1,9 @@
-IF FALSE THEN
-	PRINT("YES")
-ELSEIF FALSE THEN
-	PRINT("MAYBE")
-ELSEIF FALSE THEN
-	PRINT("PROBABLY NOT")
-ELSE
-	PRINT("NO")
-END
+if false then
+	print("YES")
+elseif false then
+	print("MAYBE")
+elseif false then
+	print("PROBABLY NOT")
+else
+	print("NO")
+end

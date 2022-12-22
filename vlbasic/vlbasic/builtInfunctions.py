@@ -11,7 +11,7 @@ from .runtimevaluesclass import String, Number
 #	VARS
 ########################################
 
-placeholderPosition = Position(0, 0, 0, File("<FUNC_RETURN>", ""))
+placeholderPosition = Position(0, 0, 0, File("<funcReturn>", ""))
 placeholderStartEndPosition = placeholderPosition.asStartEndPosition()
 
 ########################################
@@ -34,7 +34,7 @@ def funcPrint(arguments, executeContext):
 
 def funcToString(arguments, executeContext):
 	if len(arguments) > 1:
-		return None, ArgumentError(1, len(arguments), "STRING", placeholderStartEndPosition.copy(), executeContext)
+		return None, ArgumentError(1, len(arguments), "string", placeholderStartEndPosition.copy(), executeContext)
 
 	argument = arguments[0]
 
@@ -46,7 +46,7 @@ def funcToString(arguments, executeContext):
 
 def funcToNumber(arguments, executeContext):
 	if len(arguments) > 1:
-		return None, ArgumentError(1, len(arguments), "NUMBER", placeholderStartEndPosition.copy(), executeContext)
+		return None, ArgumentError(1, len(arguments), "number", placeholderStartEndPosition.copy(), executeContext)
 
 	argument = arguments[0]
 

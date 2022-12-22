@@ -1,10 +1,9 @@
-CONST a = {1: 2, 3: 4}
+const a = {1: 2, 3: 4}
 
-PRINT(a[1])
+print(a[1])
 
 a["abc"] = 123
 
-PRINT(a)
+print(a)
 
-PRINT("a" == "a")
-PRINT(a.abc)
+print("a" == "a")

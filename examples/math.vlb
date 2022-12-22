@@ -1,19 +1,19 @@
-PRINT(2 + 2)
-PRINT(2 - 2)
-PRINT(2 * 2)
-PRINT(2 / 2)
-PRINT(2 ^ 10)
-PRINT(2 % 10)
+print(2 + 2)
+print(2 - 2)
+print(2 * 2)
+print(2 / 2)
+print(2 ^ 10)
+print(2 % 10)
 
-LET a = 100
+let a = 100
 a /= 10
-PRINT(a)
+print(a)
 
 a *= 99
-PRINT(a)
+print(a)
 
 a -= a
-PRINT(a)
+print(a)
 
 a += 10921
-PRINT(a)
+print(a)

@@ -1,8 +1,8 @@
-FUNCTION a(text, times)
-	FUNCTION b()
-		PRINT(text * times)
-	END
-	RETURN b
-END
+function a(text, times)
+	function b()
+		print(text * times)
+	end
+	return b
+end
 
 a("HELLO WORLD!", 3)()

@@ -62,7 +62,7 @@ class InterpretFile:
 		return False
 
 	def __repr__(self) -> str:
-		return f"INTERPRET_FILE({self.name}, {str(self.importedModules)})"
+		return f"interpretFile({self.name}, {str(self.importedModules)})"
 
 class Position:
 	def __init__(self, index: int, line: int, column: int, file: File) -> None:

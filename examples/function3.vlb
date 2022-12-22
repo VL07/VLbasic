@@ -1,9 +1,9 @@
-FUNCTION run(func)
+function run(func)
 	func()
-END
+end
 
-FUNCTION a()
-	PRINT("YES")
-END
+function a()
+	print("YES")
+end
 
 run(a)

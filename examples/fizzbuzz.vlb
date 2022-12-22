@@ -1,16 +1,16 @@
-CONST fizzbuzz = {}
+const fizzbuzz = {}
 
-FOR item IN [0->100] THEN
-	IF item % 15 == 0 THEN
-		PRINT("FizzBuzz")
+for item in [0->100] then
+	if item % 15 == 0 then
+		print("FizzBuzz")
 		fizzbuzz[item] = item
-	ELSEIF item % 5 == 0 THEN
-		PRINT("Fizz")
-	ELSEIF item % 3 == 0 THEN
-		PRINT("Buzz")
-	ELSE
-		PRINT(item)
-	END
-END
+	elseif item % 5 == 0 then
+		print("Fizz")
+	elseif item % 3 == 0 then
+		print("Buzz")
+	else
+		print(item)
+	end
+end
 
-PRINT(fizzbuzz)
+print(fizzbuzz)

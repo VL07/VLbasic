@@ -1,39 +1,39 @@
-LET a = ["a", 2, "c"]
-LET item = 2
+let a = ["a", 2, "c"]
+let item = 2
 
-FOR item IN a THEN
-	IF item == 2 THEN
-		BREAK
-	END
-	PRINT(item)
-END
+for item in a then
+	if item == 2 then
+		break
+	end
+	print(item)
+end
 
 a = 0
 
-WHILE TRUE THEN
+while true then
 	a = a + 1
-	IF a % 10 == 0 THEN
-		PRINT(a)
-	ELSEIF a > 1000 THEN
-		BREAK
-	END
-END
+	if a % 10 == 0 then
+		print(a)
+	elseif a > 1000 then
+		break
+	end
+end
 
 a = 0
-LET b = 0
+let b = 0
 
-WHILE a < 100 THEN
+while a < 100 then
 	b = 0
-	WHILE TRUE THEN
-		IF b > 10 THEN
-			BREAK
-		END
+	while true then
+		if b > 10 then
+			break
+		end
 		a += 1
 		b += 1
-	END
-	PRINT("BREAKED")
-END
+	end
+	print("breaked")
+end
 
 
 
-PRINT(a)
+print(a)
