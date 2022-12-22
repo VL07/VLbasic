@@ -8,7 +8,7 @@ from .runtimevaluesclass import RuntimeValue, Number, Boolean, Null, BuiltInFunc
 from .tokenclass import TokenTypes
 from .error import RTError, CircularImportError, InvalidIteratorError, ArgumentError, ReturnOutsideFunctionError, ContinueOutsideLoopError, BreakOutsideLoopError, ValueError_
 from .utils import StartEndPosition, Position, File, InterpretFile
-from .builtInfunctions import funcPrint, funcToString, funcToNumber
+from .builtins import builtins
 from .tokenizer import Tokenizer
 from .parser import Parser
 import os
@@ -47,12 +47,9 @@ class Interpreter:
 		file = File("<defaultVariable>", "")
 		position = StartEndPosition(file, Position(-1, -1, -1, file))
 
-		context.variableTable.declareVariable("true", Boolean(True, position, context), True, position, True)
-		context.variableTable.declareVariable("false", Boolean(False, position, context), True, position, True)
-		context.variableTable.declareVariable("null", Null(position, context), True, position, True)
-		context.variableTable.declareVariable("print", BuiltInFunction("print", funcPrint, position, context), True, position, True)
-		context.variableTable.declareVariable("string", BuiltInFunction("string", funcToString, position, context), True, position, True)
-		context.variableTable.declareVariable("number", BuiltInFunction("number", funcToNumber, position, context), True, position, True)
+		for key, variable in builtins.items():
+			variable.context = context
+			context.variableTable.declareVariable(key, variable, True, position, True)
 
 	def convertValue(self, value: any, position: StartEndPosition, context: Context, path: str, variableName: str = "", data: dict = {}) -> tuple[RuntimeValue, RuntimeError]:
 		if isinstance(value, int) or isinstance(value, float):
