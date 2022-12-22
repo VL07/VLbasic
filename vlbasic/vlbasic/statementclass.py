@@ -141,6 +141,15 @@ class GetItemNode:
 	def __repr__(self) -> str:
 		return f"GET_ITEM_NODE({str(self.variable)}, {str(self.item)})"
 
+class GetAttributeNode:
+	def __init__(self, position: StartEndPosition, variable: ExpressionNode, item: VariableAccessNode) -> None:
+		self.position = position
+		self.variable = variable
+		self.item = item
+
+	def __repr__(self) -> str:
+		return f"GET_ATTRIBUTE_NODE({str(self.variable)}, {str(self.item)})"
+
 class SetItemNode:
 	def __init__(self, position: StartEndPosition, variable: ExpressionNode, item: VariableAccessNode, value: ExpressionNode) -> None:
 		self.position = position
@@ -211,3 +220,13 @@ class ImportNode:
 
 	def __repr__(self) -> str:
 		return f"IMPORT_NODE({self.moduleName}, {self.asName})"
+
+class RangeNode:
+	def __init__(self, position: StartEndPosition, start: ExpressionNode, end: ExpressionNode, step: ExpressionNode) -> None:
+		self.position = position
+		self.start = start
+		self.end = end
+		self.step = step
+
+	def __repr__(self) -> str:
+		return f"RANGE_NODE({self.start}->{self.end}->{self.step})"

@@ -1,0 +1,19 @@
+IMPORT "terminal"
+
+FUNCTION fizzbuzz(n)
+	LET f = FALSE
+	FOR res IN [[15, "fizzbuzz"], [5, "fizz"], [3, "buzz"]] THEN
+		IF n % res[0] == 0 THEN
+			PRINT(res[1])
+			f = TRUE
+			BREAK
+		END
+	END
+	IF NOT f THEN
+		PRINT(n)
+	END
+END
+
+FOR n IN [1->1000] THEN
+	fizzbuzz(n)
+END

@@ -1,0 +1,4 @@
+PRINT("avasdasd".GET(6))
+PRINT([1, 2, 3].GET(0))
+PRINT("avasdasd".GET_FROM_LAST(0))
+PRINT([1, 2, 3].GET_FROM_LAST(0))

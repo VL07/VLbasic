@@ -4,7 +4,7 @@
 
 from .runtimevaluesclass import Null
 from .utils import Position, File
-from .error import RTError
+from .error import RTError, ArgumentError
 from .runtimevaluesclass import String, Number
 
 ########################################
@@ -34,7 +34,7 @@ def funcPrint(arguments, executeContext):
 
 def funcToString(arguments, executeContext):
 	if len(arguments) > 1:
-		return None, RTError(f"STRING function only accepts 1 argument, not {str(len(arguments))}", placeholderStartEndPosition.copy(), executeContext)
+		return None, ArgumentError(1, len(arguments), "STRING", placeholderStartEndPosition.copy(), executeContext)
 
 	argument = arguments[0]
 
@@ -46,7 +46,7 @@ def funcToString(arguments, executeContext):
 
 def funcToNumber(arguments, executeContext):
 	if len(arguments) > 1:
-		return None, RTError(f"NUMBER function only accepts 1 argument, not {str(len(arguments))}", placeholderStartEndPosition.copy(), executeContext)
+		return None, ArgumentError(1, len(arguments), "NUMBER", placeholderStartEndPosition.copy(), executeContext)
 
 	argument = arguments[0]
 

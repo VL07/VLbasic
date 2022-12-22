@@ -53,6 +53,8 @@ class TokenTypes(Enum):
 	GREATER_EQUALS =	auto()
 	LESS_EQUALS = 		auto()
 
+	RIGHT_ARROW = 		auto()
+
 ########################################
 #	TOKEN CLASS
 ########################################

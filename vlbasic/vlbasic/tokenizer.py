@@ -77,7 +77,7 @@ class Tokenizer:
 				token, error = self.makePlusEquals()
 				tokens.append(token)
 			elif self.currentCharacter == "-":
-				token, error = self.makeMinusEquals()
+				token, error = self.makeMinusEqualsArrow()
 				tokens.append(token)
 			elif self.currentCharacter == "*":
 				token, error = self.makeMultiplyEquals()
@@ -113,8 +113,8 @@ class Tokenizer:
 				tokens.append(Token(TokenTypes.COMMA, self.position.asStartEndPosition()))
 				self.advance()
 			elif self.currentCharacter == ".":
-				tokens.append(Token(TokenTypes.DOT, self.position.asStartEndPosition()))
-				self.advance()
+				token, error = self.makeDot()
+				tokens.append(token)
 			elif self.currentCharacter == ":":
 				tokens.append(Token(TokenTypes.COLON, self.position.asStartEndPosition()))
 				self.advance()
@@ -149,6 +149,22 @@ class Tokenizer:
 
 		return tokens, None
 
+	def makeDot(self) -> tuple[Token | None, Error | None]:
+		startPosition = self.position.copy()
+
+		# self.advance()
+
+		# if self.currentCharacter == ".":
+		# 	endPosition = self.position.copy()
+
+		# 	self.advance()
+
+		# 	return Token(TokenTypes.DOUBLE_DOT, startPosition.createStartEndPosition(endPosition)), None
+		
+		self.advance()
+
+		return Token(TokenTypes.DOT, startPosition.asStartEndPosition()), None
+
 	def makePlusEquals(self) -> tuple[Token | None, Error | None]:
 		startPosition = self.position.copy()
 
@@ -162,7 +178,7 @@ class Tokenizer:
 			return Token(TokenTypes.PLUS_EQUALS, startPosition.createStartEndPosition(endPosition)), None
 		return Token(TokenTypes.PLUS, startPosition.asStartEndPosition()), None
 
-	def makeMinusEquals(self) -> tuple[Token | None, Error | None]:
+	def makeMinusEqualsArrow(self) -> tuple[Token | None, Error | None]:
 		startPosition = self.position.copy()
 
 		self.advance()
@@ -173,6 +189,12 @@ class Tokenizer:
 			self.advance()
 
 			return Token(TokenTypes.MINUS_EQUALS, startPosition.createStartEndPosition(endPosition)), None
+		elif self.currentCharacter == ">":
+			endPosition = self.position.copy()
+
+			self.advance()
+
+			return Token(TokenTypes.RIGHT_ARROW, startPosition.createStartEndPosition(endPosition)), None
 		return Token(TokenTypes.MINUS, startPosition.asStartEndPosition()), None
 
 	def makeMultiplyEquals(self) -> tuple[Token | None, Error | None]:
@@ -266,7 +288,9 @@ class Tokenizer:
 
 			if self.currentCharacter == ".":
 				if dots == 1:
-					return
+					position = StartEndPosition(self.file, startPosition, self.position.copy())
+
+					return Token(TokenTypes.FLOAT, position, float(number[:-1])), None
 
 				dots += 1
 
