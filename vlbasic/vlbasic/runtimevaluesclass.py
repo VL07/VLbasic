@@ -255,6 +255,15 @@ class Number(RuntimeValue):
 	def attribute_double(self, position: StartEndPosition) -> tuple[Number, RTError]:
 		return Number(self.value * 2, position.copy(), self.context), None
 
+	def attribute_floor(self, position: StartEndPosition) -> tuple[Number, RTError]:
+		return Number(math.floor(self.value), position.copy(), self.context), None
+
+	def attribute_ceil(self, position: StartEndPosition) -> tuple[Number, RTError]:
+		return Number(math.ceil(self.value), position.copy(), self.context), None
+
+	def attribute_sqrt(self, position: StartEndPosition) -> tuple[Number, RTError]:
+		return Number(math.sqrt(self.value), position.copy(), self.context), None
+
 class String(RuntimeValue):
 	def __init__(self, value: str, position: StartEndPosition, context: Context) -> None:
 		self.value = value
