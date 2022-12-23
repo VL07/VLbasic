@@ -4,7 +4,7 @@
 
 from .statementclass import StatementNode, NumberNode, BinaryOperationNode, UnaryOperationNode, VariableAccessNode, VariableAssignNode, VariableDeclareNode, WhileNode, FunctionCallNode, StringNode, ListNode, GetItemNode, FunctionDefineNode, ReturnNode, IfContainerNode, SetItemNode, ImportNode, DictionaryNode, ContinueNode, BreakNode, ForNode, RangeNode, GetAttributeNode
 from .contextclass import Context, VariableTable
-from .runtimevaluesclass import RuntimeValue, Number, Boolean, Null, BuiltInFunction, String, List, Function, Dictionary, PythonFunction
+from .runtimevaluesclass import RuntimeValue, Number, Boolean, Null, BuiltInFunction, String, List, Function, Dictionary, PythonFunction, Module
 from .tokenclass import TokenTypes
 from .error import RTError, CircularImportError, InvalidIteratorError, ArgumentError, ReturnOutsideFunctionError, ContinueOutsideLoopError, BreakOutsideLoopError, ValueError_
 from .utils import StartEndPosition, Position, File, InterpretFile
@@ -109,7 +109,7 @@ class Interpreter:
 		except AttributeError:
 			return None, RTError(f"Module {path} dose not have a global variable variables", position.copy(), context)
 
-		variableDictionary = Dictionary({}, position.copy(), context)
+		variableDictionary = Module({}, position.copy(), context)
 
 		for variableName, variableData in variables.items():
 			variable = variableData["value"]
@@ -118,7 +118,7 @@ class Interpreter:
 			if error:
 				return None, error
 
-			variableDictionary.value[String(variableName, position.copy(), context)] = convertedValue
+			variableDictionary.value[variableName] = convertedValue
 
 			if importAs == "*":
 				context.variableTable.declareVariable(variableName, convertedValue, variableData["constant"], position.copy(), False)
@@ -195,7 +195,7 @@ class Interpreter:
 			error.importStack.append(f"Error while trying to import module {moduleName}")
 			return None, error
 
-		variableDictionary = Dictionary({}, position.copy(), context)
+		variableDictionary = Module({}, position.copy(), context)
 
 		for variableName in importFileContext.variableTable.variables.keys():
 			variable = importFileContext.variableTable.variables[variableName]
@@ -203,7 +203,7 @@ class Interpreter:
 			if variable.builtIn:
 				continue
 
-			variableDictionary.value[String(variableName, variable.value.position.copy(), context)] = variable.value
+			variableDictionary.value[variableName] = variable.value
 
 			if importAs == "*":
 				context.variableTable.declareVariable(variableName, variable.value, variable.constant, position.copy(), False)

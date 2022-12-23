@@ -88,15 +88,15 @@ class ArgumentError(RTError):
 
 class VariableDeclarationError(RTError):
 	def __init__(self, variableName: str, position: StartEndPosition, context) -> None:
-		super().__init__(f"Variable {variableName} is already declared", position, context, "VariableDeclarationError")
+		super().__init__(f"Variable '{variableName}' is already declared", position, context, "VariableDeclarationError")
 
 class VariableConstantAssignmentError(RTError):
 	def __init__(self, variableName: str, position: StartEndPosition, context, name: str = "RuntimeError") -> None:
-		super().__init__(f"Variable {variableName} is a constant and can therefor not be assigned to", position, context, "VariableConstantAssignmentError")
+		super().__init__(f"Variable '{variableName}' is a constant and can therefor not be assigned to", position, context, "VariableConstantAssignmentError")
 
 class VariableNotDefinedError(RTError):
 	def __init__(self, variableName: str, position: StartEndPosition, context) -> None:
-		super().__init__(f"Variable {variableName} is not defined", position, context, "VariableNotDefinedError")
+		super().__init__(f"Variable '{variableName}' is not defined", position, context, "VariableNotDefinedError")
 
 class CircularImportError(RTError):
 	def __init__(self, file: str, fileToImport: str, position: StartEndPosition, context) -> None:
@@ -136,4 +136,4 @@ class InvalidStringError(RTError):
 
 class KeyError_(RTError):
 	def __init__(self, key: str, position: StartEndPosition, context) -> None:
-		super().__init__(f"Invalid key with value {key}", position, context, "KeyError")
+		super().__init__(f"Invalid key with value '{key}'", position, context, "KeyError")

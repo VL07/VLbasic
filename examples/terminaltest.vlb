@@ -1,19 +1,19 @@
 import "terminal"
 
-print("abc\n" * 3)
+terminal.clear()
 
-terminal["clear"]()
+print(terminal.type)
 
-terminal["print"]("abc")
-terminal["print"]("abc")
+terminal.print("abc")
+terminal.print("abc")
 
-terminal["printLine"]("abc")
-terminal["printLine"]("abc")
+terminal.printLine("abc")
+terminal.printLine("abc")
 
-const name = terminal["input"]("Enter your name: ")
+const name = terminal.input("Enter your name: ")
 print("Your name is " + name)
 
-const age = terminal["input"]("Enter your age: ")
+const age = terminal.input("Enter your age: ")
 print("Your age is " + age)
 
 if number(age) >= 18 then

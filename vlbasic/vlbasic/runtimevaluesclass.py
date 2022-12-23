@@ -20,6 +20,7 @@ class RuntimeValue:
 		self.context = context
 		self.continueLoop = False
 		self.breakLoop = False
+		self.type = "<NOT_DEFINED>"
 
 	def __repr__(self) -> str:
 		return f"runtimeValue({self.value})"
@@ -92,13 +93,21 @@ class RuntimeValue:
 
 		functionName = f"attribute_{item.value}"
 		func = getattr(self, functionName, notFound)
-		return func(position)
+
+		value, error = func(position)
+
+		return value, error
 
 	def setItem(self, item: RuntimeValue, value: RuntimeValue, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
 		return None, RTError(f"Unable to set item {str(item)} of {type(self).__name__} to {str(value)}", position.copy(), self.context, "ValueError")
 
 	def getLength(self, position: StartEndPosition) -> tuple[Number, RTError]:
 		return None, RTError(f"Unable to get length of a {type(self).__name__}", position.copy(), self.context, "ValueError")
+
+	################
+
+	def attribute_type(self, position: StartEndPosition) -> tuple[String, RTError]:
+		return String(self.type, position.copy(), self.context), None
 
 class Number(RuntimeValue):
 	def __init__(self, value: int | float, position: StartEndPosition, context: Context) -> None:
@@ -107,6 +116,7 @@ class Number(RuntimeValue):
 		self.context = context
 		self.continueLoop = False
 		self.breakLoop = False
+		self.type = "number"
 
 	def __repr__(self) -> str:
 		return f"number({self.value})"
@@ -237,6 +247,7 @@ class String(RuntimeValue):
 		self.context = context
 		self.continueLoop = False
 		self.breakLoop = False
+		self.type = "string"
 
 	def __repr__(self) -> str:
 		return f"string({self.value})" 
@@ -301,6 +312,9 @@ class String(RuntimeValue):
 	def toNumber(self, position: StartEndPosition) -> tuple[Number, RTError]:
 		dots = 0
 
+		if not self.value:
+			return None, RTError("Unable to convert this string, to a number", position.copy(), self.context, "ValueError")
+
 		for i, character in enumerate(self.value):
 			if character in NUMBERS:
 				continue
@@ -349,6 +363,7 @@ class Boolean(RuntimeValue):
 		self.context = context
 		self.continueLoop = False
 		self.breakLoop = False
+		self.type = "boolean"
 
 	def __repr__(self) -> str:
 		return f"boolean({self.value})"
@@ -411,6 +426,7 @@ class Null(RuntimeValue):
 		self.value = "null"
 		self.continueLoop = False
 		self.breakLoop = False
+		self.type = "null"
 
 	def __repr__(self) -> str:
 		return f" null()"
@@ -440,6 +456,7 @@ class List(RuntimeValue):
 		self.value = expressions
 		self.continueLoop = False
 		self.breakLoop = False
+		self.type = "list"
 
 	def __repr__(self) -> str:
 		return f"list({self.value})"
@@ -556,6 +573,7 @@ class Dictionary(RuntimeValue):
 		self.value = expressions
 		self.continueLoop = False
 		self.breakLoop = False
+		self.type = "dictionary"
 
 	def __repr__(self) -> str:
 		return f"dictionary({self.value})"
@@ -644,6 +662,7 @@ class BuiltInFunction(RuntimeValue):
 		self.value = "builtInFunction"
 		self.continueLoop = False
 		self.breakLoop = False
+		self.type = "builtinFunction"
 
 	def execute(self, arguments: list[RuntimeValue], position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
 		executeContext = Context(self.name, self.context)
@@ -688,6 +707,7 @@ class PythonFunction(RuntimeValue):
 		self.breakLoop = False
 		self.path = path
 		self.parameters = parameters
+		self.type = "pythonFunction"
 
 	def execute(self, arguments: list[RuntimeValue], position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
 		executeContext = Context(self.name, self.context)
@@ -732,6 +752,7 @@ class Function(RuntimeValue):
 		self.anonymous = anonymous
 		self.continueLoop = False
 		self.breakLoop = False
+		self.type = "function"
 
 	def __repr__(self) -> str:
 		return f"function({self.name})"
@@ -750,3 +771,25 @@ class Function(RuntimeValue):
 
 	def toString(self, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
 		return String(f"{self.name}()", position.copy(), self.context), None
+
+class Module(RuntimeValue):
+	def __init__(self, expressions: dict[RuntimeValue, RuntimeValue], position: StartEndPosition, context: Context) -> None:
+		self.position = position
+		self.context = context
+		self.value = expressions
+		self.continueLoop = False
+		self.breakLoop = False
+		self.type = "module"
+
+	def __repr__(self) -> str:
+		return f"module({self.value})"
+
+	def getAttribute(self, item: RuntimeValue, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
+		if not isinstance(item, String):
+			return None, ValueError_(["string"], item.type, position.copy(), self.context)
+
+		value = self.value.get(item.value, None)
+		if not value:
+			return super().getAttribute(item, position)
+
+		return value, None
