@@ -4,7 +4,7 @@
 
 from .runtimevaluesclass import Null
 from .utils import Position, File
-from .error import RTError, ArgumentError
+from .error import RTError, ArgumentError, ValueError_
 from .runtimevaluesclass import String, Number, BuiltInFunction, Boolean, RuntimeValue
 from .contextclass import Context
 
@@ -73,3 +73,18 @@ def funcToNumber(arguments: list[RuntimeValue], executeContext: Context):
 	return Number(asNumber.value, position.copy(), executeContext), None
 
 builtins["number"] = BuiltInFunction("number", funcToNumber, position, context)
+
+def funcExpectType(arguments: list[RuntimeValue], executeContext: Context):
+	if len(arguments) < 2:
+		return None, ArgumentError(2, len(arguments), "number", position.copy(), executeContext)
+
+	for argumentType in arguments[1:]:
+		if not isinstance(argumentType, String):
+			return None, ValueError_(["string"], argumentType.type, argumentType.position.copy(), executeContext)
+
+		if arguments[0].type == argumentType.value:
+			return Null(position.copy(), executeContext), None
+
+	return None, ValueError_(map(lambda x : x.value, arguments[1:]), arguments[0].type, position.copy(), executeContext)
+
+builtins["expectType"] = BuiltInFunction("expectType", funcExpectType, position, context)

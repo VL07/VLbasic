@@ -8,6 +8,7 @@ from .contextclass import Context, VariableTable
 from .error import RTError, DivisionByZeroError, RangeError, KeyError_, ArgumentError, ValueError_
 from typing import Callable
 from .statementclass import ExpressionNode
+import math
 
 ########################################
 #	INTERPRETER
