@@ -380,6 +380,36 @@ class String(RuntimeValue):
 
 		return BuiltInFunction("getFromLast", func, position.copy(), self.context), None
 
+	def attribute_upper(self, position: StartEndPosition) -> tuple[String, RTError]:
+		return String(self.value.upper(), position.copy(), self.context), None
+
+	def attribute_lower(self, position: StartEndPosition) -> tuple[String, RTError]:
+		return String(self.value.lower(), position.copy(), self.context), None
+
+	def attribute_includes(self, position: StartEndPosition) -> tuple[String, RTError]:
+		def func(arguments: list[RuntimeValue], executeContext: Context):
+			if len(arguments) != 1:
+				return None, ArgumentError(1, len(arguments), "includes", position.copy(), executeContext)
+
+			if not isinstance(arguments[0], String):
+				return None, ValueError_(["string"], arguments[0].type, position.copy(), executeContext)
+
+			return Boolean(arguments[0].value in self.value, position.copy(), executeContext), None
+		
+		return BuiltInFunction("includes", func, position.copy(), self.context), None
+
+	def attribute_inside(self, position: StartEndPosition) -> tuple[String, RTError]:
+		def func(arguments: list[RuntimeValue], executeContext: Context):
+			if len(arguments) != 1:
+				return None, ArgumentError(1, len(arguments), "inside", position.copy(), executeContext)
+
+			if not isinstance(arguments[0], String):
+				return None, ValueError_(["string"], arguments[0].type, position.copy(), executeContext)
+
+			return Boolean(self.value in arguments[0].value, position.copy(), executeContext), None
+		
+		return BuiltInFunction("inside", func, position.copy(), self.context), None
+
 class Boolean(RuntimeValue):
 	def __init__(self, value: bool, position: StartEndPosition, context: Context) -> None:
 		self.value = value
