@@ -3,7 +3,7 @@
 ########################################
 
 from __future__ import annotations
-from .utils import StartEndPosition, NUMBERS
+from .utils import StartEndPosition, NUMBERS, Position, File
 from .contextclass import Context, VariableTable
 from .error import RTError, DivisionByZeroError, RangeError, KeyError_, ArgumentError, ValueError_
 from typing import Callable
@@ -108,6 +108,9 @@ class RuntimeValue:
 
 	def attribute_type(self, position: StartEndPosition) -> tuple[String, RTError]:
 		return String(self.type, position.copy(), self.context), None
+
+	def attribute_position(self, position: StartEndPosition) -> tuple[String, RTError]:
+		return RuntimePositionStartEnd(self.position, position.copy(), self.context), None
 
 class Number(RuntimeValue):
 	def __init__(self, value: int | float, position: StartEndPosition, context: Context) -> None:
@@ -793,3 +796,102 @@ class Module(RuntimeValue):
 			return super().getAttribute(item, position)
 
 		return value, None
+
+class RuntimePositionStartEnd(RuntimeValue):
+	def __init__(self, positionValue: StartEndPosition, position: StartEndPosition, context: Context) -> None:
+		self.type = "positionStartEnd"
+		self.position = position
+		self.context = context
+		self.continueLoop = False
+		self.breakLoop = False
+
+		self.startPosition = positionValue.start
+		self.endPosition = positionValue.end
+		self.file = positionValue.file
+
+	def toString(self, position: StartEndPosition) -> tuple[String, RTError]:
+		return String(f"positionStartEnd(start: (index: {self.startPosition.index}, line: {self.startPosition.line}, column: {self.startPosition.column}), end: (index: {self.endPosition.index}, line: {self.endPosition.line}, column: {self.endPosition.column}), file: {self.file.name})", position.copy(), self.context), None
+
+	def equals(self, other: RuntimeValue, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
+		if isinstance(other, RuntimePositionStartEnd):
+			return Boolean(self.startPosition.index == other.startPosition.index and self.endPosition.index == other.endPosition.index and self.file.name == other.file.name, position.copy(), self.context), None
+
+		return super().equals(other, position.copy())
+
+	def notEquals(self, other: RuntimeValue, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
+		return not self.equals(other, position.copy())
+
+	def attribute_start(self, position: StartEndPosition) -> tuple[RuntimePosition, RTError]:
+		return RuntimePosition(self.startPosition, position.copy(), self.context), None
+
+	def attribute_end(self, position: StartEndPosition) -> tuple[RuntimePosition, RTError]:
+		return RuntimePosition(self.endPosition, position.copy(), self.context), None
+
+	def attribute_file(self, position: StartEndPosition) -> tuple[RuntimeFile, RTError]:
+		return RuntimeFile(self.file, position.copy(), self.context), None
+
+class RuntimePosition(RuntimeValue):
+	def __init__(self, positionValue: Position, position: StartEndPosition, context: Context) -> None:
+		self.type = "position"
+		self.position = position
+		self.context = context
+		self.continueLoop = False
+		self.breakLoop = False
+
+		self.positionValue = positionValue
+		self.file = positionValue.file
+
+	def toString(self, position: StartEndPosition) -> tuple[String, RTError]:
+		return String(f"position(index: {self.positionValue.index}, line: {self.positionValue.line}, column: {self.positionValue.column}, file: {self.file})", position.copy(), self.context), None
+
+	def equals(self, other: RuntimeValue, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
+		if isinstance(other, RuntimePosition):
+			return Boolean(self.positionValue.index == other.positionValue.index and self.file.name == other.file.name, position.copy(), self.context), None
+
+		return super().equals(other, position.copy())
+
+	def notEquals(self, other: RuntimeValue, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
+		return not self.equals(other, position.copy())
+
+	def attribute_column(self, position: StartEndPosition) -> tuple[String, RTError]:
+		return Number(self.positionValue.column, position.copy(), self.context), None
+
+	def attribute_line(self, position: StartEndPosition) -> tuple[String, RTError]:
+		return Number(self.positionValue.line, position.copy(), self.context), None
+
+	def attribute_index(self, position: StartEndPosition) -> tuple[String, RTError]:
+		return Number(self.positionValue.index, position.copy(), self.context), None
+	
+	def attribute_file(self, position: StartEndPosition) -> tuple[RuntimeFile, RTError]:
+		return RuntimeFile(self.file, position.copy(), self.context), None
+		
+class RuntimeFile(RuntimeValue):
+	def __init__(self, file: File, position: StartEndPosition, context: Context) -> None:
+		self.type = "file"
+		self.position = position
+		self.context = context
+		self.continueLoop = False
+		self.breakLoop = False
+
+		self.file = file
+
+	def toString(self, position: StartEndPosition) -> tuple[String, RTError]:
+		return String(f"file({self.file.name})", position.copy(), self.context), None
+
+	def equals(self, other: RuntimeValue, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
+		if isinstance(other, RuntimeFile):
+			return Boolean(self.file.name == other.file.name, position.copy(), self.context), None
+
+		return super().equals(other, position.copy())
+
+	def notEquals(self, other: RuntimeValue, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
+		return not self.equals(other, position.copy())
+
+	def attribute_name(self, position: StartEndPosition) -> tuple[String, RTError]:
+		return String(self.file.name, position.copy(), self.context), None
+
+	def attribute_text(self, position: StartEndPosition) -> tuple[String, RTError]:
+		return String(self.file.text, position.copy(), self.context), None
+
+	def attribute_length(self, position: StartEndPosition) -> tuple[Number, RTError]:
+		return Number(self.file.length, position.copy(), self.context), None
