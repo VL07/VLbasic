@@ -243,6 +243,17 @@ class Number(RuntimeValue):
 	def toNumber(self, position: StartEndPosition) -> tuple[Number, RTError]:
 		return Number(self.value, position.copy(), self.context), None
 
+	##############
+
+	def attribute_half(self, position: StartEndPosition) -> tuple[Number, RTError]:
+		if self.value == 0:
+			return Number(0, position.copy(), self.context), None
+
+		return Number(self.value / 2, position.copy(), self.context), None
+
+	def attribute_double(self, position: StartEndPosition) -> tuple[Number, RTError]:
+		return Number(self.value * 2, position.copy(), self.context), None
+
 class String(RuntimeValue):
 	def __init__(self, value: str, position: StartEndPosition, context: Context) -> None:
 		self.value = value

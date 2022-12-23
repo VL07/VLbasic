@@ -66,7 +66,7 @@ class Tokenizer:
 				self.advance()
 			elif self.currentCharacter in NUMBERS:
 				token, error = self.makeNumber()
-				tokens.append(token)
+				tokens.extend(token)
 			elif self.currentCharacter in LETTERS:
 				token, error = self.makeKeywordOrIdentifier()
 				tokens.append(token)
@@ -280,17 +280,23 @@ class Tokenizer:
 		number = self.currentCharacter
 		startPosition = self.position.copy()
 		dots = 0
+		dotLast = False
+		dotLastPos = None
 
 		self.advance()
 
 		while self.currentCharacter and self.currentCharacter in NUMBERS + ".":
 			number += self.currentCharacter
+			dotLast = False
 
 			if self.currentCharacter == ".":
+				dotLast = True
+				dotLastPos = self.position.copy()
+
 				if dots == 1:
 					position = StartEndPosition(self.file, startPosition, self.position.copy())
 
-					return Token(TokenTypes.FLOAT, position, float(number[:-1])), None
+					return [Token(TokenTypes.FLOAT, position, float(number[:-1])), Token(TokenTypes.DOT, dotLastPos.asStartEndPosition())], None
 
 				dots += 1
 
@@ -298,9 +304,12 @@ class Tokenizer:
 
 		position = StartEndPosition(self.file, startPosition, self.position.copy())
 
+		if dotLast:
+			return [Token(TokenTypes.INTEGER, position, int(number[:-1])), Token(TokenTypes.DOT, dotLastPos.asStartEndPosition())], None
+
 		if dots == 0:
-			return Token(TokenTypes.INTEGER, position, int(number)), None
-		return Token(TokenTypes.FLOAT, position, float(number)), None
+			return [Token(TokenTypes.INTEGER, position, int(number))], None
+		return [Token(TokenTypes.FLOAT, position, float(number))], None
 
 	def makeKeywordOrIdentifier(self) -> tuple[Token | None, Error | None]:
 		startPosition = self.position.copy()
