@@ -70,6 +70,9 @@ class RuntimeValue:
 	def lessThanEquals(self, other: RuntimeValue, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
 		return None, RTError(f"Unable to compare size between {type(self).__name__} and {type(other).__name__}", position.copy(), self.context, "ValueError")
 
+	def hasValue(self, other: RuntimeValue, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
+		return None, RTError(f"Unable to check if {type(self).__name__} has a value of {type(other).__name__}", position.copy(), self.context, "ValueError")
+
 	def notted(self, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
 		return None, RTError(f"Unable to invert {type(self).__name__}", position.copy(), self.context, "ValueError")
 
@@ -619,6 +622,26 @@ class List(RuntimeValue):
 				return None, RangeError(arguments[0].__class__.__name__, position.copy(), executeContext)
 
 		return BuiltInFunction("getFromLast", func, position.copy(), self.context), None
+
+	def attribute_len(self, position: StartEndPosition) -> tuple[BuiltInFunction, RTError]:
+		return self.getLength(position.copy())
+
+	def attribute_append(self, position: StartEndPosition) -> tuple[BuiltInFunction, RTError]:
+		def func(arguments: list[RuntimeValue], executeContext: Context):
+			for argument in arguments:
+				self.value.append(argument)
+
+			return Null(position.copy(), executeContext), None
+
+		return BuiltInFunction("append", func, position.copy(), self.context), None
+		
+
+	def hasValue(self, other: RuntimeValue, position: StartEndPosition) -> tuple[RuntimeValue, RTError]:
+		for value in self.value:
+			if value.equals(other, position.copy()):
+				return Boolean(True, position.copy(), self.context), None
+
+		return Boolean(False, position.copy(), self.context), None
 
 class Dictionary(RuntimeValue):
 	def __init__(self, expressions: dict[RuntimeValue, RuntimeValue], position: StartEndPosition, context: Context) -> None:

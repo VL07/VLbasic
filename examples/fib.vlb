@@ -1,0 +1,18 @@
+const cache = {}
+const keys = []
+
+function fib(n)
+	if n < 2 then return n end
+
+	if n in keys then
+		return cache[n]
+	end
+
+	const val = fib(n - 1) + fib(n - 2)
+	cache[n] = val
+	keys.append(n)
+
+	return val
+end
+
+print(fib(10))

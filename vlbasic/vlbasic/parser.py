@@ -213,7 +213,9 @@ class Parser:
 			TokenTypes.LESS_THAN,
 			TokenTypes.GREATER_EQUALS,
 			TokenTypes.LESS_EQUALS
-		))
+		), [
+			"in"
+		])
 		
 		if error:
 			return None, error
@@ -709,12 +711,12 @@ class Parser:
 
 	######################################
 
-	def binaryOperation(self, function, operators) -> tuple[BinaryOperationNode, Error]:
+	def binaryOperation(self, function, operators, keywords = []) -> tuple[BinaryOperationNode, Error]:
 		left, error = function()
 		if error:
 			return None, error
 		
-		while self.currentToken.type in operators:
+		while self.currentToken.type in operators or self.currentToken.isOneOfKeywords(keywords):
 			operationToken = self.currentToken
 			self.advance()
 

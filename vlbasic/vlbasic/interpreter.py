@@ -265,8 +265,10 @@ class Interpreter:
 			result, error = left.graterThanEquals(right, position)
 		elif node.operationToken.type == TokenTypes.LESS_EQUALS:
 			result, error = left.lessThanEquals(right, position)
+		elif node.operationToken.isKeyword("in"):
+			result, error = right.hasValue(left, position)
 		else:
-			raise f"{node.operationToken.type} is not implemented!"
+			raise Exception(f"{node.operationToken.type} is not implemented!")
 
 		if error:
 			return None, error
